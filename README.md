@@ -1,131 +1,393 @@
 # Zander LCARS Bookmark System
 
-**Zander** is a single-file, offline-first bookmark manager designed with a high-fidelity **LCARS (Library Computer Access and Retrieval System)** interface, inspired by *Star Trek: The Next Generation*.
+**Zander** is a single‑file, offline‑first bookmark manager with a high‑fidelity **LCARS (Library Computer Access and Retrieval System)** interface, inspired by *Star Trek: The Next Generation*.
 
-It runs entirely in your browser with no backend, no build steps, and no external dependencies. Your data is stored locally in your browser.
+The entire app runs in your browser as a single `index.html` file:
+
+- No backend, no build steps, no bundlers.
+- No external CSS/JS libraries or fonts.
+- All data is stored locally in `localStorage`.
+- Import/Export lets you move your data between browsers and machines.
 
 ---
 
 ## Features
 
-- **Authentic LCARS UI**: Custom CSS implementation of the 24th-century interface, featuring elbow connectors, pill buttons, and a "neon glow" focus system.
-- **Single File**: The entire app lives in one `index.html` file.
-- **Local Privacy**: All data is stored in your browser's `localStorage`. No cloud, no tracking.
-- **Category Management**: Create, rename, reorder, delete, and color-code your bookmark categories.
-- **Stardates**: All entries are timestamped with a TNG-era Stardate calculator.
-- **Import/Export**: Backup your data to JSON or migrate it to another device.
-- **Keyboard Shortcuts**: Power-user hotkeys for common actions.
-- **Responsive**: Adapts to different screen sizes (within reason for an LCARS layout).
+- **Authentic LCARS UI**
+  - Continuous LCARS “elbow” frame wrapping header, sidebar, and footer.
+  - Pill buttons, elbow connectors, and a neon‑style focus glow.
+  - System status readout, stardates, and console‑like labels.
+
+- **Single‑File App**
+  - One `index.html` file containing HTML, CSS, and JavaScript.
+  - Works directly via `file://` in any modern browser.
+
+- **Local Privacy**
+  - Bookmarks and categories live only in your browser’s `localStorage`.
+  - No accounts, no tracking, no network dependencies (beyond your bookmarks’ URLs).
+
+- **Category Management with Nesting**
+  - Create, rename, reorder, and delete categories.
+  - Hierarchical categories (parent/child “trees”).
+  - Category colors control both sidebar buttons and bookmark accents.
+  - Deleting a category can cascade‑delete its entire subtree of bookmarks.
+
+- **Bookmark Management**
+  - Add, edit, and delete bookmarks.
+  - Per‑bookmark LCARS stardate and derived Earth date.
+  - Smart URL normalization and protocol handling.
+
+- **System Views**
+  - **Bookmarks View** – Main grid of tiles, filtered by category.
+  - **Settings View** – Category configuration, data management, system status.
+  - **About View** – System info, stardate, and credits.
+
+- **Stardates**
+  - TNG‑style stardate calculator used for `createdAt`.
+  - Human‑readable Earth date shown alongside the stardate in dialogs.
+
+- **Import/Export**
+  - Export full bookmark+category state to JSON.
+  - Import JSON to fully replace the current state.
+
+- **Keyboard Shortcuts**
+  - Power‑user hotkeys for common actions (see below).
+
+- **Responsive within LCARS Constraints**
+  - Layout adapts to various viewport sizes while preserving the LCARS frame and proportions as much as possible.
 
 ---
 
 ## Getting Started
 
-1. **Download**: Save the `index.html` file to your computer.
-2. **Open**: Double-click the file to open it in any modern web browser (Chrome, Firefox, Edge, Safari).
-3. **Enjoy**: Start adding your bookmarks!
+1. **Download**
+   - Save `index.html` from this repository to your computer.
 
-*Note: Since Zander uses `localStorage`, your bookmarks are tied to the specific browser and computer you are using. Use the Export feature to move data between browsers.*
+2. **Open**
+   - Double‑click `index.html`, or open it from your browser’s *File → Open* menu.
+   - Any modern browser (Chrome, Firefox, Edge, Safari) should work.
+
+3. **Use**
+   - Start with the built‑in demo categories and bookmarks.
+   - Add your own categories and links, then export for backup if desired.
+
+> Note: Because Zander uses `localStorage`, your data is **per‑browser and per‑device**. Export your data if you want to move it elsewhere.
 
 ---
 
 ## Interface Overview
 
-The interface is divided into four main sections:
+The layout is a continuous LCARS “C‑shaped” frame wrapping the content:
 
-1.  **Header Bar**: Contains the system title and the top structural arc.
-2.  **Sidebar (Left)**: Your navigation hub. Click category buttons here to filter the bookmark grid.
-3.  **Main Display (Right)**:
-    - **Grid**: Displays your bookmarks as interactive tiles.
-    - **Status Block**: A decorative data readout showing system stats (category count, bookmark count, current stardate).
-4.  **Footer Bar**: Contains global action buttons (`ADD ENTRY`, `SETTINGS`, `ABOUT`).
+1. **Header Bar (Top‑Left)**
+   - Displays the system title and decorative LCARS band.
+   - Connects into the sidebar via the **top elbow** (`.sidebar-top-cap`).
+
+2. **Sidebar (Right Column)**
+   - Continuous vertical LCARS bar with:
+     - **Top Cap** – Curved connector linking header to sidebar (`.sidebar-top-cap`).
+     - **Track** – Vertical bar containing category buttons (`.sidebar-track`).
+     - **Bottom Cap** – Curved connector linking sidebar to footer (`.sidebar-bottom-cap`).
+   - Category buttons (`.cat-btn`) are stacked along the sidebar track.
+   - The active category visually “lights up”.
+
+3. **Main Content Area (Left Column)**
+   - Sits inside the open side of the “C” frame.
+   - Contains:
+     - **Location/Path Display** – Shows the current category path (e.g. `DATABANKS ▸ LCARS ▸ REFERENCE`).
+     - **Main View Container** – One active panel at a time:
+       - **Bookmarks View** – Grid of bookmark tiles.
+       - **Settings View** – Category config + data tools.
+       - **About View** – System info, stardate, and shortcuts.
+     - **Status Display** – Decorative system status block with category/bookmark counts and current stardate.
+
+4. **Footer Bar (Bottom‑Left)**
+   - LCARS footer band connected to the sidebar via the **bottom elbow**.
+   - Contains global action buttons:
+     - `ADD ENTRY`
+     - `SETTINGS`
+     - `ABOUT`
+
+All dialogs are implemented using native `<dialog>` elements with custom LCARS styling.
 
 ---
 
-## Usage Guide
+## Using the App
 
-### Managing Bookmarks
+### 1. Managing Bookmarks
 
-- **Add Bookmark**: Click `ADD ENTRY` in the footer (or press `Alt+N`). Enter a title and URL. The category defaults to the currently selected one.
-- **Edit Bookmark**: Hover over a bookmark tile and click the "Edit" (pencil) icon.
-- **Delete Bookmark**: Open the Edit dialog for a bookmark and click `DELETE`.
-- **Open Link**: Click anywhere on the bookmark tile to open the URL in a new tab.
+**Add Bookmark**
 
-### Managing Categories
+- Click `ADD ENTRY` in the footer, or press `Alt + N`.
+- In the **Bookmark** dialog:
+  - Enter a **Title**.
+  - Enter a **URL**:
+    - If you omit the protocol, the app can prepend `https://` when saving.
+  - Select a **Category**:
+    - Defaults to the current category from the sidebar.
+  - Confirm to save.
 
-You can fully customize the sidebar categories via the **Settings** menu.
+**Edit Bookmark**
 
-1.  Click `SETTINGS` in the footer (or press `Alt+S`).
-2.  Look for the **CATEGORY CONFIGURATION** section.
-3.  **Add**: Click `NEW CATEGORY` (or press `Alt+C` while in settings).
-4.  **Edit Name**: Type directly into the text field of any category.
-5.  **Change Color**: Click the colored square to open the **LCARS Color Picker**. Select a new color from the palette.
-6.  **Reorder**: Use the `▲` and `▼` buttons to move categories up or down in the sidebar.
-7.  **Delete**: Click the `×` button. *Warning: Deleting a category will delete all bookmarks inside it.*
+- Hover over a bookmark tile to reveal the edit icon.
+- Click the pencil icon to open the **Edit Bookmark** dialog.
+- Update title, URL, or category and save.
 
-### Import & Export
+**Delete Bookmark**
 
-Protect your data or move it to another machine.
+- Open the **Edit Bookmark** dialog for the bookmark.
+- Click `DELETE` and confirm in the confirmation dialog.
 
-1.  Click `SETTINGS`.
-2.  **Export**: Click `EXPORT DATA` to download a `.json` file containing all your categories and bookmarks.
-3.  **Import**: Click `IMPORT DATA`, select a previously exported JSON file, and confirm. *Note: This will overwrite your current data.*
+**Open Bookmark**
 
-### System Reset
+- Click anywhere on a bookmark tile (except the edit icon).
+- The URL opens in a new tab/window, depending on browser settings.
 
-If you want to start fresh:
-1.  Click `SETTINGS`.
-2.  Scroll to **SYSTEM RESET**.
-3.  Click `RESET SYSTEM` and confirm. This wipes all Zander data from the browser.
+---
+
+### 2. Category Management (Including Nested Categories)
+
+Category management lives primarily in the **Settings** view.
+
+1. Click `SETTINGS` in the footer, or press `Alt + S`.
+2. In the **Category Configuration** section you will see a list/tree of configured categories.
+
+Each category row provides:
+
+- **Name Field**
+  - Inline editable text input.
+  - Displayed as uppercase in the sidebar.
+
+- **Color Swatch**
+  - Clicking opens the **LCARS Color Picker** dialog.
+  - Choose from the LCARS palette; the sidebar button and bookmark accents adopt this color.
+
+- **Reorder Controls**
+  - `▲` / `▼` controls to move a category up or down among its siblings.
+  - Reordering is local to the category’s level in the tree.
+
+- **Add Child / Add Sibling**
+  - Controls to create new categories attached to the current one.
+  - Newly created categories are initialized with a default LCARS color and current stardate.
+
+- **Delete**
+  - Removes the category (and, optionally, its subtree).
+  - Confirm dialog describes how many bookmarks and subcategories will be affected.
+
+#### Nested Category Behavior
+
+- Categories are stored in a **tree** (each category can have a `children` array).
+- In the sidebar, nested categories are rendered as indented buttons, with a visual hierarchy.
+- The currently active category determines:
+  - Which bookmarks are displayed.
+  - The category path shown in the **Bookmark Location** area.
+- Deleting a category:
+  - Cascades over its entire subtree (all child categories and their bookmarks) according to the confirmation message.
+
+---
+
+### 3. Views: Bookmarks, Settings, About
+
+The main content region has three primary views, toggled via footer buttons and internal controls.
+
+#### Bookmarks View
+
+- Default view when the app loads.
+- Shows:
+  - **Category Path** – e.g., `DATABANKS ▸ LCARS`.
+  - **Bookmark Grid** – Tiles representing bookmarks for the selected category.
+  - **System Status Block** – Live counts of categories and bookmarks plus current stardate.
+- When there are no bookmarks in the selected category:
+  - An empty state message encourages adding a new entry.
+
+#### Settings View
+
+- Accessible from the footer `SETTINGS` button or `Alt + S`.
+- Contains:
+  - **Category Configuration**
+    - Tree view of categories with:
+      - Name editing
+      - Color selection
+      - Reordering
+      - Adding/removing categories
+  - **Data Management**
+    - `EXPORT DATA` button
+    - `IMPORT DATA` button (opens file picker)
+    - `RESET SYSTEM` button (wipe everything back to defaults)
+  - **Status Panel**
+    - Decorative system status, stardate, and counts.
+
+#### About View
+
+- Accessible via the footer `ABOUT` button.
+- Displays:
+  - Short description of the system.
+  - Current LCARS stardate and Earth date.
+  - Keyboard shortcuts summary.
+  - Credits.
+
+---
+
+## Import, Export & Reset
+
+All data operations are handled through the **Settings** view.
+
+### Export Data
+
+1. Open **Settings**.
+2. Click `EXPORT DATA`.
+3. Your browser downloads a `.json` file with your current:
+   - Categories (including nested structure).
+   - Bookmarks.
+4. Save this file somewhere safe. You can import it later on the same or another device.
+
+The export format is a JSON object with two top‑level arrays: `bookmarks` and `categories`.
+
+### Import Data
+
+1. Open **Settings**.
+2. Click `IMPORT DATA`.
+3. Choose a previously exported `.json` file.
+4. Confirm the overwrite in the confirmation dialog.
+
+**Important:**
+- Import is a **full overwrite**:
+  - Existing categories and bookmarks are replaced by the contents of the file.
+- The UI re‑renders immediately to reflect the imported structure.
+
+### Reset System
+
+1. Open **Settings**.
+2. Use the `RESET SYSTEM` action.
+3. Confirm the reset.
+
+This clears the app’s `localStorage` and restores the default demo categories and bookmarks.
 
 ---
 
 ## Keyboard Shortcuts
 
-| Shortcut | Action |
-| :--- | :--- |
-| `Alt + N` | Open **Add Bookmark** dialog |
-| `Alt + S` | Open **Settings** dialog |
-| `Alt + C` | Add **New Category** (only when Settings dialog is open) |
-| `Esc` | Close any open dialog |
+| Shortcut   | Action                               |
+|-----------|---------------------------------------|
+| `Alt + N` | Open **Add Bookmark** dialog          |
+| `Alt + S` | Open **Settings** view                |
+| `Alt + C` | Add **New Category** (in Settings)    |
+| `Esc`     | Close the active dialog (if any)      |
+
+Browser or OS‑level shortcuts may conflict; when they do, those take precedence.
 
 ---
 
 ## Technical Details
 
-For developers or the curious:
+### Architecture
 
-- **Architecture**: Monolithic HTML file containing HTML5, CSS3, and ES6 JavaScript.
-- **Storage**: `window.localStorage` key `zander-lcars:v1`.
-- **Icons**: SVG icons embedded directly in the code.
-- **Fonts**: Uses system sans-serif fonts (Antonio, Arial, Helvetica) to avoid network requests.
-- **Stardate Formula**: Based on TNG Season 1 epoch (41000.0) progressing at 1000 units per Earth year.
+- Monolithic `index.html` file.
+- Pure HTML5, CSS3, and vanilla ES6+ JavaScript.
+- No build tools or transpilation.
 
 ### Data Model
 
-**Bookmark**:
+**Local Storage Key**
+
+- All data is saved under:
+
+  - `zander-lcars:v1`
+
+**Bookmark**
+
+- Stored shape (conceptual):
+
 ```json
 {
   "id": "uuid",
   "title": "Example Site",
   "url": "https://example.com",
   "categoryId": "uuid-of-category",
-  "createdAt": 41254.2
+  "createdAt": 41153.7
 }
 ```
 
-**Category**:
+**Category (Tree Node)**
+
 ```json
 {
   "id": "uuid",
-  "name": "MAIN",
+  "name": "DATABANKS",
   "color": "#ff9900",
-  "createdAt": 41254.1
+  "createdAt": 41153.6,
+  "children": [
+    {
+      "id": "child-uuid",
+      "name": "LCARS",
+      "color": "#cc99cc",
+      "createdAt": 41153.7,
+      "children": []
+    }
+  ]
 }
 ```
+
+**In‑Memory State (Conceptual)**
+
+```json
+{
+  "bookmarks": [ /* Bookmark[] */ ],
+  "categories": [ /* Category tree roots */ ],
+  "currentCategory": "uuid-of-current-category"
+}
+```
+
+### Core Logic Highlights
+
+- **Stardates**
+  - `calculateStardate()`:
+    - Computes a TNG‑era stardate from the current Earth date/time.
+  - `parseStardate()`:
+    - Converts a stored stardate back to an approximate Earth date.
+
+- **Category Tree Operations**
+  - `findCategoryAndParent()`:
+    - Locates a category node and its parent in the nested tree.
+  - `addCategory()`, `moveCategory()`, `deleteCategory()`:
+    - Mutate the tree (and handle cascading bookmark deletion).
+
+- **Rendering**
+  - `renderCategories()`:
+    - Builds the sidebar category tree and updates the category selector(s) in dialogs.
+  - `renderGrid()`:
+    - Renders bookmark tiles for the current category.
+  - `renderCategoryConfig()`:
+    - Renders the nested category configuration list used in Settings.
+  - `updateSystemStatus()`:
+    - Updates the status display with counts and stardate.
+
+- **Storage**
+  - `loadData()`:
+    - Reads and parses `localStorage`. If missing/invalid, seeds defaults.
+  - `saveData()`:
+    - Serializes the entire `state` (bookmarks + categories) to `localStorage` after every mutation.
+
+- **Utilities**
+  - `generateUUID()` – ID generation.
+  - `escapeHtml()` – Basic XSS‑safe rendering of user input.
+  - `normalizeUrl()` / `isProbablyUrl()` – URL detection and normalization.
+
+---
+
+## Default Data
+
+On first load (or after a reset), Zander initializes with:
+
+- A small set of LCARS‑themed categories.
+- A few demo bookmarks to showcase the UI and layout.
+
+You’re expected to customize or delete these entries as you go.
 
 ---
 
 ## Credits
 
-Designed and built as a tribute to the LCARS interface from *Star Trek*.
+Zander is a fan‑made tribute to the LCARS interface from *Star Trek: The Next Generation*.
+
+All trademarks are property of their respective owners. This project is purely for personal and educational use.
