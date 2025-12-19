@@ -112,10 +112,16 @@
                 display: flex;
                 flex-direction: column;
                 gap: 5px;
-                padding: 10px 0 0 35px;
+                padding: 5px 0 0 30px;
             }
 
             /* Bottom Elbow Connector */
+            .sidebar-filler {
+                flex: 1;
+                background-color: var(--shape-color);
+                width: 100%;
+            }
+
             .sidebar-bottom-cap {
                 height: 70px;
                 width: 100%;
@@ -1044,6 +1050,10 @@
                 state.categories.forEach((cat) => {
                     sidebar.appendChild(createCategoryButton(cat, 1));
                 });
+
+                const filler = document.createElement("div");
+                filler.className = "sidebar-filler";
+                sidebar.appendChild(filler);
 
                 // Update select in dialog
                 categoryInput.innerHTML = "";
