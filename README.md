@@ -41,7 +41,7 @@ The entire app runs in your browser as a single `index.html` file:
 - **System Views**
   - **Bookmarks View** – Main grid of tiles, filtered by category.
   - **Settings View** – Category configuration, data management, system status.
-  - **About View** – System info, stardate, and credits.
+  - **About View** – System overview, version, and keyboard shortcuts.
 
 - **Stardates**
   - LCARS-style stardate string stored in `createdAt` (format `YYYYDDD.MMMM`, e.g. `2025352.1200`).
@@ -238,10 +238,10 @@ The main content region has three primary views, toggled via footer buttons and 
 
 - Accessible via the footer `ABOUT` button.
 - Displays:
-  - Short description of the system.
-  - Current LCARS stardate and Earth date.
+  - System name and federation-style vendor line.
+  - System info summary (single‑file, offline‑capable archive).
+  - Version string.
   - Keyboard shortcuts summary.
-  - Credits.
 
 ---
 

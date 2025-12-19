@@ -388,15 +388,26 @@ Visual notes:
 
 The About view (`.about-panel`) is an informational screen:
 
-- Heading: system name and short descriptor.
-- Paragraphs with description, credits, and environment info.
-- An “about-meta” section with:
+- Heading: `ABOUT ZANDER`.
+- Federation-style vendor line:
 
-  - Current stardate display.
-  - Human-readable date.
-  - Version or build string if applicable.
+  - `ZANDER BOOKMARK TECHNOLOGIES`
+  - `UNITED FEDERATION OF PLANETS`
 
-The About panel uses the same base layout as the Settings panel but is content-focused, with minimal controls.
+- System information section:
+
+  - Short description of the system (single‑file, offline‑capable personal archive).
+  - Version or build string (e.g., `VERSION: v1.0.0`).
+
+- Keyboard shortcuts section:
+
+  - List of primary Alt‑based shortcuts such as:
+    - `ALT+H — HOME (BOOKMARKS VIEW)`
+    - `ALT+N — NEW ENTRY`
+    - `ALT+S — SETTINGS VIEW`
+    - `ALT+C — NEW CATEGORY (IN SETTINGS)`
+
+The About panel uses the same base layout as the Settings panel but is content-focused, with minimal controls and horizontal rules dividing the sections, matching the current `aboutView` markup in `index.html`.
 
 The **header title** (`.app-title`, showing “ZANDER”) functions as a **Home control**: clicking it returns the main content to the Bookmarks view. This is mirrored by the `Alt+H` keyboard shortcut (see Keyboard & Accessibility section), giving both a prominent visual target and a power-user shortcut for returning “home”. When focused via keyboard, the header title button uses the same LCARS focus pattern as other primary controls: a single, solid white focus indicator rendered as a line along the **bottom edge** of the button, implemented via `:focus-visible::after`.
 
