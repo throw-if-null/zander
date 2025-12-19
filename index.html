@@ -1784,13 +1784,15 @@
                     .replace(/'/g, "&#039;");
             }
 
-            function normalizeUrl(s) {
+            function normalizeUrl(s, defaultProtocol = "https://") {
                 const trimmed = String(s || "").trim();
                 if (!trimmed) return "";
                 // If it doesn't start with a scheme like http:, https:, ftp:, mailto:, etc.,
-                // assume https://
+                // assume the provided default protocol (normally https:// or http://)
                 if (!/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(trimmed)) {
-                    return `https://${trimmed}`;
+                    // Strip any leading slashes so we don't end up with https:////example.com
+                    const withoutSlashes = trimmed.replace(/^\/+/, "");
+                    return `${defaultProtocol}${withoutSlashes}`;
                 }
                 return trimmed;
             }
@@ -1862,13 +1864,13 @@
                 const id = document.getElementById("bookmarkId").value;
                 const title = document.getElementById("titleInput").value;
                 const protocol = document.getElementById("urlProtocol").value;
-                let rawUrl = document.getElementById("urlInput").value.trim();
+                const rawUrl = document.getElementById("urlInput").value.trim();
                 const categoryId =
                     document.getElementById("categoryInput").value;
 
-                // Strip protocol if user pasted it in
-                rawUrl = rawUrl.replace(/^https?:\/\//, "");
-                const url = protocol + rawUrl;
+                // Normalize URL using selected protocol as default, but still respect
+                // full URLs the user may have pasted (http/https and other schemes)
+                const url = normalizeUrl(rawUrl, protocol);
 
                 if (id) {
                     // Edit
