@@ -1630,23 +1630,17 @@
                 // Update select in dialog
                 categoryInput.innerHTML = "";
 
-                function addOptions(cats, level) {
-                    cats.forEach((cat) => {
-                        const opt = document.createElement("option");
-                        opt.value = cat.id;
-                        let prefix = "";
-                        for (let i = 1; i < level; i++)
-                            prefix += "\u00A0\u00A0"; // Non-breaking spaces
-                        if (level > 1) prefix += "└ ";
-                        opt.textContent = prefix + cat.name;
-                        categoryInput.appendChild(opt);
-
-                        if (cat.children) {
-                            addOptions(cat.children, level + 1);
-                        }
-                    });
-                }
-                addOptions(state.categories, 1);
+                walkCategories(state.categories, (cat, parent, depth) => {
+                    const level = depth + 1;
+                    const opt = document.createElement("option");
+                    opt.value = cat.id;
+                    let prefix = "";
+                    for (let i = 1; i < level; i++)
+                        prefix += "\u00A0\u00A0"; // Non-breaking spaces
+                    if (level > 1) prefix += "└ ";
+                    opt.textContent = prefix + cat.name;
+                    categoryInput.appendChild(opt);
+                });
 
                 updateSystemStatus();
                 updateBookmarkLocation();
