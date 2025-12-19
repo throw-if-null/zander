@@ -456,6 +456,36 @@
                 letter-spacing: 1px;
             }
 
+            /* Shared LCARS button base style */
+            .lcars-btn {
+                background-color: var(--lcars-beige);
+                color: #000;
+                border: none;
+                padding: 0 15px;
+                height: 40px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                font-family: var(--lcars-font);
+                font-size: 1.1rem;
+                font-weight: bold;
+                text-transform: uppercase;
+                border-radius: 20px;
+                cursor: pointer;
+                position: relative;
+                white-space: nowrap;
+            }
+
+            .lcars-btn-primary {
+                background-color: var(--lcars-orange);
+                color: #000;
+            }
+
+            .lcars-btn-secondary {
+                background-color: #444;
+                color: var(--lcars-beige);
+            }
+
             /* Settings buttons use LCARS control-tab style */
             .settings-panel .btn-primary,
             .settings-panel .btn-secondary {
@@ -533,14 +563,7 @@
                 background-color: #ffffff;
             }
 
-            .settings-panel .btn-primary {
-                background-color: var(--lcars-orange);
-            }
 
-            .settings-panel .btn-secondary {
-                background-color: #444;
-                color: var(--lcars-beige);
-            }
 
             /* Theme selector layout */
             #themeControlsContainer {
@@ -559,10 +582,7 @@
                 color: #000;
             }
 
-            .settings-panel .btn-primary:hover,
-            .settings-panel .btn-secondary:hover {
-                filter: brightness(1.1);
-            }
+
 
             .settings-panel .btn-primary:focus-visible,
             .settings-panel .btn-secondary:focus-visible {
