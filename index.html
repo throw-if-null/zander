@@ -1712,7 +1712,10 @@
             function updateSystemStatus() {
                 const statusEl = document.getElementById("systemStatus");
                 if (statusEl) {
-                    const catCount = state.categories.length;
+                    let catCount = 0;
+                    walkCategories(state.categories, () => {
+                        catCount++;
+                    });
                     const bmCount = state.bookmarks.length;
                     statusEl.innerHTML = `
                         <span class="status-text">STATUS:</span>
