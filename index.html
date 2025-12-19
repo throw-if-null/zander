@@ -1456,12 +1456,22 @@
                 );
             }
 
+            function setTheme(themeId) {
+                const theme =
+                    THEMES.find((t) => t.id === themeId) ||
+                    THEMES.find((t) => t.id === "pickard");
+                currentTheme = theme.id;
+                document.body.setAttribute("data-theme", currentTheme);
+                localStorage.setItem(THEME_STORAGE_KEY, currentTheme);
+                updateThemeStatus();
+            }
+
             function loadTheme() {
                 const stored = localStorage.getItem(THEME_STORAGE_KEY);
                 if (stored && THEMES.some((t) => t.id === stored)) {
-                    currentTheme = stored;
+                    setTheme(stored);
                 } else {
-                    currentTheme = "pickard";
+                    setTheme("pickard");
                 }
             }
 
@@ -1470,13 +1480,7 @@
             }
 
             function applyTheme(themeId) {
-                const theme =
-                    THEMES.find((t) => t.id === themeId) ||
-                    THEMES.find((t) => t.id === "pickard");
-                currentTheme = theme.id;
-                document.body.setAttribute("data-theme", currentTheme);
-                saveTheme();
-                updateThemeStatus();
+                setTheme(themeId);
             }
 
             function renderCategories() {
