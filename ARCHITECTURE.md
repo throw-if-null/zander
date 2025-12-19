@@ -331,8 +331,15 @@ type ExportBundle = {
 
      ```ts
      function applyDataBundle(bundle: ExportBundle) {
-       state.bookmarks = bundle.bookmarks;
-       state.categories = bundle.categories;
+       // Bookmarks are validated one-by-one. Invalid bookmarks (missing required
+       // fields or invalid URLs) are discarded; valid ones are kept.
+       state.bookmarks = validateImportedBookmarks(bundle.bookmarks);
+       // Categories are validated as a tree. Structurally invalid categories
+       // (missing `id` or `name`) are discarded. Category colors that are not
+       // part of the LCARS palette are not rejected; instead, they are
+       // normalized to a theme‑appropriate default color, and the import
+       // summary reports how many colors were reset.
+       state.categories = normalizeImportedCategoryTree(bundle.categories);
        backfillBookmarkCreatedAt(state.bookmarks);
        backfillCategoryCreatedAt(state.categories);
        saveData();
@@ -343,11 +350,20 @@ type ExportBundle = {
      }
      ```
 
-  6. `applyDataBundle` is called and all primary views are re-rendered.
+  6. `applyDataBundle` is called and all primary views are re-rendered. After import,
+     the UI shows a summary dialog indicating:
+     - How many bookmarks and categories were successfully imported.
+     - How many bookmarks and categories were discarded due to validation errors.
+     - How many category colors were reset to the current theme’s default.
 
 Notes:
 
-- Import is a **full overwrite** of bookmarks and categories.
+- Import is a **full overwrite** of bookmarks and categories in memory, but validation
+  is performed **per item**:
+  - Valid bookmarks are kept; invalid bookmarks are discarded.
+  - Structurally valid categories are kept; invalid categories are discarded.
+  - Category colors outside the LCARS palette are overridden to a theme‑appropriate
+    default rather than causing the category to be dropped.
 - Existing theme selection is preserved; import does not affect `THEME_STORAGE_KEY`.
 
 - Triggered from the Settings panel via the `IMPORT DATA` button and hidden file input.

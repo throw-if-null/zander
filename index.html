@@ -2360,52 +2360,94 @@
                 };
             }
 
+            function getDefaultCategoryColor() {
+                const theme = document.body.getAttribute('data-theme') || 'pickard';
+
+                // Map themes to preferred LCARS_PALETTE entries, falling back safely
+                const colorByTheme = {
+                    pickard: "#ff9900", // classic LCARS orange
+                    data: "#9999cc", // cooler operations/science tone
+                    doctor: "#ffcc99", // clinical beige
+                    spock: "#9999cc", // science blue
+                    seven: "#40e0d0", // turquoise / Borg-adjacent accent
+                };
+
+                const preferred = colorByTheme[theme] || colorByTheme.pickard;
+
+                // If the preferred color isn't in the palette (future edits), fall back
+                if (Array.isArray(LCARS_PALETTE) && LCARS_PALETTE.includes(preferred)) {
+                    return preferred;
+                }
+
+                // Last resort: first palette color or a safe orange
+                if (Array.isArray(LCARS_PALETTE) && LCARS_PALETTE.length > 0) {
+                    return LCARS_PALETTE[0];
+                }
+
+                return "#ff9900";
+            }
+
             function applyDataBundle(bundle) {
-                // Validate and filter bookmarks: ensure URLs are valid
+                const originalBookmarkCount = Array.isArray(bundle.bookmarks)
+                    ? bundle.bookmarks.length
+                    : 0;
+                const originalCategoryCount = Array.isArray(bundle.categories)
+                    ? bundle.categories.length
+                    : 0;
+
+                // Validate and filter bookmarks: ensure URLs and required fields are valid
                 const validBookmarks = Array.isArray(bundle.bookmarks)
                     ? bundle.bookmarks.filter(b => {
-                        // Check required fields exist
                         if (!b || typeof b !== 'object') return false;
                         if (typeof b.url !== 'string' || !b.url.trim()) return false;
                         if (typeof b.id !== 'string' || !b.id.trim()) return false;
-                        if (typeof b.title !== 'string') return false;
+                        if (typeof b.title !== 'string' || !b.title.trim()) return false;
 
-                        // Validate URL using existing validation function
                         const normalized = normalizeUrl(b.url);
                         return isProbablyUrl(normalized);
                     })
                     : [];
+                const failedBookmarks = originalBookmarkCount - validBookmarks.length;
 
-                // Validate and filter categories: ensure required fields exist and colors are valid
-                const validCategories = Array.isArray(bundle.categories)
-                    ? bundle.categories.filter(c => {
-                        // Check required fields
-                        if (!c || typeof c !== 'object') return false;
-                        if (typeof c.id !== 'string' || !c.id.trim()) return false;
-                        if (typeof c.name !== 'string' || !c.name.trim()) return false;
-                        if (typeof c.color !== 'string' || !c.color.trim()) return false;
-                        // Validate color is in LCARS palette
-                        if (!LCARS_PALETTE.includes(c.color)) return false;
-                        return true;
-                    })
-                    : [];
+                // Categories: keep structurally valid categories, override bad colors to theme default
+                const defaultColor = getDefaultCategoryColor();
+                let overriddenColorCount = 0;
 
-                // Report filtered bookmarks to user
-                const originalBookmarkCount = Array.isArray(bundle.bookmarks) ? bundle.bookmarks.length : 0;
-                const filteredBookmarkCount = originalBookmarkCount - validBookmarks.length;
-                if (filteredBookmarkCount > 0) {
-                    showAlert("IMPORT WARNING", `FILTERED OUT ${filteredBookmarkCount} BOOKMARK(S) WITH INVALID URLS OR MISSING FIELDS.`);
+                function normalizeCategoryTree(nodes) {
+                    if (!Array.isArray(nodes)) return [];
+
+                    return nodes
+                        .filter(c => {
+                            if (!c || typeof c !== 'object') return false;
+                            if (typeof c.id !== 'string' || !c.id.trim()) return false;
+                            if (typeof c.name !== 'string' || !c.name.trim()) return false;
+                            return true;
+                        })
+                        .map(c => {
+                            const clone = { ...c };
+
+                            if (
+                                typeof clone.color !== 'string' ||
+                                !clone.color.trim() ||
+                                !LCARS_PALETTE.includes(clone.color)
+                            ) {
+                                clone.color = defaultColor;
+                                overriddenColorCount++;
+                            }
+
+                            clone.children = normalizeCategoryTree(clone.children || []);
+
+                            return clone;
+                        });
                 }
 
-                // Report filtered categories to user
-                const originalCategoryCount = Array.isArray(bundle.categories) ? bundle.categories.length : 0;
-                const filteredCategoryCount = originalCategoryCount - validCategories.length;
-                if (filteredCategoryCount > 0) {
-                    showAlert("IMPORT WARNING", `FILTERED OUT ${filteredCategoryCount} CATEGORY(IES) WITH INVALID COLORS OR MISSING FIELDS.`);
-                }
+                const normalizedCategories = normalizeCategoryTree(
+                    Array.isArray(bundle.categories) ? bundle.categories : [],
+                );
+                const failedCategories = originalCategoryCount - normalizedCategories.length;
 
                 state.bookmarks = validBookmarks;
-                state.categories = validCategories;
+                state.categories = normalizedCategories;
 
                 // Backfill createdAt fields on imported data
                 backfillBookmarkCreatedAt(state.bookmarks);
@@ -2414,6 +2456,30 @@
                 saveData();
                 renderCategories();
                 renderGrid();
+                if (typeof updateAboutStardate === 'function') updateAboutStardate();
+                if (typeof updateSettingsStardate === 'function') updateSettingsStardate();
+
+                const lines = [];
+                lines.push(
+                    `IMPORTED ${validBookmarks.length} / ${originalBookmarkCount} BOOKMARK(S).`,
+                );
+                lines.push(
+                    `IMPORTED ${normalizedCategories.length} / ${originalCategoryCount} CATEGOR(IES).`,
+                );
+
+                if (failedBookmarks > 0 || failedCategories > 0) {
+                    lines.push(
+                        `DISCARDED ${failedBookmarks} BOOKMARK(S) AND ${failedCategories} CATEGOR(IES) WITH INVALID OR MISSING REQUIRED FIELDS.`,
+                    );
+                }
+
+                if (overriddenColorCount > 0) {
+                    lines.push(
+                        `RESET ${overriddenColorCount} CATEGORY COLOR(S) TO THE CURRENT THEME DEFAULT.`,
+                    );
+                }
+
+                showAlert('IMPORT RESULT', lines.join(' '));
             }
 
             function exportData() {
