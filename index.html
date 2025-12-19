@@ -102,6 +102,7 @@
             :focus-visible {
                 outline: 2px solid #fff;
                 outline-offset: 2px;
+                box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
             }
 
             body {
@@ -154,15 +155,17 @@
                 color: var(--lcars-orange);
                 background-color: #000;
                 font-size: 44px;
-                line-height: 40px;
+                line-height: 1;
                 font-weight: bold;
                 text-transform: uppercase;
                 padding: 0 10px;
                 margin: 0;
                 display: flex;
                 align-items: center;
+                justify-content: center;
                 letter-spacing: -1px;
-                transform: translateY(-3px);
+                border: none;
+                cursor: pointer;
             }
 
             /* Sidebar (Full Height Column) */
@@ -300,6 +303,12 @@
             }
 
             .cat-wrapper:hover > .cat-submenu {
+                display: flex;
+            }
+
+            /* Show submenu on keyboard focus of parent or child buttons */
+            .cat-wrapper:has(> .cat-btn:focus-visible) > .cat-submenu,
+            .cat-wrapper:has(.cat-submenu .cat-btn:focus-visible) > .cat-submenu {
                 display: flex;
             }
 
@@ -625,9 +634,11 @@
                 transition: opacity 0.2s;
                 font-size: 14px;
                 color: #000;
+                cursor: pointer;
             }
 
-            .bookmark-tile:hover .bookmark-edit-icon {
+            .bookmark-tile:hover .bookmark-edit-icon,
+            .bookmark-tile:focus-within .bookmark-edit-icon {
                 opacity: 1;
             }
 
@@ -674,12 +685,16 @@
             .action-btn:focus-visible::after {
                 content: "";
                 position: absolute;
-                top: -9px;
                 left: 0;
                 right: 0;
+                top: -9px;
                 height: 4px;
                 background-color: #ffffff;
+                border-radius: 0;
             }
+
+
+
 
             #aboutBtn {
                 border-right: 5px solid #000;
@@ -940,7 +955,7 @@
             <!-- Header Bar (Left) -->
             <div class="header-bar">
                 <div class="header-fill"></div>
-                <div class="app-title" id="homeBtn">ZANDER</div>
+                <button class="app-title" id="homeBtn" aria-label="Home - Bookmarks View">ZANDER</button>
                 <div class="header-end-cap"></div>
             </div>
 
@@ -960,14 +975,16 @@
 
             <main class="main-content">
                 <div id="bookmarksView" class="main-view active">
-                    <div id="bookmarkLocation" class="bookmark-location"></div>
-                    <div id="bookmarkGrid" class="bookmark-grid">
+                    <div id="bookmarkLocation" class="bookmark-location" aria-live="polite" aria-label="Current Category Location"></div>
+                    <div id="bookmarkGrid" class="bookmark-grid" role="list">
                         <!-- Bookmarks injected here -->
                     </div>
                     <div
                         id="emptyState"
                         class="empty-state"
                         style="display: none; text-align: center; padding: 50px"
+                        role="status"
+                        aria-live="assertive"
                     >
                         NO ENTRIES FOUND
                     </div>
@@ -976,6 +993,8 @@
                     id="settingsView"
                     class="main-view"
                     style="padding: 20px; height: 100%"
+                    role="region"
+                    aria-label="Settings Panel"
                 >
                     <div class="settings-panel">
                         <div class="settings-accent"></div>
@@ -1056,6 +1075,7 @@
                                             id="importInput"
                                             accept=".json"
                                             style="display: none"
+                                            aria-label="Import Bookmarks from JSON File"
                                         />
                                         <button
                                             class="btn-secondary reset"
@@ -1070,7 +1090,7 @@
                         </div>
                     </div>
                 </div>
-                <div id="aboutView" class="main-view" style="padding: 20px">
+                <div id="aboutView" class="main-view" style="padding: 20px" role="region" aria-label="About Zander">
                     <div class="about-panel">
                         <h1>ABOUT ZANDER</h1>
                         <p>
@@ -1100,23 +1120,23 @@
 
             <div class="footer-bar">
                 <div id="systemStatus" class="status-display"></div>
-                <button class="action-btn" id="addBtn">ADD ENTRY</button>
+                <button class="action-btn" id="addBtn" aria-label="Add Entry (Alt+N)">ADD ENTRY</button>
                 <div class="settings-wrapper">
-                    <button class="action-btn" id="settingsBtn">
+                    <button class="action-btn" id="settingsBtn" aria-label="Settings (Alt+S)">
                         SETTINGS
                     </button>
                 </div>
-                <button class="action-btn" id="aboutBtn">ABOUT</button>
+                <button class="action-btn" id="aboutBtn" aria-label="About Zander">ABOUT</button>
             </div>
         </div>
 
         <!-- Bookmark Dialog -->
-        <dialog id="bookmarkDialog">
+        <dialog id="bookmarkDialog" aria-label="Bookmark Entry Dialog">
             <div class="lcars-dialog">
                 <div class="lcars-dialog-header">
-                    <span class="lcars-dialog-title" id="dialogTitle">
+                    <h2 class="lcars-dialog-title" id="dialogTitle">
                         NEW ENTRY
-                    </span>
+                    </h2>
                     <span class="lcars-dialog-meta" id="bookmarkStardate">
                         STARDATE 0000000.0000
                     </span>
@@ -1126,12 +1146,13 @@
                         <input type="hidden" id="bookmarkId" />
                         <div class="form-group">
                             <label for="titleInput">TITLE</label>
-                            <input type="text" id="titleInput" required />
+                            <input type="text" id="titleInput" required aria-required="true" />
                         </div>
                         <div class="form-group">
                             <label for="urlInput">URL</label>
                             <div style="display: flex; gap: 10px">
-                                <select id="urlProtocol" style="width: 120px">
+                                <label for="urlProtocol" style="display: none;">Protocol</label>
+                                <select id="urlProtocol" style="width: 120px" aria-label="URL Protocol">
                                     <option value="https://">HTTPS://</option>
                                     <option value="http://">HTTP://</option>
                                 </select>
@@ -1141,12 +1162,13 @@
                                     required
                                     placeholder="example.com"
                                     style="flex: 1"
+                                    aria-required="true"
                                 />
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="categoryInput">CATEGORY</label>
-                            <select id="categoryInput">
+                            <select id="categoryInput" aria-label="Bookmark Category">
                                 <!-- Options injected -->
                             </select>
                         </div>
@@ -1157,6 +1179,7 @@
                             class="btn-secondary delete"
                             id="deleteBtn"
                             style="display: none"
+                            aria-label="Delete Bookmark"
                         >
                             DELETE
                         </button>
@@ -1168,10 +1191,11 @@
                                     .getElementById('bookmarkDialog')
                                     .close()
                             "
+                            aria-label="Cancel"
                         >
                             CANCEL
                         </button>
-                        <button type="submit" class="btn-primary">
+                        <button type="submit" class="btn-primary" aria-label="Save Bookmark">
                             ENGAGE
                         </button>
                     </div>
@@ -1181,39 +1205,40 @@
 
         <!-- Settings Dialog (no longer used for full settings UI, kept for potential small overlays if needed) -->
 
-        <dialog id="confirmDialog">
+        <dialog id="confirmDialog" aria-label="Confirmation Dialog">
             <div class="lcars-dialog">
                 <div class="lcars-dialog-header">
-                    <span class="lcars-dialog-title" id="confirmTitle">
+                    <h2 class="lcars-dialog-title" id="confirmTitle">
                         CONFIRM
-                    </span>
+                    </h2>
                 </div>
                 <div class="lcars-dialog-body">
                     <div
                         id="confirmMessage"
                         style="margin: 10px 0 0 0; font-size: 1.2rem"
+                        role="alert"
                     >
                         ARE YOU SURE?
                     </div>
                 </div>
                 <div class="lcars-dialog-footer">
-                    <button class="btn-secondary" id="confirmCancelBtn">
+                    <button class="btn-secondary" id="confirmCancelBtn" aria-label="Cancel">
                         CANCEL
                     </button>
-                    <button class="btn-primary" id="confirmOkBtn">
+                    <button class="btn-primary" id="confirmOkBtn" aria-label="Proceed">
                         PROCEED
                     </button>
                 </div>
             </div>
         </dialog>
 
-        <dialog id="colorPickerDialog">
+        <dialog id="colorPickerDialog" aria-label="Color Picker Dialog">
             <div class="lcars-dialog">
                 <div class="lcars-dialog-header">
-                    <span class="lcars-dialog-title">SELECT COLOR</span>
+                    <h2 class="lcars-dialog-title">SELECT COLOR</h2>
                 </div>
                 <div class="lcars-dialog-body">
-                    <div id="colorGrid" class="color-grid"></div>
+                    <div id="colorGrid" class="color-grid" role="group" aria-label="Color Palette"></div>
                 </div>
             </div>
         </dialog>
@@ -1443,8 +1468,10 @@
                     const btn = document.createElement("button");
                     btn.className = "color-option";
                     btn.style.backgroundColor = color;
+                    btn.setAttribute("aria-label", `Color ${color}`);
                     if (color === current) {
                         btn.style.outline = "2px solid #fff";
+                        btn.setAttribute("aria-current", "true");
                     }
                     btn.onclick = () => {
                         onSelect(color);
@@ -1600,12 +1627,18 @@
                     btn.textContent = cat.name;
                     btn.style.setProperty("--cat-color", cat.color);
                     btn.dataset.id = cat.id;
+                    btn.setAttribute("aria-label", `Category: ${cat.name}`);
+                    if (state.currentCategory === cat.id) {
+                        btn.setAttribute("aria-current", "page");
+                    }
 
                     wrapper.appendChild(btn);
 
                     if (cat.children && cat.children.length > 0 && level < 3) {
                         const submenu = document.createElement("div");
                         submenu.className = "cat-submenu";
+                        submenu.setAttribute("role", "group");
+                        submenu.setAttribute("aria-label", `Subcategories of ${cat.name}`);
 
                         cat.children.forEach((child) => {
                             submenu.appendChild(
@@ -1630,17 +1663,18 @@
                 // Update select in dialog
                 categoryInput.innerHTML = "";
 
-                walkCategories(state.categories, (cat, parent, depth) => {
-                    const level = depth + 1;
-                    const opt = document.createElement("option");
-                    opt.value = cat.id;
-                    let prefix = "";
-                    for (let i = 1; i < level; i++)
-                        prefix += "\u00A0\u00A0"; // Non-breaking spaces
-                    if (level > 1) prefix += "└ ";
-                    opt.textContent = prefix + cat.name;
-                    categoryInput.appendChild(opt);
-                });
+                walkCategories(state.categories, (cat, parent, depth, index, siblings) => {
+                        const level = depth + 1;
+                        const opt = document.createElement("option");
+                        opt.value = cat.id;
+                        let prefix = "";
+                        for (let i = 1; i < level; i++)
+                            prefix += "\u00A0\u00A0"; // Non-breaking spaces
+                        if (level > 1) prefix += "└ ";
+                        opt.textContent = prefix + cat.name;
+                        opt.setAttribute("aria-label", `${cat.name}${level > 1 ? " (subcategory)" : ""}`);
+                        categoryInput.appendChild(opt);
+                    });
 
                 updateSystemStatus();
                 updateBookmarkLocation();
@@ -1650,6 +1684,7 @@
                 const tile = document.createElement("a");
                 tile.className = "bookmark-tile";
                 tile.dataset.id = bookmark.id;
+                tile.setAttribute("role", "listitem");
 
                 // Use category color for tile if available
                 const cat = state.categories.find(
@@ -1662,13 +1697,14 @@
                 tile.innerHTML = `
                     <div class="bookmark-title">${escapeHtml(bookmark.title)}</div>
                     <div class="bookmark-url">${escapeHtml(bookmark.url)}</div>
-                    <div class="bookmark-edit-icon" title="Edit">✎</div>
+                    <div class="bookmark-edit-icon" title="Edit Bookmark" aria-label="Edit Bookmark">✎</div>
                 `;
 
                 // Left click opens
                 tile.href = bookmark.url;
                 tile.target = "_blank";
                 tile.rel = "noopener noreferrer";
+                tile.setAttribute("aria-label", `Open ${escapeHtml(bookmark.title)} - ${escapeHtml(bookmark.url)}`);
 
                 return tile;
             }
@@ -1719,7 +1755,7 @@
                     const bmCount = state.bookmarks.length;
                     statusEl.innerHTML = `
                         <span class="status-text">STATUS:</span>
-                        <div class="status-info">
+                        <div class="status-info" aria-live="polite" aria-label="System Status">
                             <span>CT: ${catCount}</span>
                             <span>•</span>
                             <span>BM: ${bmCount}</span>
@@ -2050,6 +2086,7 @@
                     const colorBtn = document.createElement("button");
                     colorBtn.className = "category-color-swatch";
                     colorBtn.style.backgroundColor = cat.color;
+                    colorBtn.setAttribute("aria-label", `Change color for ${cat.name} category`);
                     colorBtn.onclick = () => {
                         openColorPicker(cat.color, (newColor) => {
                             cat.color = newColor;
@@ -2070,6 +2107,7 @@
                     nameInput.style.color = "var(--lcars-beige)";
                     nameInput.style.borderRadius = "20px";
                     nameInput.style.padding = "8px 12px";
+                    nameInput.setAttribute("aria-label", `Edit name for ${cat.name} category`);
                     nameInput.onchange = (e) => {
                         cat.name = e.target.value.toUpperCase();
                         saveData();
@@ -2080,6 +2118,7 @@
                     const upBtn = document.createElement("button");
                     upBtn.className = "category-config-btn";
                     upBtn.innerHTML = "↑";
+                    upBtn.setAttribute("aria-label", `Move ${cat.name} category up`);
                     upBtn.disabled = index === 0;
                     if (index === 0) upBtn.style.opacity = "0.5";
                     upBtn.onclick = () => moveCategory(cat.id, -1);
@@ -2088,6 +2127,7 @@
                     const downBtn = document.createElement("button");
                     downBtn.className = "category-config-btn";
                     downBtn.innerHTML = "↓";
+                    downBtn.setAttribute("aria-label", `Move ${cat.name} category down`);
                     downBtn.disabled = index === siblings.length - 1;
                     if (index === siblings.length - 1)
                         downBtn.style.opacity = "0.5";
@@ -2097,7 +2137,7 @@
                     const addBtn = document.createElement("button");
                     addBtn.className = "category-config-btn";
                     addBtn.innerHTML = "+";
-                    addBtn.title = "Add Subcategory";
+                    addBtn.setAttribute("aria-label", `Add subcategory to ${cat.name}`);
                     if (level >= 3) {
                         addBtn.disabled = true;
                         addBtn.style.opacity = "0.5";
@@ -2108,6 +2148,7 @@
                     const delBtn = document.createElement("button");
                     delBtn.className = "category-config-btn delete";
                     delBtn.innerHTML = "×";
+                    delBtn.setAttribute("aria-label", `Delete ${cat.name} category`);
                     delBtn.onclick = () => deleteCategory(cat.id);
 
                     row.appendChild(colorBtn);
@@ -2552,7 +2593,6 @@
                 }
 
                 if (homeBtn) {
-                    homeBtn.style.cursor = "pointer";
                     homeBtn.addEventListener("click", () => {
                         bookmarksView.classList.add("active");
                         settingsView.classList.remove("active");
