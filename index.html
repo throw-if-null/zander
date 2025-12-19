@@ -429,9 +429,9 @@
                 border: none;
                 padding: 0 15px;
                 height: 40px;
-                display: flex;
+                display: inline-flex;
                 align-items: center;
-                justify-content: flex-end;
+                justify-content: center;
                 font-family: var(--lcars-font);
                 font-size: 1.1rem;
                 font-weight: bold;
@@ -449,6 +449,18 @@
             .settings-panel .btn-secondary {
                 background-color: #444;
                 color: var(--lcars-beige);
+            }
+
+            /* Theme selector layout */
+            #themeControlsContainer {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            #themeControlsContainer .btn-secondary {
+                min-width: 140px;
+                justify-content: center;
             }
 
             .settings-panel .btn-secondary.reset {
@@ -565,7 +577,12 @@
 
             /* Footer Actions */
             .action-btn {
-                background-color: var(--lcars-beige);
+                /* Light variant of the current theme color */
+                background-color: color-mix(
+                    in srgb,
+                    var(--shape-color) 30%,
+                    #ffffff 70%
+                );
                 color: #000;
                 border: none;
                 padding: 0 15px;
@@ -2125,9 +2142,6 @@
                     const btn = document.createElement("button");
                     btn.type = "button";
                     btn.className = "btn-secondary";
-                    btn.style.marginRight = "8px";
-                    btn.style.minWidth = "120px";
-                    btn.style.justifyContent = "center";
                     btn.textContent = theme.label;
                     btn.onclick = () => applyTheme(theme.id);
                     container.appendChild(btn);
