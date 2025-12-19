@@ -389,36 +389,9 @@
 
             /* Settings Menu */
             .settings-wrapper {
-                position: relative;
                 display: flex;
                 align-items: center;
                 height: 40px;
-            }
-
-            .settings-submenu {
-                display: none;
-                position: absolute;
-                bottom: 100%;
-                left: 0;
-                width: 100%;
-                flex-direction: column;
-                gap: 5px;
-                padding-bottom: 5px;
-                z-index: 100;
-            }
-
-            .settings-wrapper:hover .settings-submenu {
-                display: flex;
-            }
-
-            .data-mgmt-options {
-                display: none;
-                flex-direction: column;
-                gap: 5px;
-            }
-
-            .data-mgmt-options.visible {
-                display: flex;
             }
 
             /* Dialogs */
@@ -633,32 +606,6 @@
                 <div id="systemStatus" class="status-display"></div>
                 <button class="action-btn" id="addBtn">ADD ENTRY</button>
                 <div class="settings-wrapper">
-                    <div class="settings-submenu">
-                        <div class="data-mgmt-options" id="dataMgmtOptions">
-                            <button class="action-btn" onclick="resetSystem()">
-                                RESET
-                            </button>
-                            <button
-                                class="action-btn"
-                                onclick="
-                                    document
-                                        .getElementById('importInput')
-                                        .click()
-                                "
-                            >
-                                IMPORT
-                            </button>
-                            <button class="action-btn" onclick="exportData()">
-                                EXPORT
-                            </button>
-                        </div>
-                        <button class="action-btn" id="settingsDataBtn">
-                            DATA MGMT
-                        </button>
-                        <button class="action-btn" id="settingsCatBtn">
-                            CAT CONFIG
-                        </button>
-                    </div>
                     <button class="action-btn" id="settingsBtn">
                         SETTINGS
                     </button>
@@ -1644,9 +1591,6 @@
                                 renderCategories();
                                 renderGrid();
                                 if (settingsDialog.open) settingsDialog.close();
-                                document
-                                    .getElementById("dataMgmtOptions")
-                                    .classList.remove("visible");
                             },
                         );
                     } catch (err) {
@@ -1673,36 +1617,12 @@
                         renderCategories();
                         renderGrid();
                         if (settingsDialog.open) settingsDialog.close();
-                        document
-                            .getElementById("dataMgmtOptions")
-                            .classList.remove("visible");
                     },
                 );
             }
 
             // --- Event Listeners ---
             function setupEventListeners() {
-                document
-                    .getElementById("settingsCatBtn")
-                    .addEventListener("click", () => {
-                        document.getElementById(
-                            "settingsCategorySection",
-                        ).style.display = "block";
-                        document.getElementById(
-                            "settingsDataSection",
-                        ).style.display = "none";
-                        renderCategoryConfig();
-                        settingsDialog.showModal();
-                    });
-
-                document
-                    .getElementById("settingsDataBtn")
-                    .addEventListener("click", () => {
-                        document
-                            .getElementById("dataMgmtOptions")
-                            .classList.toggle("visible");
-                    });
-
                 document
                     .getElementById("settingsBtn")
                     .addEventListener("click", () => {
