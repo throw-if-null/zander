@@ -64,23 +64,39 @@
             .header-bar {
                 grid-column: 1;
                 grid-row: 1;
-                background-color: var(--shape-color);
-                border-top-left-radius: var(--radius);
-                border-bottom-left-radius: var(--radius);
                 display: flex;
-                align-items: center;
+                align-items: stretch;
                 justify-content: flex-end;
-                padding-right: 20px;
+                padding-right: 0;
                 margin-right: -1px;
                 height: 40px;
                 align-self: start;
             }
 
+            .header-fill {
+                flex: 1;
+                background-color: var(--shape-color);
+                border-top-left-radius: var(--radius);
+                border-bottom-left-radius: var(--radius);
+            }
+
+            .header-end-cap {
+                width: 20px;
+                background-color: var(--shape-color);
+            }
+
             .app-title {
-                color: #000;
-                font-size: 2rem;
+                color: var(--lcars-orange);
+                background-color: #000;
+                font-size: 44px;
+                line-height: 40px;
                 font-weight: bold;
                 text-transform: uppercase;
+                padding: 0 10px;
+                margin: 0;
+                display: flex;
+                align-items: center;
+                letter-spacing: -1px;
             }
 
             /* Sidebar (Full Height Column) */
@@ -583,7 +599,9 @@
         <div class="lcars-app">
             <!-- Header Bar (Left) -->
             <div class="header-bar">
-                <span class="app-title">ZANDER</span>
+                <div class="header-fill"></div>
+                <div class="app-title">ZANDER</div>
+                <div class="header-end-cap"></div>
             </div>
 
             <!-- Sidebar (Right - Full Height) -->
