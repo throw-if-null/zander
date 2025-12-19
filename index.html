@@ -1719,27 +1719,33 @@
                 return undefined;
             }
 
-            function getCategoryPath(id, cats, path = []) {
-                for (const cat of cats) {
-                    const newPath = [...path, cat];
-                    if (cat.id === id) {
-                        return newPath;
+            function getCategoryPath(id, cats) {
+                // Returns an array of category objects from root to the category with the given id,
+                // or null if no such category exists.
+                function helper(nodes, path) {
+                    for (const cat of nodes) {
+                        const newPath = [...path, cat];
+                        if (cat.id === id) {
+                            return newPath;
+                        }
+                        if (cat.children && cat.children.length > 0) {
+                            const childPath = helper(cat.children, newPath);
+                            if (childPath) return childPath;
+                        }
                     }
-                    if (cat.children && cat.children.length > 0) {
-                        const childPath = getCategoryPath(
-                            id,
-                            cat.children,
-                            newPath,
-                        );
-                        if (childPath) return childPath;
-                    }
+                    return null;
                 }
-                return null;
+                return helper(cats, []);
             }
 
             function updateBookmarkLocation() {
                 const locEl = document.getElementById("bookmarkLocation");
                 if (!locEl) return;
+
+                if (!state.currentCategory) {
+                    locEl.innerHTML = "";
+                    return;
+                }
 
                 const path = getCategoryPath(
                     state.currentCategory,
