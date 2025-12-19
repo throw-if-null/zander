@@ -1937,10 +1937,6 @@
                         updateAboutStardate();
                     });
 
-                document
-                    .getElementById("addCategoryBtn")
-                    .addEventListener("click", () => addCategory());
-
                 bookmarkForm.addEventListener("submit", saveBookmark);
 
                 // Keyboard Shortcuts
@@ -1966,15 +1962,13 @@
                                 break;
                             case "c":
                                 e.preventDefault();
-                                document.getElementById(
-                                    "settingsCategorySection",
-                                ).style.display = "block";
-                                document.getElementById(
-                                    "settingsDataSection",
-                                ).style.display = "none";
-                                renderCategoryConfig();
-                                settingsDialog.showModal();
+                                // Quick-add category while in settings mode
+                                settingsView.classList.add("active");
+                                bookmarksView.classList.remove("active");
+                                aboutView.classList.remove("active");
                                 addCategory();
+                                renderCategoryConfig();
+                                updateSettingsStardate();
                                 break;
                         }
                     }
@@ -1992,7 +1986,10 @@
                     .addEventListener("click", resetSystem);
                 document
                     .getElementById("addCategoryBtnMain")
-                    .addEventListener("click", () => addCategory());
+                    .addEventListener("click", () => {
+                        addCategory();
+                        renderCategoryConfig();
+                    });
             }
 
             // Start
