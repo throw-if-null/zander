@@ -608,6 +608,13 @@
 
             .form-group {
                 margin-bottom: 15px;
+                padding-bottom: 8px;
+                border-bottom: 1px solid rgba(153, 153, 204, 0.3);
+            }
+
+            .form-group:last-of-type {
+                border-bottom: none;
+                padding-bottom: 0;
             }
 
             label {
@@ -661,6 +668,11 @@
             #bookmarkDialog .btn-secondary {
                 background-color: #444;
                 color: var(--lcars-beige);
+            }
+
+            #bookmarkDialog .btn-secondary.delete {
+                background-color: var(--lcars-red);
+                color: #000;
             }
 
             #bookmarkDialog .btn-primary:hover,
@@ -979,7 +991,7 @@
                     <div class="lcars-dialog-footer">
                         <button
                             type="button"
-                            class="btn-secondary"
+                            class="btn-secondary delete"
                             id="deleteBtn"
                             style="display: none"
                         >
