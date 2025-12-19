@@ -60,6 +60,12 @@
                 --shape-color: var(--theme-main);
             }
 
+            body[data-theme="seven"] {
+                /* LCARS-friendly silver main tone */
+                --theme-main: #c0c0c0;
+                --shape-color: var(--theme-main);
+            }
+
             * {
                 box-sizing: border-box;
             }
@@ -577,7 +583,7 @@
 
             /* Footer Actions */
             .action-btn {
-                /* Light variant of the current theme color */
+                /* Light variant of the current theme color (overridden per-theme where needed) */
                 background-color: color-mix(
                     in srgb,
                     var(--shape-color) 30%,
@@ -619,6 +625,11 @@
 
             #aboutBtn {
                 border-right: 5px solid #000;
+            }
+
+            /* Borg green footer buttons when SEVEN OF NINE theme is active */
+            body[data-theme="seven"] .action-btn {
+                background-color: #7fff00;
             }
 
             /* Settings Menu */
@@ -1185,6 +1196,7 @@
                 { id: "data", label: "DATA" },
                 { id: "doctor", label: "DOCTOR" },
                 { id: "spock", label: "SPOCK" },
+                { id: "seven", label: "SEVEN OF NINE" },
             ];
 
             // Default Data
