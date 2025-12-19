@@ -387,26 +387,26 @@ Bookmarks are represented as `.bookmark-tile` elements rendered inside `.bookmar
   <div class="bookmark-title">EXAMPLE SITE</div>
   <div class="bookmark-description">Optional description text here...</div>
   <div class="bookmark-url-footer">
-    <span class="bookmark-url-text" title="https://example.com">https://example.com</span>
+    <div class="bookmark-edit-icon" title="Edit">✎</div>
+    <span class="bookmark-url-icon" title="https://example.com">🔗</span>
   </div>
-  <div class="bookmark-edit-icon" title="Edit">✎</div>
 </a>
 ```
 
 The tile uses a 3-row CSS grid layout:
-- **Row 1 (auto)**: Title (black text on category-colored background).
-- **Row 2 (1fr)**: Description (category-colored text on black background, with rounded top-left corner).
-- **Row 3 (auto)**: URL footer (category-colored text on black background).
+- **Row 1 (auto)**: Title (black text on main theme-colored background).
+- **Row 2 (1fr)**: Description (secondary theme-colored text on black background, with rounded top-left corner).
+- **Row 3 (auto)**: Footer (black background containing Edit and Link icons).
 
 A `::before` pseudo-element creates the signature LCARS rounded notch in the top-left corner using a radial gradient.
 
 Content breakdown:
 
-- **`.bookmark-title`**: The bookmark's title (max 64 characters). Spans full width (`grid-column: 1 / -1`). Displayed in uppercase with black text on the category color background.
-- **`.bookmark-description`**: Description text (max 512 characters). Displayed in category color on a black background. Uses `border-top-left-radius: 15px` to create an "elbow" shape against the left strip. Truncated via CSS line-clamping (4 lines).
-- **`.bookmark-url-footer`**: Compact footer strip with black background.
-  - **`.bookmark-url-text`**: The URL in category color, truncated with ellipsis. Full URL shown on hover via `title` attribute.
-- **`.bookmark-edit-icon`**: Edit pencil icon, revealed on hover.
+- **`.bookmark-title`**: The bookmark's title (max 64 characters). Spans full width (`grid-column: 1 / -1`). Displayed in uppercase with black text on the main theme color background.
+- **`.bookmark-description`**: Description text (max 512 characters). Displayed in secondary theme color on a black background. Uses `border-top-left-radius: 15px` to create an "elbow" shape against the left strip. Truncated via CSS line-clamping (4 lines).
+- **`.bookmark-url-footer`**: Compact footer strip with black background. Flex container for actions.
+  - **`.bookmark-edit-icon`**: Edit pencil icon on the left.
+  - **`.bookmark-url-icon`**: A link icon (🔗) on the right. Full URL shown on hover via `title` attribute.
 
 ### 5.2 Visual Design
 
@@ -416,17 +416,17 @@ Content breakdown:
   - Bottom-right: `border-bottom-right-radius: 30px`
   - Min-height: `140px` — compact height since description is truncated.
 - **Color zones**:
-  - **Title area (row 1)**: Category color background (via `--cat-color`) with black text.
-  - **Description area (row 2)**: Black background with category-colored text. The top-left corner is rounded (`15px`) to create the inner curve of the LCARS elbow shape.
-  - **URL footer (row 3)**: Black background with category-colored text.
-  - **Left stripe**: 15px column in category color, visible in rows 2-3 as the "handle" of the elbow.
+  - **Title area (row 1)**: Main theme color background (via `--theme-main`) with black text.
+  - **Description area (row 2)**: Black background with secondary theme-colored text (via `--theme-secondary`). The top-left corner is rounded (`15px`) to create the inner curve of the LCARS elbow shape.
+  - **URL footer (row 3)**: Black background with secondary theme-colored text.
+  - **Left stripe**: 15px column in main theme color, visible in rows 2-3 as the "handle" of the elbow.
 - **On hover**:
   - Slight scale up (`transform: scale(1.02)`).
   - Slightly brighter background (`filter: brightness(1.1)`).
 - **Edit Icon**:
-  - Positioned in the top-right corner of the tile.
-  - Revealed on hover of the tile.
-  - Clickable and keyboard-focusable, but rendered as a visual glyph inside the tile rather than a separate button element.
+  - Positioned in the bottom-left corner of the tile (inside footer).
+  - Always visible (dimmed by default, opaque on hover).
+  - Clickable and keyboard-focusable.
 
 ### 5.3 Behavior
 
