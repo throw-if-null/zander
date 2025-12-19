@@ -1616,24 +1616,28 @@
                 updateBookmarkLocation();
             }
 
+            function formatCurrentStardateDisplay() {
+                const sd = calculateStardate();
+                const date = parseStardate(sd);
+                return {
+                    stardate: sd,
+                    label: `STARDATE ${sd}`,
+                    tooltip: date ? date.toLocaleString() : "",
+                };
+            }
+
             function updateAboutStardate() {
                 if (!aboutStardateEl) return;
-                const sd = calculateStardate();
-                aboutStardateEl.textContent = `STARDATE ${sd}`;
-                const date = parseStardate(sd);
-                if (date) {
-                    aboutStardateEl.title = date.toLocaleString();
-                }
+                const info = formatCurrentStardateDisplay();
+                aboutStardateEl.textContent = info.label;
+                aboutStardateEl.title = info.tooltip;
             }
 
             function updateSettingsStardate() {
                 if (!settingsStardateEl) return;
-                const sd = calculateStardate();
-                settingsStardateEl.textContent = `STARDATE ${sd}`;
-                const date = parseStardate(sd);
-                if (date) {
-                    settingsStardateEl.title = date.toLocaleString();
-                }
+                const info = formatCurrentStardateDisplay();
+                settingsStardateEl.textContent = info.label;
+                settingsStardateEl.title = info.tooltip;
             }
 
             function updateSystemStatus() {
@@ -1778,10 +1782,10 @@
             function openAddDialog() {
                 dialogTitle.textContent = "ADD ENTRY";
 
-                const currentStardate = calculateStardate();
                 const stardateEl = document.getElementById("bookmarkStardate");
-                stardateEl.textContent = `STARDATE ${currentStardate}`;
-                stardateEl.title = new Date().toLocaleString();
+                const info = formatCurrentStardateDisplay();
+                stardateEl.textContent = info.label;
+                stardateEl.title = info.tooltip;
 
                 bookmarkForm.reset();
                 document.getElementById("bookmarkId").value = "";
