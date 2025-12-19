@@ -45,9 +45,9 @@ Accessibility is not optional—it's part of the design from the start. The Zand
 ### Focus States & Visibility
 
 - **Every interactive element must have a visible focus state** that meets contrast requirements.
-- Neon glow effects are welcome if they achieve sufficient contrast (4.5:1 for text, 3:1 for UI components).
-- Focus ring must be distinguishable from other visual states (hover, active, disabled).
-- Do not remove default focus outlines without providing an equally visible alternative via CSS.
+- Neon glow effects and LCARS-style focus bars are welcome if they achieve sufficient contrast (4.5:1 for text, 3:1 for UI components).
+- Focus indicators must be distinguishable from other visual states (hover, active, disabled).
+- Do not remove default focus outlines without providing an equally visible alternative via CSS (for example, the LCARS white focus bar used on category, footer, and title buttons).
 
 **Example:** A neon cyan glow with sufficient brightness can serve as a focus indicator without relying on a traditional outline.
 
@@ -170,13 +170,12 @@ Choose one or more of:
 
 LCARS neon aesthetic + accessibility:
 
-- **Neon Glow Focus:** Use a bright cyan or amber glow (box-shadow) that meets 4.5:1 contrast.
-  ```css
-  button:focus {
-    outline: none;
-    box-shadow: 0 0 8px rgba(0, 255, 255, 1); /* Neon cyan */
-  }
-  ```
+- **LCARS Focus Bar Pattern:** Primary LCARS controls (e.g., category buttons, footer action buttons, and the header title button) use a **white focus bar** rendered via `:focus-visible::after` instead of the default browser outline.
+  - Sidebar category buttons show a vertical white bar along the **leading edge** of the button.
+  - Footer action buttons show a horizontal white bar along the **top edge**.
+  - The `ZANDER` title button shows a horizontal white bar along the **bottom edge** when focused via keyboard.
+- **Neon Glow Focus (optional):** A bright cyan or amber glow (box-shadow) may still be used for other focusable elements that do not participate in the LCARS button system, as long as it meets 4.5:1 contrast.
+- **Generic Focus Styles:** Elements without custom LCARS button styling retain a more generic but clearly visible focus outline so they remain discoverable via keyboard.
 - **Ensure visibility** in both light and dark contexts (test in DevTools).
 
 ### High Contrast

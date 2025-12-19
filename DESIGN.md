@@ -34,10 +34,10 @@ The outer structure is organized under `.lcars-app` and uses native view and dia
   <!-- Header band and title -->
   <div class="header-bar">
     <div class="header-fill"></div>
+    <button class="app-title" id="homeBtn">
+      <!-- Title text, subtitle, and numeric callout; acts as a Home control -->
+    </button>
     <div class="header-end-cap"></div>
-    <div class="app-title">
-      <!-- Title text, subtitle, and numeric callout -->
-    </div>
   </div>
 
   <!-- Sidebar + Frame -->
@@ -151,7 +151,7 @@ Base colors (representative, not exhaustive):
 Usage guidelines:
 
 - **Frame** (header, sidebar caps, track, footer): primarily `--lcars-orange` and related warm tones.
-- **Buttons & Tiles**: use per-category colors from the LCARS palette; hover and active states brighten or invert.
+- **Buttons & Tiles**: use per-category colors from the LCARS palette; hover and active states brighten or invert. Button focus states use a consistent LCARS pattern: a solid white bar rendered along one edge via `:focus-visible::after` (top for many primary buttons, left for sidebar categories, bottom for the header title button).
 - **Status blocks & labels**: use blue for labels, orange for numeric values.
 - **Destructive actions**: use red (e.g., delete, reset).
 
@@ -283,7 +283,9 @@ Category buttons and nested submenus are placed within the `.sidebar-track` but 
 - **Active** (`.cat-btn.active`):
   - Stronger fill using the category color, with clear separation from inactive buttons.
 - **Focus-visible**:
-  - Neon glow outline (see Accessibility), implemented via `:focus-visible` and an `::after` halo.
+  - LCARS-style white focus bar rendered via `:focus-visible::after`:
+    - For sidebar category buttons, a vertical white bar is drawn along the left edge of the button.
+    - This keeps keyboard focus clearly visible without relying on the browser’s default outline.
 
 Category buttons can have nested submenus (`.cat-submenu`) for child categories. Submenus are implemented as additional stacks of `.cat-btn` inside `.cat-wrapper` elements, shown on hover or inline depending on viewport and depth.
 
@@ -361,9 +363,18 @@ The Settings view appears in-place within the main content area:
       - Add-child button.
       - Delete button (destructive style).
 
+  - **Theme**:
+    - Theme selector controls rendered as LCARS buttons (typically using secondary accent colors).
+    - A compact status readout of the currently active theme (e.g., `ACTIVE THEME: LA'AN`).
+
   - **Data Management**:
-    - Buttons for Export, Import, and Reset System.
+    - Buttons for Export and Import of the bookmark database (e.g., `EXPORT DATABASE`, `IMPORT DATABASE`).
     - Each button uses standard LCARS control styling (see Global Controls).
+
+  - **Danger Zone**:
+    - A visually separated section labeled “DANGER ZONE”.
+    - Contains the `SYSTEM RESET` control, styled as a destructive action (e.g., red-toned LCARS button) to clearly communicate risk.
+    - Reset behavior: wipes all local data and restores the built‑in defaults.
 
   - **System Status**:
     - Optional read-only status block with stardate and counts (`.settings-status`).
@@ -387,7 +398,7 @@ The About view (`.about-panel`) is an informational screen:
 
 The About panel uses the same base layout as the Settings panel but is content-focused, with minimal controls.
 
-The **header title** (`.app-title`, showing “ZANDER”) functions as a **Home control**: clicking it returns the main content to the Bookmarks view. This is mirrored by the `Alt+H` keyboard shortcut (see Keyboard & Accessibility section), giving both a prominent visual target and a power-user shortcut for returning “home”.
+The **header title** (`.app-title`, showing “ZANDER”) functions as a **Home control**: clicking it returns the main content to the Bookmarks view. This is mirrored by the `Alt+H` keyboard shortcut (see Keyboard & Accessibility section), giving both a prominent visual target and a power-user shortcut for returning “home”. When focused via keyboard, the header title button uses the same LCARS focus pattern as other primary controls: a single, solid white focus indicator rendered as a line along the **bottom edge** of the button, implemented via `:focus-visible::after`.
 
 ---
 

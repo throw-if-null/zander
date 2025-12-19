@@ -223,10 +223,14 @@ The main content region has three primary views, toggled via footer buttons and 
       - Color selection
       - Reordering
       - Adding/removing categories
+  - **Theme**
+    - Theme selector buttons using LCARS button styling.
+    - Status readout of the currently active theme.
   - **Data Management**
-    - `EXPORT DATA` button
-    - `IMPORT DATA` button (opens file picker)
-    - `RESET SYSTEM` button (wipe everything back to defaults)
+    - `EXPORT DATABASE` button
+    - `IMPORT DATABASE` button (opens file picker)
+  - **Danger Zone**
+    - `SYSTEM RESET` button (wipe everything back to defaults), visually grouped and labeled as a destructive action.
   - **Status Panel**
     - Decorative system status, stardate, and counts.
 
@@ -278,7 +282,7 @@ This clears the app’s `localStorage` and restores the default demo categories 
 
 ---
 
-## Keyboard Shortcuts
+### Keyboard Shortcuts
 
 | Shortcut   | Action                               |
 |-----------|---------------------------------------|
@@ -287,6 +291,12 @@ This clears the app’s `localStorage` and restores the default demo categories 
 | `Alt + S` | Open **Settings** view                |
 | `Alt + C` | Add **New Category** (in Settings)    |
 | `Esc`     | Close the active dialog (if any)      |
+
+Keyboard focus styles follow a consistent LCARS pattern:
+
+- Sidebar category buttons and footer action buttons use a white focus bar rendered via `:focus-visible::after` on one edge of the control.
+- The header title button (`ZANDER`) also uses a white focus line along its bottom edge when focused via keyboard.
+- A more generic focus outline is used for other focusable elements that do not have custom LCARS button styling.
 
 Browser or OS‑level shortcuts may conflict; when they do, those take precedence.
 

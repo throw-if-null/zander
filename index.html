@@ -120,7 +120,7 @@
             :focus-visible {
                 outline: 2px solid #fff;
                 outline-offset: 2px;
-                box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+                box-shadow: none;
             }
 
             body {
@@ -184,6 +184,22 @@
                 letter-spacing: -1px;
                 border: none;
                 cursor: pointer;
+            }
+
+            .app-title:focus-visible {
+                outline: none;
+                box-shadow: none;
+                position: relative;
+            }
+
+            .app-title:focus-visible::after {
+                content: "";
+                position: absolute;
+                left: 0;
+                right: 0;
+                bottom: -10px;
+                height: 4px;
+                background-color: #ffffff;
             }
 
             /* Sidebar (Full Height Column) */
@@ -295,7 +311,7 @@
             .cat-btn:focus-visible::after {
                 content: "";
                 position: absolute;
-                left: -9px;
+                left: -10px;
                 top: 0;
                 bottom: 0;
                 width: 4px;
@@ -541,7 +557,7 @@
             .btn-secondary:focus-visible::after {
                 content: "";
                 position: absolute;
-                top: -9px;
+                top: -10px;
                 left: 0;
                 right: 0;
                 height: 4px;
@@ -1113,6 +1129,13 @@
                                             style="display: none"
                                             aria-label="Import Bookmarks from JSON File"
                                         />
+                                    </div>
+                                </div>
+                            </section>
+                            <section class="settings-section">
+                                <h2>DANGER ZONE</h2>
+</h2>                                <div id="settingsDataSectionMain">
+                                    <div class="form-group">
                                         <button
                                             class="btn-secondary reset"
                                             id="resetBtnMain"

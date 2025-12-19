@@ -44,8 +44,9 @@ The app is visually presented as a **LCARS-style console** built from a continuo
     - Status display with system metrics (categories, bookmarks, stardate).
   - **Settings View**:
     - Category configuration (nested tree, colors, ordering).
-    - Import / Export controls.
-    - System reset.
+    - Theme selector and active theme readout.
+    - Data management controls (export/import).
+    - Danger Zone with system reset action.
     - Diagnostic status text, including last import/reset stardate.
   - **About View**:
     - System name, code name, and credits.
@@ -70,6 +71,11 @@ Dialogs are implemented with semantic `<dialog>` elements:
     - Stardate & Earth date display for creation time.
 - **Settings Dialog**  
   - Not a separate `<dialog>`: implemented as a main-content “view” panel (`.settings-panel`) toggled by the footer buttons.
+  - Internally organized into:
+    - Category Configuration section.
+    - Theme section.
+    - Data Management section.
+    - Danger Zone section containing the destructive System Reset control.
 - **Color Picker Dialog (`#colorPickerDialog`)**  
   - Grid-based LCARS color picker for category colors.
 - **Confirm Dialog (`#confirmDialog`)**  
