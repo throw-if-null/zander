@@ -91,18 +91,23 @@ Canonical shape:
 
 ```ts
 type Bookmark = {
-  id: string;         // UUID
-  title: string;      // User-visible title
-  url: string;        // Fully normalized URL, including protocol
-  categoryId: string; // Reference to a Category.id
-  createdAt: string;  // Stardate string, e.g. "2025352.1200"
+  id: string;          // UUID
+  title: string;       // User-visible title (max 64 characters)
+  description?: string; // Optional description (max 512 characters)
+  url: string;         // Fully normalized URL, including protocol
+  categoryId: string;  // Reference to a Category.id
+  createdAt: string;   // Stardate string, e.g. "2025352.1200"
 };
 ```
 
 Rules:
 
 - `id` is globally unique.
-- `title` is required and trimmed.
+- `title` is required and trimmed. Maximum length: 64 characters.
+- `description` is optional. Maximum length: 512 characters.
+  - Displayed on bookmark tiles truncated to first 100 characters (with ellipsis if longer).
+  - Full description is viewable and editable in the Bookmark Dialog (edit mode).
+  - If empty or omitted, no description is shown on the tile.
 - `url` is required:
   - Normalized via `normalizeUrl()`:
     - If no protocol is present and the value “looks like” a URL, `https://` is prefixed.
@@ -201,12 +206,16 @@ const DEFAULT_BOOKMARKS: Bookmark[] = [
   {
     id: "bm-lcars",
     title: "LCARS INTERFACE",
+    description: "Library Computer Access/Retrieval System reference.",
     url: "https://www.thelcars.com",
     categoryId: "cat-databanks",
     createdAt: "2025352.1200",
   },
 ];
 ```
+
+Notes:
+- `description` is optional; if omitted or empty, no description is shown on the tile.
 
 ---
 

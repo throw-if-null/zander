@@ -385,23 +385,44 @@ Bookmarks are represented as `.bookmark-tile` elements rendered inside `.bookmar
 ```/dev/null/bookmark-tile.html#L1-40
 <a class="bookmark-tile" href="https://example.com" target="_blank" rel="noopener noreferrer">
   <div class="bookmark-title">EXAMPLE SITE</div>
-  <div class="bookmark-url">https://example.com</div>
+  <div class="bookmark-description">Optional description text here...</div>
+  <div class="bookmark-url-footer">
+    <span class="bookmark-url-text" title="https://example.com">https://example.com</span>
+  </div>
   <div class="bookmark-edit-icon" title="Edit">✎</div>
 </a>
 ```
 
+The tile uses a 3-row CSS grid layout:
+- **Row 1 (auto)**: Title (theme-colored block spanning full width with category-colored text)
+- **Row 2 (auto)**: Description (truncated to 100 characters on tile; full text in edit mode)
+- **Row 3 (auto)**: URL footer (theme-colored strip with pronounced LCARS cutout)
+
+A `::before` pseudo-element creates the signature LCARS rounded notch in the top-left corner using a radial gradient.
+
+Content breakdown:
+
+- **`.bookmark-title`**: The bookmark's title (max 64 characters). Spans full width (`grid-column: 1 / -1`). Displayed in uppercase on the theme color background (`--theme-main`) with category-colored text. Creates bold LCARS-style visual separation from the description area.
+- **`.bookmark-description`**: Description text (max 512 characters stored, but truncated to first 100 characters on the tile with ellipsis). Full description viewable in edit mode. Black text on category color ensures readability.
+- **`.bookmark-url-footer`**: Compact theme-colored footer strip with pronounced LCARS rounded top-left corner cutout (`border-top-left-radius: 30px`).
+  - **`.bookmark-url-text`**: The URL in category color, truncated with ellipsis. Full URL shown on hover via `title` attribute.
+- **`.bookmark-edit-icon`**: Edit pencil icon, revealed on hover.
+
 ### 5.2 Visual Design
 
 - **Shape**:
-  - Rounded rectangle with LCARS signature exaggeration on one corner.
-  - Example:
-    - `border-radius: 10px;`
-    - `border-bottom-right-radius: 30px;`
-- **Color**:
-  - Background: category color (via `--cat-color`) or a blend of category color and neutral LCARS orange.
-  - On hover:
-    - Slight scale up (e.g., `transform: translateY(-1px) scale(1.02)`).
-    - Slightly brighter background.
+  - Rounded rectangle with LCARS signature exaggeration on corners.
+  - Top-left: LCARS notch cutout via `::before` pseudo-element with `radial-gradient`
+  - Bottom-right: `border-bottom-right-radius: 30px`
+  - Min-height: `140px` — compact height since description is truncated.
+- **Color zones**:
+  - **Title area (row 1)**: Theme color background (`--theme-main`) with category-colored text — creates bold LCARS separation. Spans full tile width.
+  - **Description area (row 2)**: Category color (via `--cat-color`) with black text for high contrast.
+  - **URL footer (row 3)**: Theme color background (`--theme-main`) with pronounced LCARS rounded cutout (`border-top-left-radius: 30px`). URL text uses category color for visual connection.
+  - **Left stripe**: 15px column in category color, maintains classic LCARS panel aesthetic (visible in rows 2-3).
+- **On hover**:
+  - Slight scale up (`transform: scale(1.02)`).
+  - Slightly brighter background (`filter: brightness(1.1)`).
 - **Edit Icon**:
   - Positioned in the top-right corner of the tile.
   - Revealed on hover of the tile.
@@ -495,7 +516,10 @@ Inputs in dialogs and settings follow a consistent style:
 
 The Bookmark dialog uses:
 
-- `TITLE` text input.
+- `TITLE` text input (max 64 characters, `maxlength="64"`).
+- `DESCRIPTION` textarea (optional, max 512 characters, `maxlength="512"`).
+  - Styled with vertical resize constraints (`min-height: 60px`, `max-height: 150px`).
+  - Placeholder text: "Optional description..."
 - `URL` composite input:
   - Protocol selector (`#urlProtocol`) for `https://` vs `http://`.
   - Text input for the rest of the URL.

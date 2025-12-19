@@ -14,16 +14,17 @@ When there is disagreement between documentation, this glossary, and the impleme
 
 ### 1.1 Bookmark
 
-- **Meaning**: A saved URL with a title that belongs to exactly one category.
+- **Meaning**: A saved URL with a title and optional description that belongs to exactly one category.
 - **Implementation**: The `Bookmark` object described in `ARCHITECTURE.md`.
 - **Fields (conceptual)**:
   - `id`: Unique identifier (string, UUID-like).
-  - `title`: Human-readable label for the link.
-  - `url`: Normalized URL including protocol (e.g., `https://example.com`).
+  - `title`: Human-readable label for the link (max 64 characters).
+  - `description`: Optional descriptive text (max 512 characters). Displayed on bookmark tiles with text wrapping, clamped to 3 lines.
+  - `url`: Normalized URL including protocol (e.g., `https://example.com`). Displayed truncated on tiles with full URL shown on hover.
   - `categoryId`: ID of the category that owns the bookmark.
   - `createdAt`: Stardate when the bookmark was created (numeric).
 - **Notes**:
-  - When any doc says **“entry”** it means **“bookmark”**, unless explicitly stated otherwise.
+  - When any doc says **"entry"** it means **"bookmark"**, unless explicitly stated otherwise.
   - Each bookmark is associated with exactly one category via `categoryId`.
 
 ---
@@ -200,14 +201,17 @@ When there is disagreement between documentation, this glossary, and the impleme
 
 - **Meaning**: The visual card representing a single bookmark in the grid.
 - **Implementation**:
-  - `.bookmark-tile`
+  - `.bookmark-tile` — uses a 3-row CSS grid layout with a `::before` pseudo-element creating the signature LCARS rounded notch in the top-left corner
   - Contains:
-    - `.bookmark-title`
-    - `.bookmark-url`
+    - `.bookmark-title` — the bookmark's title (max 64 characters), spans full width, displayed on the theme color background (`--theme-main`) with category-colored text (row 1) for bold LCARS-style separation
+    - `.bookmark-description` — description text (max 512 characters stored, truncated to first 100 characters on tile with ellipsis; full text viewable in edit mode), displayed on the category-colored background with black text (row 2)
+    - `.bookmark-url-footer` — compact theme-colored footer strip with LCARS rounded cutout (row 3)
+      - `.bookmark-url-text` — the URL in category color, truncated with ellipsis; full URL shown on hover via `title` attribute
     - `.bookmark-edit-icon` (edit action)
 - **Behavior**:
   - Clicking the tile opens the URL in a new tab/window.
   - Clicking the edit icon opens the **Bookmark Dialog** in edit mode.
+  - Hovering over the URL text shows the full URL in a tooltip.
 
 ---
 
@@ -280,7 +284,8 @@ When there is disagreement between documentation, this glossary, and the impleme
 - **Implementation**:
   - `<dialog id="bookmarkDialog">` with `.lcars-dialog` structure.
   - Contains form elements for:
-    - Title
+    - Title (max 64 characters)
+    - Description (optional, max 512 characters)
     - Protocol selector (e.g., `https://` vs `http://`)
     - URL body
     - Category selection

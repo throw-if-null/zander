@@ -94,11 +94,21 @@ Accessibility is not optional—it's part of the design from the start. The Zand
   - Example: `<button aria-label="Delete this bookmark">🗑️</button>`
 - **Decorative icons:** Use `aria-hidden="true"` if the icon is purely visual and the action is described elsewhere.
 
+### Truncated Text & Tooltips
+
+- **Use `title` attribute for truncated content:**
+  - When text is visually truncated (e.g., via `text-overflow: ellipsis`), provide the full content in a `title` attribute so users can access it on hover.
+  - Example: Bookmark URLs are truncated on tiles but the full URL is available via `title` on `.bookmark-url-text`.
+- **Note:** `title` attributes are not reliably announced by all screen readers; ensure essential information is also available via `aria-label` on the parent element where appropriate.
+
 ### Form Accessibility
 
-- Every `<input>` must have an associated `<label>`.
+- Every `<input>` and `<textarea>` must have an associated `<label>` or `aria-label`.
+  - The description textarea uses `aria-label="Bookmark Description"` since it has a visible label but benefits from explicit labeling for screen readers.
 - Use `aria-describedby` for hints or validation messages:
   - Example: `<input id="url" aria-describedby="url-hint">` + `<small id="url-hint">Enter a valid HTTP or HTTPS URL</small>`
+- Use `maxlength` attribute to enforce character limits (e.g., `maxlength="64"` for title, `maxlength="512"` for description).
+- Use `placeholder` for optional fields to indicate they are not required (e.g., "Optional description...").
 - Validate on blur or submit; announce errors clearly.
 
 ### Headings & Document Structure
@@ -144,8 +154,11 @@ Choose one or more of:
 - **TalkBack** (Android, built-in)
 
 **Test these flows:**
-- Navigate to Bookmarks view and add a new bookmark via dialog.
-- Announce the bookmark tile content and available actions.
+- Navigate to Bookmarks view and add a new bookmark via dialog (including title, optional description, URL, and category).
+- Announce the bookmark tile content and available actions:
+  - Title (max 64 characters)
+  - Description (if present, max 512 characters, displayed with line clamping)
+  - URL (truncated visually; full URL available via `title` attribute on hover)
 - Navigate to Settings and adjust category colors.
 - Open and close dialogs; verify focus is restored.
 
