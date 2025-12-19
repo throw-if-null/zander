@@ -1,0 +1,1739 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>ZANDER</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Antonio:wght@400;700&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            :root {
+                --lcars-bg: #000000;
+                --lcars-orange: #ff9900;
+                --lcars-purple: #cc99cc;
+                --lcars-red: #cc6666;
+                --lcars-blue: #9999cc;
+                --lcars-beige: #ffcc99;
+                --lcars-gray: #999999;
+                --lcars-font: "Antonio", sans-serif;
+                --gutter: 5px;
+                --radius: 30px;
+                --shape-color: var(--lcars-purple);
+
+                /* Layout variables */
+                --sidebar-width: 160px;
+                --header-height: 80px;
+                --gap: 10px;
+            }
+
+            * {
+                box-sizing: border-box;
+            }
+
+            :focus-visible {
+                outline: 2px solid #fff;
+                outline-offset: 2px;
+            }
+
+            body {
+                background-color: #000;
+                color: var(--lcars-orange);
+                font-family: var(--lcars-font);
+                margin: 0;
+                height: 100vh;
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+            }
+
+            /* LCARS Layout Grid */
+            .lcars-app {
+                display: grid;
+                grid-template-columns: 1fr 160px; /* Content | Sidebar */
+                grid-template-rows: 70px 1fr 70px; /* Header | Main | Footer */
+                height: 100%;
+                padding: 10px;
+                gap: 0; /* Seamless connections */
+            }
+
+            /* Header (Left Part) */
+            .header-bar {
+                grid-column: 1;
+                grid-row: 1;
+                background-color: var(--shape-color);
+                border-top-left-radius: var(--radius);
+                border-bottom-left-radius: var(--radius);
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+                padding-right: 20px;
+                margin-right: -1px;
+                height: 40px;
+                align-self: start;
+            }
+
+            .app-title {
+                color: #000;
+                font-size: 2rem;
+                font-weight: bold;
+                text-transform: uppercase;
+            }
+
+            /* Sidebar (Full Height Column) */
+            .sidebar-container {
+                grid-column: 2;
+                grid-row: 1 / 4;
+                display: flex;
+                flex-direction: column;
+                width: 100%;
+                height: 100%;
+            }
+
+            /* Top Elbow Connector */
+            .sidebar-top-cap {
+                height: 70px;
+                width: 100%;
+                background: radial-gradient(
+                    circle at bottom left,
+                    var(--lcars-bg) 30px,
+                    var(--shape-color) 30.5px
+                );
+                border-top-right-radius: var(--radius);
+            }
+
+            /* Middle Sidebar Track */
+            .sidebar-track {
+                flex: 1;
+                background: none;
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+                padding: 10px 0 0 35px;
+            }
+
+            /* Bottom Elbow Connector */
+            .sidebar-bottom-cap {
+                height: 70px;
+                width: 100%;
+                background: radial-gradient(
+                    circle at top left,
+                    var(--lcars-bg) 30px,
+                    var(--shape-color) 30.5px
+                );
+                border-bottom-right-radius: var(--radius);
+            }
+
+            .footer-bar {
+                grid-column: 1;
+                grid-row: 3;
+                background-color: var(--shape-color);
+                border-top-left-radius: var(--radius);
+                border-bottom-left-radius: var(--radius);
+                display: flex;
+                align-items: center;
+                padding-left: 0;
+                padding-right: 5px;
+                gap: 5px;
+                margin-right: -1px;
+                height: 40px;
+                align-self: end;
+            }
+
+            /* Sidebar Buttons */
+            .cat-btn {
+                background-color: var(--cat-color, var(--shape-color));
+                color: #000;
+                border: none;
+                height: 50px;
+                width: 100%;
+                font-family: var(--lcars-font);
+                font-size: 1.2rem;
+                font-weight: bold;
+                text-transform: uppercase;
+                text-align: right;
+                padding-right: 15px;
+                cursor: pointer;
+                transition: background-color 0.2s;
+                position: relative;
+            }
+
+            .cat-btn:hover,
+            .cat-btn.active {
+                background-color: var(--lcars-beige);
+            }
+
+            .cat-btn:focus-visible {
+                outline: none;
+            }
+
+            .cat-btn:focus-visible::after {
+                content: "";
+                position: absolute;
+                left: -9px;
+                top: 0;
+                bottom: 0;
+                width: 4px;
+                background-color: #ffffff;
+            }
+            /* Nested Categories */
+            .cat-wrapper {
+                position: relative;
+                width: 100%;
+            }
+
+            .cat-submenu {
+                display: none;
+                position: absolute;
+                right: 100%; /* Move to the left of the parent */
+                top: 0;
+                width: 160px; /* Match sidebar width */
+                flex-direction: column;
+                gap: 5px;
+                padding-right: 10px; /* Space between levels */
+                z-index: 100;
+            }
+
+            .cat-wrapper:hover > .cat-submenu {
+                display: flex;
+            }
+
+            .cat-submenu .cat-btn {
+                border-top-right-radius: 0;
+                border-bottom-right-radius: 0;
+                border-top-left-radius: var(--radius);
+                border-bottom-left-radius: var(--radius);
+            }
+
+            /* Main Content */
+            .main-content {
+                grid-column: 1;
+                grid-row: 1 / 4;
+                overflow-y: auto;
+                padding: 20px;
+                border: none;
+                border-radius: 30px;
+                margin-right: -25px;
+                margin-top: 42px;
+                margin-bottom: 42px;
+            }
+
+            .bookmark-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 20px;
+            }
+
+            .bookmark-tile {
+                position: relative;
+                background-color: var(--cat-color, var(--lcars-orange));
+                color: #fff;
+                padding: 0;
+                border-radius: 20px 0 0 0;
+                border-bottom-right-radius: 30px;
+                cursor: pointer;
+                text-decoration: none;
+                display: grid;
+                grid-template-columns: 15px 1fr;
+                grid-template-rows: auto 1fr;
+                height: 140px;
+                transition:
+                    transform 0.1s,
+                    filter 0.1s;
+                user-select: none;
+                overflow: hidden;
+            }
+
+            .bookmark-tile::after {
+                content: "";
+                grid-column: 2;
+                grid-row: 2;
+                background-color: #000;
+                border-top-left-radius: 25px;
+                z-index: 1;
+            }
+
+            .bookmark-tile:hover {
+                filter: brightness(1.1);
+                transform: scale(1.02);
+            }
+
+            .bookmark-title {
+                grid-column: 2;
+                grid-row: 1;
+                font-size: 1.2rem;
+                font-weight: bold;
+                line-height: 1.1;
+                text-transform: uppercase;
+                padding: 15px;
+                padding-right: 40px;
+                color: #000;
+            }
+
+            .bookmark-url {
+                grid-column: 2;
+                grid-row: 2;
+                background-color: #444;
+                border-top-left-radius: 20px;
+                margin-top: 5px;
+                margin-left: 5px;
+                z-index: 2;
+                font-size: 0.8rem;
+                opacity: 0.7;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                padding: 15px;
+                align-self: stretch;
+                display: flex;
+                align-items: flex-end;
+            }
+
+            .bookmark-edit-icon {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                width: 24px;
+                height: 24px;
+                background-color: rgba(0, 0, 0, 0.2);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                opacity: 0;
+                transition: opacity 0.2s;
+                font-size: 14px;
+                color: #000;
+            }
+
+            .bookmark-tile:hover .bookmark-edit-icon {
+                opacity: 1;
+            }
+
+            /* Footer Actions */
+            .action-btn {
+                background-color: var(--lcars-beige);
+                color: #000;
+                border: none;
+                padding: 0 15px;
+                height: 40px;
+                width: 150px;
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+                font-family: var(--lcars-font);
+                font-size: 1.2rem;
+                font-weight: bold;
+                text-transform: uppercase;
+                cursor: pointer;
+                position: relative;
+            }
+
+            .action-btn:hover {
+                background-color: #fff;
+            }
+
+            .action-btn:focus-visible {
+                outline: none;
+            }
+
+            .action-btn:focus-visible::after {
+                content: "";
+                position: absolute;
+                top: -9px;
+                left: 0;
+                right: 0;
+                height: 4px;
+                background-color: #ffffff;
+            }
+
+            /* Settings Menu */
+            .settings-wrapper {
+                position: relative;
+                display: flex;
+                align-items: center;
+                height: 40px;
+            }
+
+            .settings-submenu {
+                display: none;
+                position: absolute;
+                bottom: 100%;
+                left: 0;
+                width: 100%;
+                flex-direction: column;
+                gap: 5px;
+                padding-bottom: 5px;
+                z-index: 100;
+            }
+
+            .settings-wrapper:hover .settings-submenu {
+                display: flex;
+            }
+
+            .data-mgmt-options {
+                display: none;
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .data-mgmt-options.visible {
+                display: flex;
+            }
+
+            /* Dialogs */
+            dialog {
+                background-color: #000;
+                color: var(--lcars-orange);
+                border: 2px solid var(--lcars-orange);
+                border-radius: 20px;
+                padding: 20px;
+                max-width: 500px;
+                width: 90%;
+            }
+
+            dialog::backdrop {
+                background-color: rgba(0, 0, 0, 0.8);
+            }
+
+            dialog h2 {
+                margin-top: 0;
+                border-bottom: 2px solid var(--lcars-orange);
+                padding-bottom: 10px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .form-group {
+                margin-bottom: 15px;
+            }
+
+            label {
+                display: block;
+                margin-bottom: 5px;
+                font-weight: bold;
+            }
+
+            input,
+            select {
+                width: 100%;
+                padding: 10px;
+                background-color: #222;
+                border: 1px solid var(--lcars-orange);
+                color: #fff;
+                border-radius: 5px;
+                font-family: var(--lcars-font);
+            }
+
+            .dialog-actions {
+                display: flex;
+                justify-content: flex-end;
+                gap: 10px;
+                margin-top: 20px;
+            }
+
+            .btn-primary {
+                background-color: var(--lcars-orange);
+                color: #000;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 20px;
+                font-weight: bold;
+                cursor: pointer;
+            }
+
+            .btn-secondary {
+                background-color: #444;
+                color: #fff;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 20px;
+                font-weight: bold;
+                cursor: pointer;
+            }
+
+            .category-config-list {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                margin-bottom: 10px;
+                max-height: 300px;
+                overflow-y: auto;
+                border: 1px solid var(--lcars-blue);
+                padding: 10px;
+                border-radius: 10px;
+            }
+
+            .category-config-row {
+                display: grid;
+                grid-template-columns: 40px 1fr 40px 40px 40px 40px;
+                gap: 5px;
+                align-items: center;
+            }
+
+            .category-color-swatch {
+                width: 100%;
+                height: 40px;
+                border: none;
+                border-radius: 20px;
+                cursor: pointer;
+            }
+
+            .color-grid {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 15px;
+                margin-top: 20px;
+            }
+
+            .color-option {
+                width: 100%;
+                aspect-ratio: 1.5;
+                border: none;
+                border-radius: 10px;
+                border-bottom-right-radius: 20px;
+                cursor: pointer;
+            }
+
+            .color-option:hover {
+                filter: brightness(1.2);
+                outline: 2px solid #fff;
+            }
+
+            .category-config-btn {
+                background-color: var(--lcars-blue);
+                color: #000;
+                border: none;
+                height: 40px;
+                border-radius: 20px;
+                cursor: pointer;
+                font-weight: bold;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.2rem;
+            }
+
+            .category-config-btn:hover {
+                background-color: var(--lcars-beige);
+            }
+
+            .category-config-btn.delete {
+                background-color: var(--lcars-red);
+            }
+
+            /* System Status Display */
+            .status-display {
+                display: flex;
+                align-items: center;
+                flex: 1;
+                padding-left: 20px;
+            }
+
+            .status-text {
+                color: #000;
+                font-weight: bold;
+                margin-right: 10px;
+                font-size: 1.2rem;
+            }
+
+            .status-info {
+                background-color: #000;
+                color: var(--lcars-orange);
+                padding: 5px 10px;
+                border-radius: 15px;
+                display: flex;
+                gap: 10px;
+                font-weight: bold;
+                font-size: 1.1rem;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="lcars-app">
+            <!-- Header Bar (Left) -->
+            <div class="header-bar">
+                <span class="app-title">ZANDER</span>
+            </div>
+
+            <!-- Sidebar (Right - Full Height) -->
+            <aside class="sidebar-container">
+                <!-- Top Elbow -->
+                <div class="sidebar-top-cap"></div>
+
+                <!-- Middle Track -->
+                <div class="sidebar-track" id="categorySidebar">
+                    <!-- Categories injected here -->
+                </div>
+
+                <!-- Bottom Elbow -->
+                <div class="sidebar-bottom-cap"></div>
+            </aside>
+
+            <main class="main-content">
+                <div id="bookmarkGrid" class="bookmark-grid">
+                    <!-- Bookmarks injected here -->
+                </div>
+                <div
+                    id="emptyState"
+                    class="empty-state"
+                    style="display: none; text-align: center; padding: 50px"
+                >
+                    NO ENTRIES FOUND
+                </div>
+            </main>
+
+            <div class="footer-bar">
+                <div id="systemStatus" class="status-display"></div>
+                <button class="action-btn" id="addBtn">ADD ENTRY</button>
+                <div class="settings-wrapper">
+                    <div class="settings-submenu">
+                        <div class="data-mgmt-options" id="dataMgmtOptions">
+                            <button class="action-btn" onclick="resetSystem()">
+                                RESET
+                            </button>
+                            <button
+                                class="action-btn"
+                                onclick="
+                                    document
+                                        .getElementById('importInput')
+                                        .click()
+                                "
+                            >
+                                IMPORT
+                            </button>
+                            <button class="action-btn" onclick="exportData()">
+                                EXPORT
+                            </button>
+                        </div>
+                        <button class="action-btn" id="settingsDataBtn">
+                            DATA MGMT
+                        </button>
+                        <button class="action-btn" id="settingsCatBtn">
+                            CAT CONFIG
+                        </button>
+                    </div>
+                    <button class="action-btn" id="settingsBtn">
+                        SETTINGS
+                    </button>
+                </div>
+                <button class="action-btn" id="aboutBtn">ABOUT</button>
+            </div>
+        </div>
+
+        <!-- Bookmark Dialog -->
+        <dialog id="bookmarkDialog">
+            <h2>
+                <span id="dialogTitle">NEW ENTRY</span>
+                <span
+                    id="bookmarkStardate"
+                    style="
+                        font-size: 0.7em;
+                        color: #000;
+                        opacity: 0.7;
+                        cursor: help;
+                    "
+                ></span>
+            </h2>
+            <form id="bookmarkForm" method="dialog">
+                <input type="hidden" id="bookmarkId" />
+                <div class="form-group">
+                    <label for="titleInput">TITLE</label>
+                    <input type="text" id="titleInput" required />
+                </div>
+                <div class="form-group">
+                    <label for="urlInput">URL</label>
+                    <div style="display: flex; gap: 10px">
+                        <select id="urlProtocol" style="width: 120px">
+                            <option value="https://">HTTPS://</option>
+                            <option value="http://">HTTP://</option>
+                        </select>
+                        <input
+                            type="text"
+                            id="urlInput"
+                            required
+                            placeholder="example.com"
+                            style="flex: 1"
+                        />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="categoryInput">CATEGORY</label>
+                    <select id="categoryInput">
+                        <!-- Options injected -->
+                    </select>
+                </div>
+                <div class="dialog-actions">
+                    <button
+                        type="button"
+                        class="btn-secondary"
+                        id="deleteBtn"
+                        style="display: none"
+                    >
+                        DELETE
+                    </button>
+                    <button
+                        type="button"
+                        class="btn-secondary"
+                        onclick="
+                            document.getElementById('bookmarkDialog').close()
+                        "
+                    >
+                        CANCEL
+                    </button>
+                    <button type="submit" class="btn-primary">ENGAGE</button>
+                </div>
+            </form>
+        </dialog>
+
+        <!-- Settings Dialog -->
+        <dialog id="settingsDialog" style="max-width: 600px">
+            <h2>SYSTEM SETTINGS</h2>
+
+            <div id="settingsCategorySection">
+                <h3
+                    style="
+                        border-bottom: 1px solid var(--lcars-blue);
+                        padding-bottom: 5px;
+                        margin-top: 0;
+                    "
+                >
+                    CATEGORY CONFIGURATION
+                </h3>
+                <div id="categoryConfigList" class="category-config-list">
+                    <!-- Rows injected via JS -->
+                </div>
+                <button
+                    class="btn-primary"
+                    id="addCategoryBtn"
+                    style="width: 100%; margin-bottom: 20px"
+                >
+                    ADD CATEGORY
+                </button>
+            </div>
+
+            <div id="settingsDataSection">
+                <h3
+                    style="
+                        border-bottom: 1px solid var(--lcars-blue);
+                        padding-bottom: 5px;
+                    "
+                >
+                    DATA MANAGEMENT
+                </h3>
+                <div class="form-group">
+                    <button
+                        class="btn-primary"
+                        id="exportBtn"
+                        style="width: 100%; margin-bottom: 10px"
+                    >
+                        EXPORT DATABASE
+                    </button>
+                    <button
+                        class="btn-primary"
+                        id="importBtn"
+                        style="width: 100%; margin-bottom: 10px"
+                    >
+                        IMPORT DATABASE
+                    </button>
+                    <input
+                        type="file"
+                        id="importInput"
+                        accept=".json"
+                        style="display: none"
+                    />
+                    <button
+                        class="btn-secondary"
+                        id="resetBtn"
+                        style="width: 100%"
+                    >
+                        SYSTEM RESET
+                    </button>
+                </div>
+            </div>
+            <div class="dialog-actions">
+                <button
+                    class="btn-secondary"
+                    onclick="document.getElementById('settingsDialog').close()"
+                >
+                    CLOSE
+                </button>
+            </div>
+        </dialog>
+
+        <dialog id="confirmDialog">
+            <h2 id="confirmTitle">CONFIRM</h2>
+            <div style="margin: 20px 0; font-size: 1.2rem" id="confirmMessage">
+                ARE YOU SURE?
+            </div>
+            <div class="dialog-actions">
+                <button class="btn-secondary" id="confirmCancelBtn">
+                    CANCEL
+                </button>
+                <button class="btn-primary" id="confirmOkBtn">PROCEED</button>
+            </div>
+        </dialog>
+
+        <dialog id="colorPickerDialog">
+            <h2>SELECT COLOR</h2>
+            <div id="colorGrid" class="color-grid"></div>
+            <div class="dialog-actions">
+                <button
+                    class="btn-secondary"
+                    onclick="
+                        document.getElementById('colorPickerDialog').close()
+                    "
+                >
+                    CANCEL
+                </button>
+            </div>
+        </dialog>
+
+        <dialog id="aboutDialog">
+            <h2>ABOUT ZANDER</h2>
+            <div style="line-height: 1.5; margin-bottom: 20px">
+                <p>
+                    <strong>ZANDER BOOKMARK TECHNOLOGIES</strong><br />
+                    UNITED FEDERATION OF PLANETS<br />
+                    STARDATE 2025352.1342
+                </p>
+                <p>A SINGLE-FILE, OFFLINE-CAPABLE PERSONAL ARCHIVE.</p>
+                <p style="font-size: 0.9rem; opacity: 0.8">
+                    DATA PERSISTENCE: LOCAL STORAGE<br />
+                    NETWORK STATUS: OFFLINE MODE AVAILABLE
+                </p>
+            </div>
+            <div class="dialog-actions">
+                <button
+                    class="btn-primary"
+                    onclick="document.getElementById('aboutDialog').close()"
+                >
+                    ACKNOWLEDGE
+                </button>
+            </div>
+        </dialog>
+
+        <script>
+            const STORAGE_KEY = "zander-lcars:v1";
+
+            // Default Data
+            const DEFAULT_CATEGORIES = [
+                {
+                    id: "cat-databanks",
+                    name: "DATABANKS",
+                    color: "#ff9900",
+                    createdAt: "2025352.1200",
+                    children: [],
+                },
+            ];
+
+            const DEFAULT_BOOKMARKS = [
+                {
+                    id: "bm-lcars",
+                    title: "LCARS INTERFACE",
+                    url: "https://www.thelcars.com",
+                    categoryId: "cat-databanks",
+                    createdAt: "2025352.1200",
+                },
+            ];
+            const LCARS_PALETTE = [
+                "#ff9900",
+                "#cc99cc",
+                "#99ccff",
+                "#cc6666",
+                "#ffcc99",
+                "#9999cc",
+                "#ffcc00",
+                "#ff6666",
+                "#6699cc",
+                "#cc9966",
+            ];
+
+            let state = {
+                bookmarks: JSON.parse(JSON.stringify(DEFAULT_BOOKMARKS)),
+                categories: JSON.parse(JSON.stringify(DEFAULT_CATEGORIES)),
+                currentCategory: "cat-databanks",
+            };
+
+            const grid = document.getElementById("bookmarkGrid");
+            const emptyState = document.getElementById("emptyState");
+            const sidebar = document.getElementById("categorySidebar");
+            const categoryInput = document.getElementById("categoryInput");
+            const bookmarkDialog = document.getElementById("bookmarkDialog");
+            const bookmarkForm = document.getElementById("bookmarkForm");
+            const dialogTitle = document.getElementById("dialogTitle");
+            const deleteBtn = document.getElementById("deleteBtn");
+            const settingsDialog = document.getElementById("settingsDialog");
+            const categoryConfigList =
+                document.getElementById("categoryConfigList");
+            const importInput = document.getElementById("importInput");
+            const confirmDialog = document.getElementById("confirmDialog");
+            const confirmTitle = document.getElementById("confirmTitle");
+            const confirmMessage = document.getElementById("confirmMessage");
+            const confirmOkBtn = document.getElementById("confirmOkBtn");
+            const confirmCancelBtn =
+                document.getElementById("confirmCancelBtn");
+            const colorPickerDialog =
+                document.getElementById("colorPickerDialog");
+            const colorGrid = document.getElementById("colorGrid");
+
+            function showConfirm(title, message, onOk) {
+                confirmTitle.textContent = title;
+                confirmMessage.textContent = message;
+
+                const handleOk = () => {
+                    onOk();
+                    cleanup();
+                };
+
+                const handleCancel = () => {
+                    cleanup();
+                };
+
+                const cleanup = () => {
+                    confirmOkBtn.removeEventListener("click", handleOk);
+                    confirmCancelBtn.removeEventListener("click", handleCancel);
+                    confirmDialog.close();
+                };
+
+                confirmOkBtn.addEventListener("click", handleOk);
+                confirmCancelBtn.addEventListener("click", handleCancel);
+                confirmDialog.showModal();
+            }
+
+            function openColorPicker(current, onSelect) {
+                colorGrid.innerHTML = "";
+                LCARS_PALETTE.forEach((color) => {
+                    const btn = document.createElement("button");
+                    btn.className = "color-option";
+                    btn.style.backgroundColor = color;
+                    if (color === current) {
+                        btn.style.outline = "2px solid #fff";
+                    }
+                    btn.onclick = () => {
+                        onSelect(color);
+                        colorPickerDialog.close();
+                    };
+                    colorGrid.appendChild(btn);
+                });
+                colorPickerDialog.showModal();
+            }
+
+            function showAlert(title, message) {
+                alert(`${title}: ${message}`);
+            }
+
+            function init() {
+                loadData();
+                renderCategories();
+                renderGrid();
+                setupEventListeners();
+            }
+
+            function loadData() {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    try {
+                        const data = JSON.parse(raw);
+                        if (Array.isArray(data.bookmarks)) {
+                            state.bookmarks = data.bookmarks;
+                            // Backfill createdAt
+                            state.bookmarks.forEach((b) => {
+                                if (!b.createdAt)
+                                    b.createdAt = calculateStardate();
+                            });
+                        }
+                        if (
+                            Array.isArray(data.categories) &&
+                            data.categories.length > 0
+                        ) {
+                            state.categories = data.categories;
+                            // Backfill createdAt
+                            state.categories.forEach((c) => {
+                                if (!c.createdAt)
+                                    c.createdAt = calculateStardate();
+                            });
+                        }
+                    } catch (e) {
+                        console.error("Data corruption detected", e);
+                    }
+                }
+
+                // Ensure current category is valid
+                if (
+                    !state.categories.find(
+                        (c) => c.id === state.currentCategory,
+                    )
+                ) {
+                    state.currentCategory =
+                        state.categories[0]?.id || "cat-databanks";
+                }
+            }
+
+            function saveData() {
+                localStorage.setItem(
+                    STORAGE_KEY,
+                    JSON.stringify({
+                        bookmarks: state.bookmarks,
+                        categories: state.categories,
+                    }),
+                );
+            }
+
+            function renderCategories() {
+                sidebar.innerHTML = "";
+
+                function createCategoryButton(cat, level) {
+                    const wrapper = document.createElement("div");
+                    wrapper.className = "cat-wrapper";
+
+                    const btn = document.createElement("button");
+                    btn.className = `cat-btn ${state.currentCategory === cat.id ? "active" : ""}`;
+                    btn.textContent = cat.name;
+                    btn.style.setProperty("--cat-color", cat.color);
+
+                    btn.onclick = (e) => {
+                        e.stopPropagation();
+                        state.currentCategory = cat.id;
+                        renderCategories();
+                        renderGrid();
+                    };
+
+                    wrapper.appendChild(btn);
+
+                    if (cat.children && cat.children.length > 0 && level < 3) {
+                        const submenu = document.createElement("div");
+                        submenu.className = "cat-submenu";
+
+                        cat.children.forEach((child) => {
+                            submenu.appendChild(
+                                createCategoryButton(child, level + 1),
+                            );
+                        });
+
+                        wrapper.appendChild(submenu);
+                    }
+
+                    return wrapper;
+                }
+
+                state.categories.forEach((cat) => {
+                    sidebar.appendChild(createCategoryButton(cat, 1));
+                });
+
+                // Update select in dialog
+                categoryInput.innerHTML = "";
+
+                function addOptions(cats, level) {
+                    cats.forEach((cat) => {
+                        const opt = document.createElement("option");
+                        opt.value = cat.id;
+                        let prefix = "";
+                        for (let i = 1; i < level; i++)
+                            prefix += "\u00A0\u00A0"; // Non-breaking spaces
+                        if (level > 1) prefix += "└ ";
+                        opt.textContent = prefix + cat.name;
+                        categoryInput.appendChild(opt);
+
+                        if (cat.children) {
+                            addOptions(cat.children, level + 1);
+                        }
+                    });
+                }
+                addOptions(state.categories, 1);
+
+                updateSystemStatus();
+            }
+
+            function renderGrid() {
+                grid.innerHTML = "";
+                const filtered = state.bookmarks.filter(
+                    (b) => b.categoryId === state.currentCategory,
+                );
+
+                if (filtered.length === 0) {
+                    emptyState.style.display = "block";
+                } else {
+                    emptyState.style.display = "none";
+                    filtered.forEach((b) => {
+                        const tile = document.createElement("a");
+                        tile.className = "bookmark-tile";
+                        // Use category color for tile if available
+                        const cat = state.categories.find(
+                            (c) => c.id === b.categoryId,
+                        );
+                        const catColor = cat
+                            ? cat.color
+                            : "var(--lcars-orange)";
+
+                        tile.style.setProperty("--cat-color", catColor);
+
+                        tile.innerHTML = `
+                    <div class="bookmark-title">${escapeHtml(b.title)}</div>
+                    <div class="bookmark-url">${escapeHtml(b.url)}</div>
+                    <div class="bookmark-edit-icon" title="Edit">✎</div>
+                `;
+
+                        // Left click opens
+                        tile.href = b.url;
+                        tile.target = "_blank";
+                        tile.rel = "noopener noreferrer";
+
+                        // Edit button click
+                        const editIcon = tile.querySelector(
+                            ".bookmark-edit-icon",
+                        );
+                        editIcon.onclick = (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            openEditDialog(b);
+                        };
+
+                        // Double click to edit
+                        tile.ondblclick = (e) => {
+                            e.preventDefault();
+                            openEditDialog(b);
+                        };
+
+                        // Right click (context menu) or long press to edit
+                        tile.oncontextmenu = (e) => {
+                            e.preventDefault();
+                            openEditDialog(b);
+                        };
+
+                        grid.appendChild(tile);
+                    });
+                }
+                updateSystemStatus();
+            }
+
+            function updateSystemStatus() {
+                const statusEl = document.getElementById("systemStatus");
+                if (statusEl) {
+                    const catCount = state.categories.length;
+                    const bmCount = state.bookmarks.length;
+                    statusEl.innerHTML = `
+                        <span class="status-text">STATUS:</span>
+                        <div class="status-info">
+                            <span>CT: ${catCount}</span>
+                            <span>•</span>
+                            <span>BM: ${bmCount}</span>
+                        </div>
+                    `;
+                }
+            }
+
+            function calculateStardate(date = new Date()) {
+                const start = new Date(date.getFullYear(), 0, 0);
+                const diff = date - start;
+                const oneDay = 1000 * 60 * 60 * 24;
+                const day = Math.floor(diff / oneDay);
+                const minutes = date.getHours() * 60 + date.getMinutes();
+
+                // Format: YYYYDDD.MMMM (Year + DayOfYear . TotalMinutes)
+                return `${date.getFullYear()}${day.toString().padStart(3, "0")}.${minutes.toString().padStart(4, "0")}`;
+            }
+
+            function parseStardate(stardate) {
+                if (!stardate || typeof stardate !== "string") return null;
+                const year = parseInt(stardate.substring(0, 4));
+                const dayOfYear = parseInt(stardate.substring(4, 7));
+                const minutes = parseInt(stardate.substring(8));
+
+                if (isNaN(year) || isNaN(dayOfYear) || isNaN(minutes))
+                    return null;
+
+                const date = new Date(year, 0, dayOfYear);
+                date.setHours(Math.floor(minutes / 60));
+                date.setMinutes(minutes % 60);
+                return date;
+            }
+
+            function generateUUID() {
+                if (typeof crypto !== "undefined" && crypto.randomUUID) {
+                    return crypto.randomUUID();
+                }
+                return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
+                    /[xy]/g,
+                    function (c) {
+                        var r = (Math.random() * 16) | 0,
+                            v = c == "x" ? r : (r & 0x3) | 0x8;
+                        return v.toString(16);
+                    },
+                );
+            }
+
+            function escapeHtml(str) {
+                if (!str) return "";
+                return str
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+            }
+
+            function normalizeUrl(s) {
+                const trimmed = String(s || "").trim();
+                if (!trimmed) return "";
+                // If it doesn't start with a scheme like http:, https:, ftp:, mailto:, etc.,
+                // assume https://
+                if (!/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(trimmed)) {
+                    return `https://${trimmed}`;
+                }
+                return trimmed;
+            }
+
+            function isProbablyUrl(s) {
+                try {
+                    const url = new URL(s);
+                    return ["http:", "https:"].includes(url.protocol);
+                } catch {
+                    return false;
+                }
+            }
+
+            function openAddDialog() {
+                dialogTitle.textContent = "ADD ENTRY";
+
+                const currentStardate = calculateStardate();
+                const stardateEl = document.getElementById("bookmarkStardate");
+                stardateEl.textContent = `STARDATE ${currentStardate}`;
+                stardateEl.title = new Date().toLocaleString();
+
+                bookmarkForm.reset();
+                document.getElementById("bookmarkId").value = "";
+                document.getElementById("urlProtocol").value = "https://";
+                categoryInput.value = state.currentCategory;
+                deleteBtn.style.display = "none";
+                bookmarkDialog.showModal();
+            }
+
+            function openEditDialog(bookmark) {
+                dialogTitle.textContent = "EDIT ENTRY";
+
+                const stardateEl = document.getElementById("bookmarkStardate");
+                if (bookmark.createdAt) {
+                    stardateEl.textContent = `STARDATE ${bookmark.createdAt}`;
+                    const date = parseStardate(bookmark.createdAt);
+                    stardateEl.title = date ? date.toLocaleString() : "";
+                } else {
+                    stardateEl.textContent = "";
+                    stardateEl.title = "";
+                }
+
+                document.getElementById("bookmarkId").value = bookmark.id;
+                document.getElementById("titleInput").value = bookmark.title;
+
+                let url = bookmark.url;
+                let protocol = "https://";
+                if (url.startsWith("http://")) {
+                    protocol = "http://";
+                    url = url.substring(7);
+                } else if (url.startsWith("https://")) {
+                    protocol = "https://";
+                    url = url.substring(8);
+                }
+
+                document.getElementById("urlProtocol").value = protocol;
+                document.getElementById("urlInput").value = url;
+
+                document.getElementById("categoryInput").value =
+                    bookmark.categoryId || state.categories[0].id;
+                deleteBtn.style.display = "inline-block";
+                deleteBtn.onclick = () => deleteBookmark(bookmark.id);
+                bookmarkDialog.showModal();
+            }
+
+            function saveBookmark(e) {
+                e.preventDefault(); // Prevent default form submission
+
+                const id = document.getElementById("bookmarkId").value;
+                const title = document.getElementById("titleInput").value;
+                const protocol = document.getElementById("urlProtocol").value;
+                let rawUrl = document.getElementById("urlInput").value.trim();
+                const categoryId =
+                    document.getElementById("categoryInput").value;
+
+                // Strip protocol if user pasted it in
+                rawUrl = rawUrl.replace(/^https?:\/\//, "");
+                const url = protocol + rawUrl;
+
+                if (id) {
+                    // Edit
+                    const idx = state.bookmarks.findIndex((b) => b.id === id);
+                    if (idx !== -1) {
+                        state.bookmarks[idx].title = title;
+                        state.bookmarks[idx].url = url;
+                        state.bookmarks[idx].categoryId = categoryId;
+                    }
+                } else {
+                    // Add
+                    const newBookmark = {
+                        id: generateUUID(),
+                        title,
+                        url,
+                        categoryId,
+                        createdAt: calculateStardate(),
+                    };
+                    state.bookmarks.push(newBookmark);
+                }
+
+                saveData();
+                renderGrid();
+                bookmarkDialog.close();
+            }
+
+            function deleteBookmark(id) {
+                showConfirm("DELETE ENTRY", "CONFIRM DELETION?", () => {
+                    state.bookmarks = state.bookmarks.filter(
+                        (b) => b.id !== id,
+                    );
+                    saveData();
+                    renderGrid();
+                    bookmarkDialog.close();
+                });
+            }
+
+            // --- Category Management ---
+
+            function findCategoryAndParent(id, cats, parent) {
+                for (let i = 0; i < cats.length; i++) {
+                    if (cats[i].id === id) {
+                        return {
+                            category: cats[i],
+                            parent: parent,
+                            siblings: cats,
+                            index: i,
+                        };
+                    }
+                    if (cats[i].children) {
+                        const result = findCategoryAndParent(
+                            id,
+                            cats[i].children,
+                            cats[i],
+                        );
+                        if (result) return result;
+                    }
+                }
+                return null;
+            }
+
+            function renderCategoryConfig() {
+                categoryConfigList.innerHTML = "";
+
+                function renderConfigRow(cat, parent, index, siblings, level) {
+                    const row = document.createElement("div");
+                    row.className = "category-config-row";
+                    // Indent
+                    row.style.paddingLeft = `${(level - 1) * 40}px`;
+
+                    // Color Picker
+                    const colorBtn = document.createElement("button");
+                    colorBtn.className = "category-color-swatch";
+                    colorBtn.style.backgroundColor = cat.color;
+                    colorBtn.onclick = () => {
+                        openColorPicker(cat.color, (newColor) => {
+                            cat.color = newColor;
+                            saveData();
+                            renderCategories();
+                            renderGrid();
+                            renderCategoryConfig();
+                        });
+                    };
+
+                    // Name Input
+                    const nameInput = document.createElement("input");
+                    nameInput.type = "text";
+                    nameInput.value = cat.name;
+                    nameInput.style.width = "100%";
+                    nameInput.onchange = (e) => {
+                        cat.name = e.target.value.toUpperCase();
+                        saveData();
+                        renderCategories();
+                    };
+
+                    // Move Up
+                    const upBtn = document.createElement("button");
+                    upBtn.className = "category-config-btn";
+                    upBtn.innerHTML = "↑";
+                    upBtn.disabled = index === 0;
+                    if (index === 0) upBtn.style.opacity = "0.5";
+                    upBtn.onclick = () => moveCategory(cat.id, -1);
+
+                    // Move Down
+                    const downBtn = document.createElement("button");
+                    downBtn.className = "category-config-btn";
+                    downBtn.innerHTML = "↓";
+                    downBtn.disabled = index === siblings.length - 1;
+                    if (index === siblings.length - 1)
+                        downBtn.style.opacity = "0.5";
+                    downBtn.onclick = () => moveCategory(cat.id, 1);
+
+                    // Add Subcategory (New)
+                    const addBtn = document.createElement("button");
+                    addBtn.className = "category-config-btn";
+                    addBtn.innerHTML = "+";
+                    addBtn.title = "Add Subcategory";
+                    if (level >= 3) {
+                        addBtn.disabled = true;
+                        addBtn.style.opacity = "0.5";
+                    }
+                    addBtn.onclick = () => addCategory(cat.id);
+
+                    // Delete
+                    const delBtn = document.createElement("button");
+                    delBtn.className = "category-config-btn delete";
+                    delBtn.innerHTML = "×";
+                    delBtn.onclick = () => deleteCategory(cat.id);
+
+                    row.appendChild(colorBtn);
+                    row.appendChild(nameInput);
+                    row.appendChild(upBtn);
+                    row.appendChild(downBtn);
+                    row.appendChild(addBtn);
+                    row.appendChild(delBtn);
+
+                    categoryConfigList.appendChild(row);
+                }
+
+                function processCategories(cats, parent, level) {
+                    cats.forEach((cat, index) => {
+                        renderConfigRow(cat, parent, index, cats, level);
+                        if (cat.children) {
+                            processCategories(cat.children, cat, level + 1);
+                        }
+                    });
+                }
+
+                processCategories(state.categories, null, 1);
+            }
+
+            function addCategory(parentId = null) {
+                const newCat = {
+                    id: generateUUID(),
+                    name: "NEW CATEGORY",
+                    color: LCARS_PALETTE[
+                        Math.floor(Math.random() * LCARS_PALETTE.length)
+                    ],
+                    createdAt: calculateStardate(),
+                    children: [],
+                };
+
+                if (parentId) {
+                    const result = findCategoryAndParent(
+                        parentId,
+                        state.categories,
+                        null,
+                    );
+                    if (result) {
+                        if (!result.category.children)
+                            result.category.children = [];
+                        result.category.children.push(newCat);
+                    }
+                } else {
+                    state.categories.push(newCat);
+                }
+
+                saveData();
+                renderCategories();
+                renderCategoryConfig();
+            }
+
+            function moveCategory(id, direction) {
+                const result = findCategoryAndParent(
+                    id,
+                    state.categories,
+                    null,
+                );
+                if (!result) return;
+
+                const { siblings, index } = result;
+                const newIndex = index + direction;
+
+                if (newIndex >= 0 && newIndex < siblings.length) {
+                    const temp = siblings[index];
+                    siblings[index] = siblings[newIndex];
+                    siblings[newIndex] = temp;
+                    saveData();
+                    renderCategories();
+                    renderCategoryConfig();
+                }
+            }
+
+            function deleteCategory(id) {
+                const result = findCategoryAndParent(
+                    id,
+                    state.categories,
+                    null,
+                );
+                if (!result) return;
+
+                const cat = result.category;
+
+                // Check for bookmarks
+                const count = state.bookmarks.filter(
+                    (b) => b.categoryId === id,
+                ).length;
+
+                // Check for subcategories
+                const subCount = cat.children ? cat.children.length : 0;
+
+                let msg = `Delete category "${cat.name}"?`;
+                if (count > 0) {
+                    msg += `\nThis will delete ${count} bookmark(s).`;
+                }
+                if (subCount > 0) {
+                    msg += `\nThis will delete ${subCount} sub-categories.`;
+                }
+
+                showConfirm("DELETE CATEGORY", msg, () => {
+                    // Remove bookmarks
+                    state.bookmarks = state.bookmarks.filter(
+                        (b) => b.categoryId !== id,
+                    );
+
+                    function deleteBookmarksInTree(c) {
+                        state.bookmarks = state.bookmarks.filter(
+                            (b) => b.categoryId !== c.id,
+                        );
+                        if (c.children)
+                            c.children.forEach(deleteBookmarksInTree);
+                    }
+                    if (cat.children)
+                        cat.children.forEach(deleteBookmarksInTree);
+
+                    // Remove category
+                    const { siblings, index } = result;
+                    siblings.splice(index, 1);
+
+                    // If current category was deleted or inside deleted tree, reset to first available
+                    const currentExists = findCategoryAndParent(
+                        state.currentCategory,
+                        state.categories,
+                        null,
+                    );
+                    if (!currentExists && state.categories.length > 0) {
+                        state.currentCategory = state.categories[0].id;
+                    } else if (state.categories.length === 0) {
+                        // Create default if all deleted
+                        state.categories.push({
+                            id: "cat-default",
+                            name: "DEFAULT",
+                            color: "#ff9900",
+                            createdAt: calculateStardate(),
+                            children: [],
+                        });
+                        state.currentCategory = "cat-default";
+                    }
+
+                    saveData();
+                    renderCategories();
+                    renderGrid();
+                    renderCategoryConfig();
+                });
+            }
+
+            function exportData() {
+                const dataStr = JSON.stringify(
+                    {
+                        bookmarks: state.bookmarks,
+                        categories: state.categories,
+                    },
+                    null,
+                    2,
+                );
+                const blob = new Blob([dataStr], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `lcars-bookmarks-${new Date().toISOString().split("T")[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+
+            function triggerImport() {
+                importInput.click();
+            }
+
+            function handleImport(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = async (event) => {
+                    try {
+                        const data = JSON.parse(event.target.result);
+                        const count = Array.isArray(data.bookmarks)
+                            ? data.bookmarks.length
+                            : 0;
+                        showConfirm(
+                            "IMPORT DATA",
+                            `IMPORT ${data.bookmarks?.length || 0} ENTRIES? THIS WILL OVERWRITE CURRENT DATA.`,
+                            () => {
+                                if (Array.isArray(data.bookmarks)) {
+                                    state.bookmarks = data.bookmarks;
+                                    // Backfill createdAt
+                                    state.bookmarks.forEach((b) => {
+                                        if (!b.createdAt)
+                                            b.createdAt = calculateStardate();
+                                    });
+                                }
+                                if (
+                                    Array.isArray(data.categories) &&
+                                    data.categories.length > 0
+                                ) {
+                                    state.categories = data.categories;
+                                    // Backfill createdAt
+                                    state.categories.forEach((c) => {
+                                        if (!c.createdAt)
+                                            c.createdAt = calculateStardate();
+                                    });
+                                }
+                                saveData();
+                                renderCategories();
+                                renderGrid();
+                                if (settingsDialog.open) settingsDialog.close();
+                                document
+                                    .getElementById("dataMgmtOptions")
+                                    .classList.remove("visible");
+                            },
+                        );
+                    } catch (err) {
+                        showAlert("ERROR", "INVALID DATA FORMAT");
+                    }
+                };
+                reader.readAsText(file);
+                e.target.value = ""; // Reset
+            }
+
+            function resetSystem() {
+                showConfirm(
+                    "SYSTEM RESET",
+                    "WARNING: SYSTEM RESET WILL ERASE ALL DATA. PROCEED?",
+                    () => {
+                        localStorage.removeItem(STORAGE_KEY);
+                        state.bookmarks = JSON.parse(
+                            JSON.stringify(DEFAULT_BOOKMARKS),
+                        );
+                        state.categories = JSON.parse(
+                            JSON.stringify(DEFAULT_CATEGORIES),
+                        );
+                        saveData();
+                        renderCategories();
+                        renderGrid();
+                        if (settingsDialog.open) settingsDialog.close();
+                        document
+                            .getElementById("dataMgmtOptions")
+                            .classList.remove("visible");
+                    },
+                );
+            }
+
+            // --- Event Listeners ---
+            function setupEventListeners() {
+                document
+                    .getElementById("settingsCatBtn")
+                    .addEventListener("click", () => {
+                        document.getElementById(
+                            "settingsCategorySection",
+                        ).style.display = "block";
+                        document.getElementById(
+                            "settingsDataSection",
+                        ).style.display = "none";
+                        renderCategoryConfig();
+                        settingsDialog.showModal();
+                    });
+
+                document
+                    .getElementById("settingsDataBtn")
+                    .addEventListener("click", () => {
+                        document
+                            .getElementById("dataMgmtOptions")
+                            .classList.toggle("visible");
+                    });
+
+                document
+                    .getElementById("settingsBtn")
+                    .addEventListener("click", () => {
+                        document.getElementById(
+                            "settingsCategorySection",
+                        ).style.display = "block";
+                        document.getElementById(
+                            "settingsDataSection",
+                        ).style.display = "block";
+                        renderCategoryConfig();
+                        settingsDialog.showModal();
+                    });
+                document
+                    .getElementById("addBtn")
+                    .addEventListener("click", openAddDialog);
+
+                document
+                    .getElementById("aboutBtn")
+                    .addEventListener("click", () =>
+                        document.getElementById("aboutDialog").showModal(),
+                    );
+
+                document
+                    .getElementById("addCategoryBtn")
+                    .addEventListener("click", () => addCategory());
+
+                bookmarkForm.addEventListener("submit", saveBookmark);
+
+                // Keyboard Shortcuts
+                document.addEventListener("keydown", (e) => {
+                    if (e.altKey) {
+                        switch (e.key.toLowerCase()) {
+                            case "n":
+                                e.preventDefault();
+                                openAddDialog();
+                                break;
+                            case "s":
+                                e.preventDefault();
+                                document.getElementById(
+                                    "settingsCategorySection",
+                                ).style.display = "block";
+                                document.getElementById(
+                                    "settingsDataSection",
+                                ).style.display = "block";
+                                renderCategoryConfig();
+                                settingsDialog.showModal();
+                                break;
+                            case "c":
+                                e.preventDefault();
+                                document.getElementById(
+                                    "settingsCategorySection",
+                                ).style.display = "block";
+                                document.getElementById(
+                                    "settingsDataSection",
+                                ).style.display = "none";
+                                renderCategoryConfig();
+                                settingsDialog.showModal();
+                                addCategory();
+                                break;
+                        }
+                    }
+                });
+
+                document
+                    .getElementById("exportBtn")
+                    .addEventListener("click", exportData);
+                document
+                    .getElementById("importBtn")
+                    .addEventListener("click", triggerImport);
+                importInput.addEventListener("change", handleImport);
+                document
+                    .getElementById("resetBtn")
+                    .addEventListener("click", resetSystem);
+            }
+
+            // Start
+            init();
+        </script>
+    </body>
+</html>
