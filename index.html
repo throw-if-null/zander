@@ -1335,6 +1335,10 @@
             const bookmarkForm = document.getElementById("bookmarkForm");
             const dialogTitle = document.getElementById("dialogTitle");
             const deleteBtn = document.getElementById("deleteBtn");
+            const bookmarkIdInput = document.getElementById("bookmarkId");
+            const titleInput = document.getElementById("titleInput");
+            const urlProtocolSelect = document.getElementById("urlProtocol");
+            const urlInput = document.getElementById("urlInput");
             const categoryConfigList =
                 document.getElementById("categoryConfigList");
             const importInput = document.getElementById("importInput");
@@ -1813,8 +1817,8 @@
                 stardateEl.title = info.tooltip;
 
                 bookmarkForm.reset();
-                document.getElementById("bookmarkId").value = "";
-                document.getElementById("urlProtocol").value = "https://";
+                bookmarkIdInput.value = "";
+                urlProtocolSelect.value = "https://";
                 categoryInput.value = state.currentCategory;
                 deleteBtn.style.display = "none";
                 bookmarkDialog.showModal();
@@ -1833,8 +1837,8 @@
                     stardateEl.title = "";
                 }
 
-                document.getElementById("bookmarkId").value = bookmark.id;
-                document.getElementById("titleInput").value = bookmark.title;
+                bookmarkIdInput.value = bookmark.id;
+                titleInput.value = bookmark.title;
 
                 let url = bookmark.url;
                 let protocol = "https://";
@@ -1846,10 +1850,10 @@
                     url = url.substring(8);
                 }
 
-                document.getElementById("urlProtocol").value = protocol;
-                document.getElementById("urlInput").value = url;
+                urlProtocolSelect.value = protocol;
+                urlInput.value = url;
 
-                document.getElementById("categoryInput").value =
+                categoryInput.value =
                     bookmark.categoryId || state.categories[0].id;
                 deleteBtn.style.display = "inline-block";
                 deleteBtn.onclick = () => deleteBookmark(bookmark.id);
@@ -1859,12 +1863,11 @@
             function saveBookmark(e) {
                 e.preventDefault(); // Prevent default form submission
 
-                const id = document.getElementById("bookmarkId").value;
-                const title = document.getElementById("titleInput").value;
-                const protocol = document.getElementById("urlProtocol").value;
-                const rawUrl = document.getElementById("urlInput").value.trim();
-                const categoryId =
-                    document.getElementById("categoryInput").value;
+                const id = bookmarkIdInput.value;
+                const title = titleInput.value;
+                const protocol = urlProtocolSelect.value;
+                const rawUrl = urlInput.value.trim();
+                const categoryId = categoryInput.value;
 
                 // Normalize URL using selected protocol as default, but still respect
                 // full URLs the user may have pasted (http/https and other schemes)
