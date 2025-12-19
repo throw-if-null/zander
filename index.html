@@ -2079,37 +2079,35 @@
 
                 const cat = result.category;
 
-                // Check for bookmarks
-                const count = state.bookmarks.filter(
-                    (b) => b.categoryId === id,
+                // Collect full subtree for accurate counts and deletion
+                const subtreeCategories = [];
+                walkCategories([cat], (node) => {
+                    subtreeCategories.push(node);
+                    return undefined;
+                });
+
+                const subtreeIds = new Set(subtreeCategories.map((c) => c.id));
+
+                // Count bookmarks across entire subtree
+                const totalBookmarksInSubtree = state.bookmarks.filter((b) =>
+                    subtreeIds.has(b.categoryId),
                 ).length;
 
-                // Check for subcategories
-                const subCount = cat.children ? cat.children.length : 0;
+                const subCategoryCount = subtreeCategories.length - 1; // exclude root
 
                 let msg = `Delete category "${cat.name}"?`;
-                if (count > 0) {
-                    msg += `\nThis will delete ${count} bookmark(s).`;
+                if (totalBookmarksInSubtree > 0) {
+                    msg += `\nThis will delete ${totalBookmarksInSubtree} bookmark(s).`;
                 }
-                if (subCount > 0) {
-                    msg += `\nThis will delete ${subCount} sub-categories.`;
+                if (subCategoryCount > 0) {
+                    msg += `\nThis will delete ${subCategoryCount} sub-categories.`;
                 }
 
                 showConfirm("DELETE CATEGORY", msg, () => {
-                    // Remove bookmarks
+                    // Remove all bookmarks in the subtree in a single pass
                     state.bookmarks = state.bookmarks.filter(
-                        (b) => b.categoryId !== id,
+                        (b) => !subtreeIds.has(b.categoryId),
                     );
-
-                    function deleteBookmarksInTree(c) {
-                        state.bookmarks = state.bookmarks.filter(
-                            (b) => b.categoryId !== c.id,
-                        );
-                        if (c.children)
-                            c.children.forEach(deleteBookmarksInTree);
-                    }
-                    if (cat.children)
-                        cat.children.forEach(deleteBookmarksInTree);
 
                     // Remove category
                     const { siblings, index } = result;
