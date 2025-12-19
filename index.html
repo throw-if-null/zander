@@ -458,7 +458,9 @@
             }
 
             /* Shared LCARS button base style */
-            .lcars-btn {
+            .lcars-btn,
+            .btn-primary,
+            .btn-secondary {
                 background-color: var(--lcars-beige);
                 color: #000;
                 border: none;
@@ -477,84 +479,39 @@
                 white-space: nowrap;
             }
 
-            .lcars-btn-primary {
+            .lcars-btn-primary,
+            .btn-primary {
                 background-color: var(--lcars-orange);
                 color: #000;
             }
 
-            .lcars-btn-secondary {
+            .lcars-btn-secondary,
+            .btn-secondary {
                 background-color: #444;
                 color: var(--lcars-beige);
             }
 
-            /* Settings buttons use LCARS control-tab style */
-            .settings-panel .btn-primary,
-            .settings-panel .btn-secondary {
-                background-color: var(--lcars-beige);
-                color: #000;
-                border: none;
-                padding: 0 15px;
-                height: 40px;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                font-family: var(--lcars-font);
-                font-size: 1.1rem;
-                font-weight: bold;
-                text-transform: uppercase;
-                border-radius: 20px;
-                cursor: pointer;
-                position: relative;
-                white-space: nowrap;
-            }
-
-            /* Generic LCARS dialog buttons (used by bookmark & confirm dialogs) */
-            .lcars-dialog-footer .btn-primary,
-            .lcars-dialog-footer .btn-secondary {
-                background-color: var(--lcars-beige);
-                color: #000;
-                border: none;
-                padding: 0 15px;
-                height: 40px;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                font-family: var(--lcars-font);
-                font-size: 1.1rem;
-                font-weight: bold;
-                text-transform: uppercase;
-                border-radius: 20px;
-                cursor: pointer;
-                position: relative;
-                white-space: nowrap;
-            }
-
-            .lcars-dialog-footer .btn-primary {
-                background-color: var(--lcars-orange);
-            }
-
-            .lcars-dialog-footer .btn-secondary {
-                background-color: #444;
-                color: var(--lcars-beige);
-            }
-
-            .lcars-dialog-footer .btn-secondary.delete {
+            .btn-secondary.delete,
+            .btn-secondary.reset {
                 background-color: var(--lcars-red);
                 color: #000;
             }
 
-            .lcars-dialog-footer .btn-primary:hover,
-            .lcars-dialog-footer .btn-secondary:hover {
+            .lcars-btn:hover,
+            .btn-primary:hover,
+            .btn-secondary:hover {
                 filter: brightness(1.1);
             }
 
-            .lcars-dialog-footer .btn-primary:focus-visible,
-            .lcars-dialog-footer .btn-secondary:focus-visible {
+            .lcars-btn:focus-visible,
+            .btn-primary:focus-visible,
+            .btn-secondary:focus-visible {
                 outline: none;
             }
 
-            .lcars-dialog-footer .btn-primary:focus-visible::after,
-            .lcars-dialog-footer .btn-secondary:focus-visible::after {
+            .lcars-btn:focus-visible::after,
+            .btn-primary:focus-visible::after,
+            .btn-secondary:focus-visible::after {
                 content: "";
                 position: absolute;
                 top: -9px;
@@ -584,26 +541,7 @@
                 box-shadow: 0 0 0 2px #fff;
             }
 
-            .settings-panel .btn-secondary.reset {
-                background-color: var(--lcars-red);
-                color: #000;
-            }
 
-            .settings-panel .btn-primary:focus-visible,
-            .settings-panel .btn-secondary:focus-visible {
-                outline: none;
-            }
-
-            .settings-panel .btn-primary:focus-visible::after,
-            .settings-panel .btn-secondary:focus-visible::after {
-                content: "";
-                position: absolute;
-                top: -9px;
-                left: 0;
-                right: 0;
-                height: 4px;
-                background-color: #ffffff;
-            }
 
             .bookmark-tile {
                 position: relative;
@@ -884,12 +822,7 @@
                 margin-top: 20px;
             }
 
-            /* Bookmark dialog buttons use generic LCARS dialog button style */
-            #bookmarkDialog .btn-primary,
-            #bookmarkDialog .btn-secondary {
-                display: inline-flex;
-                justify-content: center;
-            }
+
 
             .category-config-list {
                 display: flex;
@@ -1552,8 +1485,8 @@
                 renderGrid();
                 setupEventListeners();
                 renderThemeControls();
-                updateAboutStardate();
-                updateSettingsStardate();
+                updateStardateDisplay(aboutStardateEl);
+                updateStardateDisplay(settingsStardateEl);
             }
 
             function loadData() {
@@ -1800,18 +1733,11 @@
                 };
             }
 
-            function updateAboutStardate() {
-                if (!aboutStardateEl) return;
+            function updateStardateDisplay(el) {
+                if (!el) return;
                 const info = formatCurrentStardateDisplay();
-                aboutStardateEl.textContent = info.label;
-                aboutStardateEl.title = info.tooltip;
-            }
-
-            function updateSettingsStardate() {
-                if (!settingsStardateEl) return;
-                const info = formatCurrentStardateDisplay();
-                settingsStardateEl.textContent = info.label;
-                settingsStardateEl.title = info.tooltip;
+                el.textContent = info.label;
+                el.title = info.tooltip;
             }
 
             function updateSystemStatus() {
@@ -2456,8 +2382,8 @@
                 saveData();
                 renderCategories();
                 renderGrid();
-                if (typeof updateAboutStardate === 'function') updateAboutStardate();
-                if (typeof updateSettingsStardate === 'function') updateSettingsStardate();
+                updateStardateDisplay(aboutStardateEl);
+                updateStardateDisplay(settingsStardateEl);
 
                 const lines = [];
                 lines.push(
@@ -2624,7 +2550,7 @@
                     aboutView.classList.remove("active");
                     settingsView.classList.add("active");
                     renderCategoryConfig();
-                    updateSettingsStardate();
+                    updateStardateDisplay(settingsStardateEl);
                 });
 
                 onClick("addBtn", () => {
@@ -2639,7 +2565,7 @@
                     bookmarksView.classList.remove("active");
                     settingsView.classList.remove("active");
                     aboutView.classList.add("active");
-                    updateAboutStardate();
+                    updateStardateDisplay(aboutStardateEl);
                 });
 
                 bookmarkForm.addEventListener("submit", saveBookmark);
@@ -2663,7 +2589,7 @@
                                 aboutView.classList.remove("active");
                                 settingsView.classList.add("active");
                                 renderCategoryConfig();
-                                updateSettingsStardate();
+                                updateStardateDisplay(settingsStardateEl);
                                 break;
                             case "c":
                                 e.preventDefault();
