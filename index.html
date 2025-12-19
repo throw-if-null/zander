@@ -22,12 +22,42 @@
                 --lcars-font: "Antonio", sans-serif;
                 --gutter: 5px;
                 --radius: 30px;
-                --shape-color: var(--lcars-purple);
 
                 /* Layout variables */
                 --sidebar-width: 160px;
                 --header-height: 80px;
                 --gap: 10px;
+            }
+
+            /* THEME VARIABLES
+               - Defined on body so per-theme overrides always apply
+               - --theme-main drives the LCARS frame & primary accents
+               - --shape-color derives from --theme-main
+               - Background (black) and base text color remain fixed */
+            body {
+                --theme-main: #830025; /* default: pickard */
+                --shape-color: var(--theme-main);
+            }
+
+            /* Theme variants applied on the <body> element via data-theme */
+            body[data-theme="pickard"] {
+                --theme-main: #830025;
+                --shape-color: var(--theme-main);
+            }
+
+            body[data-theme="data"] {
+                --theme-main: #da9706;
+                --shape-color: var(--theme-main);
+            }
+
+            body[data-theme="doctor"] {
+                --theme-main: #008b8b; /* LCARS-ish teal */
+                --shape-color: var(--theme-main);
+            }
+
+            body[data-theme="spock"] {
+                --theme-main: #003366;
+                --shape-color: var(--theme-main);
             }
 
             * {
@@ -318,7 +348,7 @@
 
             .settings-accent {
                 grid-row: 1 / span 3;
-                background-color: var(--lcars-purple);
+                background-color: var(--shape-color);
                 border-radius: 20px;
             }
 
@@ -409,6 +439,7 @@
                 border-radius: 20px;
                 cursor: pointer;
                 position: relative;
+                white-space: nowrap;
             }
 
             .settings-panel .btn-primary {
@@ -584,7 +615,7 @@
             dialog {
                 background-color: #000;
                 color: var(--lcars-orange);
-                border: 2px solid var(--lcars-orange);
+                border: 2px solid var(--shape-color);
                 border-radius: 20px;
                 padding: 0;
                 max-width: 540px;
@@ -606,11 +637,11 @@
             #colorPickerDialog {
                 max-width: 520px;
                 border-radius: 26px;
-                border-color: var(--lcars-orange);
+                border-color: var(--shape-color);
             }
 
             #colorPickerDialog .lcars-dialog-header {
-                background-color: var(--lcars-orange);
+                background-color: var(--shape-color);
                 color: #000;
             }
 
@@ -630,7 +661,7 @@
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                background-color: var(--lcars-orange);
+                background-color: var(--shape-color);
                 color: #000;
                 padding: 10px 16px;
             }
@@ -940,8 +971,28 @@
                             </section>
 
                             <section class="settings-section">
+                                <h2>THEME</h2>
+                                <div class="form-group">
+                                    <div
+                                        id="themeControlsContainer"
+                                        style="margin-bottom: 10px"
+                                    ></div>
+                                    <div
+                                        id="themeStatusReadout"
+                                        style="
+                                            font-size: 0.85rem;
+                                            opacity: 0.8;
+                                            letter-spacing: 1px;
+                                        "
+                                    >
+                                        ACTIVE THEME: PICKARD
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section class="settings-section">
                                 <h2>DATA MANAGEMENT</h2>
-                                <div id="settingsDataSectionMain">
+</h2>                                <div id="settingsDataSectionMain">
                                     <div class="form-group">
                                         <button
                                             class="btn-primary"
@@ -1110,6 +1161,14 @@
 
         <script>
             const STORAGE_KEY = "zander-lcars:v1";
+            const THEME_STORAGE_KEY = "zander-lcars-theme:v1";
+
+            const THEMES = [
+                { id: "pickard", label: "PICKARD" },
+                { id: "data", label: "DATA" },
+                { id: "doctor", label: "DOCTOR" },
+                { id: "spock", label: "SPOCK" },
+            ];
 
             // Default Data
             const DEFAULT_CATEGORIES = [
@@ -1159,6 +1218,10 @@
                 categories: JSON.parse(JSON.stringify(DEFAULT_CATEGORIES)),
                 currentCategory: "cat-databanks",
             };
+
+            // Theme state is intentionally separate from bookmark/category state
+            // so we don't disturb the existing import/export format.
+            let currentTheme = "pickard";
 
             const grid = document.getElementById("bookmarkGrid");
             const emptyState = document.getElementById("emptyState");
@@ -1235,9 +1298,12 @@
 
             function init() {
                 loadData();
+                loadTheme();
+                applyTheme(currentTheme);
                 renderCategories();
                 renderGrid();
                 setupEventListeners();
+                renderThemeControls();
                 updateAboutStardate();
                 updateSettingsStardate();
             }
@@ -1290,6 +1356,29 @@
                         categories: state.categories,
                     }),
                 );
+            }
+
+            function loadTheme() {
+                const stored = localStorage.getItem(THEME_STORAGE_KEY);
+                if (stored && THEMES.some((t) => t.id === stored)) {
+                    currentTheme = stored;
+                } else {
+                    currentTheme = "pickard";
+                }
+            }
+
+            function saveTheme() {
+                localStorage.setItem(THEME_STORAGE_KEY, currentTheme);
+            }
+
+            function applyTheme(themeId) {
+                const theme =
+                    THEMES.find((t) => t.id === themeId) ||
+                    THEMES.find((t) => t.id === "pickard");
+                currentTheme = theme.id;
+                document.body.setAttribute("data-theme", currentTheme);
+                saveTheme();
+                updateThemeStatus();
             }
 
             function renderCategories() {
@@ -1463,6 +1552,16 @@
                         </div>
                     `;
                 }
+            }
+
+            function updateThemeStatus() {
+                const themeStatusEl =
+                    document.getElementById("themeStatusReadout");
+                if (!themeStatusEl) return;
+                const current =
+                    THEMES.find((t) => t.id === currentTheme) ||
+                    THEMES[0];
+                themeStatusEl.textContent = `ACTIVE THEME: ${current.label}`;
             }
 
             function calculateStardate(date = new Date()) {
@@ -2009,9 +2108,32 @@
                         saveData();
                         renderCategories();
                         renderGrid();
+                        // Do not reset theme on system reset; theme is a UI preference.
                         if (settingsDialog.open) settingsDialog.close();
                     },
                 );
+            }
+
+            function renderThemeControls() {
+                const container = document.getElementById(
+                    "themeControlsContainer",
+                );
+                if (!container) return;
+                container.innerHTML = "";
+
+                THEMES.forEach((theme) => {
+                    const btn = document.createElement("button");
+                    btn.type = "button";
+                    btn.className = "btn-secondary";
+                    btn.style.marginRight = "8px";
+                    btn.style.minWidth = "120px";
+                    btn.style.justifyContent = "center";
+                    btn.textContent = theme.label;
+                    btn.onclick = () => applyTheme(theme.id);
+                    container.appendChild(btn);
+                });
+
+                updateThemeStatus();
             }
 
             // --- Event Listeners ---
