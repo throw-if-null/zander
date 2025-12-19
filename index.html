@@ -635,6 +635,65 @@
                         NO ENTRIES FOUND
                     </div>
                 </div>
+                <div id="settingsView" class="main-view" style="padding: 20px">
+                    <div class="settings-panel">
+                        <h1>SYSTEM SETTINGS</h1>
+
+                        <section class="settings-section">
+                            <h2>CATEGORY CONFIGURATION</h2>
+                            <div id="settingsCategorySectionMain">
+                                <div
+                                    id="categoryConfigList"
+                                    class="category-config-list"
+                                >
+                                    <!-- Rows injected via JS -->
+                                </div>
+                                <button
+                                    class="btn-primary"
+                                    id="addCategoryBtnMain"
+                                    style="width: 100%; margin-bottom: 20px"
+                                >
+                                    ADD CATEGORY
+                                </button>
+                            </div>
+                        </section>
+
+                        <section class="settings-section">
+                            <h2>DATA MANAGEMENT</h2>
+                            <div id="settingsDataSectionMain">
+                                <div class="form-group">
+                                    <button
+                                        class="btn-primary"
+                                        id="exportBtnMain"
+                                        style="width: 100%; margin-bottom: 10px"
+                                    >
+                                        EXPORT DATABASE
+                                    </button>
+                                    <button
+                                        class="btn-primary"
+                                        id="importBtnMain"
+                                        style="width: 100%; margin-bottom: 10px"
+                                    >
+                                        IMPORT DATABASE
+                                    </button>
+                                    <input
+                                        type="file"
+                                        id="importInput"
+                                        accept=".json"
+                                        style="display: none"
+                                    />
+                                    <button
+                                        class="btn-secondary"
+                                        id="resetBtnMain"
+                                        style="width: 100%"
+                                    >
+                                        SYSTEM RESET
+                                    </button>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
                 <div id="aboutView" class="main-view" style="padding: 20px">
                     <div class="about-panel">
                         <h1>ABOUT ZANDER</h1>
@@ -731,80 +790,7 @@
             </form>
         </dialog>
 
-        <!-- Settings Dialog -->
-        <dialog id="settingsDialog" style="max-width: 600px">
-            <h2>SYSTEM SETTINGS</h2>
-
-            <div id="settingsCategorySection">
-                <h3
-                    style="
-                        border-bottom: 1px solid var(--lcars-blue);
-                        padding-bottom: 5px;
-                        margin-top: 0;
-                    "
-                >
-                    CATEGORY CONFIGURATION
-                </h3>
-                <div id="categoryConfigList" class="category-config-list">
-                    <!-- Rows injected via JS -->
-                </div>
-                <button
-                    class="btn-primary"
-                    id="addCategoryBtn"
-                    style="width: 100%; margin-bottom: 20px"
-                >
-                    ADD CATEGORY
-                </button>
-            </div>
-
-            <div id="settingsDataSection">
-                <h3
-                    style="
-                        border-bottom: 1px solid var(--lcars-blue);
-                        padding-bottom: 5px;
-                    "
-                >
-                    DATA MANAGEMENT
-                </h3>
-                <div class="form-group">
-                    <button
-                        class="btn-primary"
-                        id="exportBtn"
-                        style="width: 100%; margin-bottom: 10px"
-                    >
-                        EXPORT DATABASE
-                    </button>
-                    <button
-                        class="btn-primary"
-                        id="importBtn"
-                        style="width: 100%; margin-bottom: 10px"
-                    >
-                        IMPORT DATABASE
-                    </button>
-                    <input
-                        type="file"
-                        id="importInput"
-                        accept=".json"
-                        style="display: none"
-                    />
-                    <button
-                        class="btn-secondary"
-                        id="resetBtn"
-                        style="width: 100%"
-                    >
-                        SYSTEM RESET
-                    </button>
-                </div>
-            </div>
-            <div class="dialog-actions">
-                <button
-                    class="btn-secondary"
-                    onclick="document.getElementById('settingsDialog').close()"
-                >
-                    CLOSE
-                </button>
-            </div>
-        </dialog>
+        <!-- Settings Dialog (no longer used for full settings UI, kept for potential small overlays if needed) -->
 
         <dialog id="confirmDialog">
             <h2 id="confirmTitle">CONFIRM</h2>
@@ -880,6 +866,7 @@
             const emptyState = document.getElementById("emptyState");
             const sidebar = document.getElementById("categorySidebar");
             const bookmarksView = document.getElementById("bookmarksView");
+            const settingsView = document.getElementById("settingsView");
             const aboutView = document.getElementById("aboutView");
             const aboutStardateEl = document.getElementById("aboutStardate");
             const categoryInput = document.getElementById("categoryInput");
@@ -887,7 +874,6 @@
             const bookmarkForm = document.getElementById("bookmarkForm");
             const dialogTitle = document.getElementById("dialogTitle");
             const deleteBtn = document.getElementById("deleteBtn");
-            const settingsDialog = document.getElementById("settingsDialog");
             const categoryConfigList =
                 document.getElementById("categoryConfigList");
             const importInput = document.getElementById("importInput");
@@ -1671,20 +1657,18 @@
                 document
                     .getElementById("settingsBtn")
                     .addEventListener("click", () => {
-                        document.getElementById(
-                            "settingsCategorySection",
-                        ).style.display = "block";
-                        document.getElementById(
-                            "settingsDataSection",
-                        ).style.display = "block";
+                        // Switch to settings main view
+                        bookmarksView.classList.remove("active");
+                        aboutView.classList.remove("active");
+                        settingsView.classList.add("active");
                         renderCategoryConfig();
-                        settingsDialog.showModal();
                     });
                 document
                     .getElementById("addBtn")
                     .addEventListener("click", () => {
                         // Ensure main view is bookmarks when adding an entry
                         bookmarksView.classList.add("active");
+                        settingsView.classList.remove("active");
                         aboutView.classList.remove("active");
                         openAddDialog();
                     });
@@ -1693,6 +1677,7 @@
                     .getElementById("aboutBtn")
                     .addEventListener("click", () => {
                         bookmarksView.classList.remove("active");
+                        settingsView.classList.remove("active");
                         aboutView.classList.add("active");
                         updateAboutStardate();
                     });
@@ -1711,22 +1696,17 @@
                                 e.preventDefault();
                                 // Switch back to bookmarks view on New Entry
                                 bookmarksView.classList.add("active");
+                                settingsView.classList.remove("active");
                                 aboutView.classList.remove("active");
                                 openAddDialog();
                                 break;
                             case "s":
                                 e.preventDefault();
-                                // Ensure main view is bookmarks when opening settings
+                                // Switch to settings main view via keyboard
+                                bookmarksView.classList.remove("active");
                                 aboutView.classList.remove("active");
-                                bookmarksView.classList.add("active");
-                                document.getElementById(
-                                    "settingsCategorySection",
-                                ).style.display = "block";
-                                document.getElementById(
-                                    "settingsDataSection",
-                                ).style.display = "block";
+                                settingsView.classList.add("active");
                                 renderCategoryConfig();
-                                settingsDialog.showModal();
                                 break;
                             case "c":
                                 e.preventDefault();
@@ -1745,15 +1725,18 @@
                 });
 
                 document
-                    .getElementById("exportBtn")
+                    .getElementById("exportBtnMain")
                     .addEventListener("click", exportData);
                 document
-                    .getElementById("importBtn")
+                    .getElementById("importBtnMain")
                     .addEventListener("click", triggerImport);
                 importInput.addEventListener("change", handleImport);
                 document
-                    .getElementById("resetBtn")
+                    .getElementById("resetBtnMain")
                     .addEventListener("click", resetSystem);
+                document
+                    .getElementById("addCategoryBtnMain")
+                    .addEventListener("click", () => addCategory());
             }
 
             // Start
