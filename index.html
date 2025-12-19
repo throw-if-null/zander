@@ -574,6 +574,14 @@
             #themeControlsContainer .btn-secondary {
                 min-width: 140px;
                 justify-content: center;
+                background-color: var(--lcars-blue);
+                color: #000;
+            }
+
+            #themeControlsContainer .btn-secondary.theme-active {
+                background-color: var(--theme-secondary, var(--lcars-beige));
+                color: #000;
+                box-shadow: 0 0 0 2px #fff;
             }
 
             .settings-panel .btn-secondary.reset {
@@ -711,6 +719,14 @@
 
             .action-btn:hover {
                 background-color: #fff;
+            }
+
+            .action-btn--small {
+                height: 32px;
+                font-size: 0.9rem;
+                padding: 0 10px;
+                width: 100%;
+                justify-content: center;
             }
 
             .action-btn:focus-visible {
@@ -930,7 +946,7 @@
             }
 
             .category-config-btn {
-                background-color: var(--lcars-blue);
+                background-color: var(--theme-secondary, var(--lcars-blue));
                 color: #000;
                 border: none;
                 height: 40px;
@@ -945,7 +961,11 @@
             }
 
             .category-config-btn:hover {
-                background-color: var(--lcars-beige);
+                background-color: color-mix(
+                    in srgb,
+                    var(--theme-secondary, var(--lcars-blue)) 70%,
+                    #ffffff 30%
+                );
             }
 
             .category-config-btn.delete {
@@ -1045,7 +1065,7 @@
                                         <!-- Rows injected via JS -->
                                     </div>
                                     <button
-                                        class="btn-primary"
+                                        class="btn-primary action-btn action-btn--small"
                                         id="addCategoryBtnMain"
                                         style="width: 100%; margin-bottom: 20px"
                                     >
@@ -1079,7 +1099,7 @@
 </h2>                                <div id="settingsDataSectionMain">
                                     <div class="form-group">
                                         <button
-                                            class="btn-primary"
+                                            class="btn-primary action-btn action-btn--small"
                                             id="exportBtnMain"
                                             style="
                                                 width: 100%;
@@ -1089,7 +1109,7 @@
                                             EXPORT DATABASE
                                         </button>
                                         <button
-                                            class="btn-primary"
+                                            class="btn-primary action-btn action-btn--small"
                                             id="importBtnMain"
                                             style="
                                                 width: 100%;
@@ -2483,8 +2503,14 @@
                     const btn = document.createElement("button");
                     btn.type = "button";
                     btn.className = "btn-secondary";
+                    if (theme.id === currentTheme) {
+                        btn.classList.add("theme-active");
+                    }
                     btn.textContent = theme.label;
-                    btn.onclick = () => applyTheme(theme.id);
+                    btn.onclick = () => {
+                        applyTheme(theme.id);
+                        renderThemeControls();
+                    };
                     container.appendChild(btn);
                 });
 
