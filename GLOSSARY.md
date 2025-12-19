@@ -134,7 +134,8 @@ When there is disagreement between documentation, this glossary, and the impleme
     - About view.
 - **Usage**:
   - Toggled by footer buttons (`ADD ENTRY`, `SETTINGS`, `ABOUT`).
-  - Toggled programmatically via JavaScript.
+  - Toggled by the **Home control** (`ZANDER` header title) which always returns to the Bookmarks view.
+  - Toggled programmatically via JavaScript and keyboard shortcuts (e.g., `Alt+H`, `Alt+S`).
 
 ---
 
@@ -189,6 +190,7 @@ When there is disagreement between documentation, this glossary, and the impleme
     - `ABOUT`
 - **Behavior**:
   - Footer buttons change the active view and open dialogs where appropriate.
+  - Together with the **Home control** in the header and keyboard shortcuts, they provide primary navigation between Bookmarks, Settings, and About.
 
 ---
 
@@ -331,6 +333,7 @@ When there is disagreement between documentation, this glossary, and the impleme
   - Implemented as a **panel**: `.about-panel` under `.main-content`.
 - **Behavior**:
   - Activated via footer `ABOUT`.
+  - Can be exited by using the **Home control** (clicking the `ZANDER` title or pressing `Alt+H`) to return to the Bookmarks view.
   - Does not modify state; read-only.
 
 ---

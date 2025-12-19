@@ -1007,7 +1007,7 @@
             <!-- Header Bar (Left) -->
             <div class="header-bar">
                 <div class="header-fill"></div>
-                <div class="app-title">ZANDER</div>
+                <div class="app-title" id="homeBtn">ZANDER</div>
                 <div class="header-end-cap"></div>
             </div>
 
@@ -1151,6 +1151,15 @@
                         <p class="about-meta">
                             DATA PERSISTENCE: LOCAL STORAGE<br />
                             NETWORK STATUS: OFFLINE MODE AVAILABLE
+                        </p>
+                        <p class="about-meta">
+                            KEYBOARD SHORTCUTS:
+                            <ul>
+                                <li>ALT+H — HOME (BOOKMARKS VIEW)</li>
+                                <li>ALT+N — NEW ENTRY</li>
+                                <li>ALT+S — SETTINGS VIEW</li>
+                                <li>ALT+C — NEW CATEGORY (IN SETTINGS)</li>
+                            </ul>
                         </p>
                     </div>
                 </div>
@@ -1441,6 +1450,7 @@
 
             const grid = document.getElementById("bookmarkGrid");
             const emptyState = document.getElementById("emptyState");
+            const homeBtn = document.getElementById("homeBtn");
             const sidebar = document.getElementById("categorySidebar");
             const bookmarksView = document.getElementById("bookmarksView");
             const settingsView = document.getElementById("settingsView");
@@ -2533,6 +2543,15 @@
 
             // --- Event Listeners ---
             function setupEventListeners() {
+                if (homeBtn) {
+                    homeBtn.style.cursor = "pointer";
+                    homeBtn.addEventListener("click", () => {
+                        bookmarksView.classList.add("active");
+                        settingsView.classList.remove("active");
+                        aboutView.classList.remove("active");
+                    });
+                }
+
                 onClick("settingsBtn", () => {
                     // Switch to settings main view
                     bookmarksView.classList.remove("active");
@@ -2587,6 +2606,13 @@
                                     addCategory(null);
                                     renderCategoryConfig();
                                 }
+                                break;
+                            case "h":
+                                e.preventDefault();
+                                // Alt+H: go Home (Bookmarks view)
+                                bookmarksView.classList.add("active");
+                                settingsView.classList.remove("active");
+                                aboutView.classList.remove("active");
                                 break;
                         }
                     }

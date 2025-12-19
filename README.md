@@ -55,7 +55,7 @@ The entire app runs in your browser as a single `index.html` file:
   - Import JSON to fully replace the current state.
 
 - **Keyboard Shortcuts**
-  - Power‑user hotkeys for common actions (see below).
+  - Power-user hotkeys for common actions (see below), including a dedicated **Home** shortcut (`Alt + H`) that jumps back to the main Bookmarks view.
 
 - **Responsive within LCARS Constraints**
   - Layout adapts to various viewport sizes while preserving the LCARS frame and proportions as much as possible.
@@ -85,6 +85,7 @@ The layout is a continuous LCARS “C‑shaped” frame wrapping the content:
 
 1. **Header Bar (Top‑Left)**
    - Displays the system title and decorative LCARS band.
+   - The `ZANDER` title in the header acts as a **Home control**: clicking it returns to the main Bookmarks view (same behavior as `Alt + H`).
    - Connects into the sidebar via the **top elbow** (`.sidebar-top-cap`).
 
 2. **Sidebar (Right Column)**
@@ -273,6 +274,7 @@ This clears the app’s `localStorage` and restores the default demo categories 
 
 | Shortcut   | Action                               |
 |-----------|---------------------------------------|
+| `Alt + H` | Go **Home** (Bookmarks view)          |
 | `Alt + N` | Open **Add Bookmark** dialog          |
 | `Alt + S` | Open **Settings** view                |
 | `Alt + C` | Add **New Category** (in Settings)    |

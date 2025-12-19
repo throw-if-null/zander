@@ -165,7 +165,12 @@ Usage guidelines:
 
 ### 2.3 Themes
 
-The app supports multiple visual themes that all share the same layout, typography, and LCARS structure but vary the palette and emphasis:
+The app supports multiple visual themes that all share the same layout, typography, and LCARS structure but vary the palette and emphasis. Themes primarily drive two CSS custom properties on `body`:
+
+- `--theme-main`: feeds the LCARS frame and primary accents.
+- `--theme-secondary`: feeds **footer and primary action buttons**, bookmark URL strips, and certain configuration buttons so that controls and content accents stay visually synchronized.
+
+Current themes:
 
 - **PICKARD** (`body[data-theme="pickard"]`)
   - Default, balanced LCARS look.
@@ -189,13 +194,14 @@ The app supports multiple visual themes that all share the same layout, typograp
 
 - **SEVEN OF NINE** (`body[data-theme="seven"]`)
   - High-contrast, almost Borg-adjacent variation.
-  - Strong highlights and accent overrides (for example, footer action buttons).
+  - Strong highlights and accent overrides (for example, footer and other action buttons using a Borg-green secondary color).
   - Feels sharper and more “augmented” than the baseline theme.
 
 Implementation notes:
 
 - Themes are applied via a `data-theme` attribute on `<body>` and theme-specific CSS variable overrides.
 - The theme system does **not** affect layout or data; it only swaps colors and minor stylistic details.
+- Controls that use `.action-btn` and category configuration buttons that reference `--theme-secondary` will update automatically when the theme changes, keeping **footer buttons**, **add/export/import** controls, and certain **category-config buttons** visually consistent with the active theme.
 
 ---
 
@@ -365,6 +371,8 @@ The About view (`.about-panel`) is an informational screen:
   - Version or build string if applicable.
 
 The About panel uses the same base layout as the Settings panel but is content-focused, with minimal controls.
+
+The **header title** (`.app-title`, showing “ZANDER”) functions as a **Home control**: clicking it returns the main content to the Bookmarks view. This is mirrored by the `Alt+H` keyboard shortcut (see Keyboard & Accessibility section), giving both a prominent visual target and a power-user shortcut for returning “home”.
 
 ---
 

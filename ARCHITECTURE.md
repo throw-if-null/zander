@@ -30,6 +30,7 @@ The app is visually presented as a **LCARS-style console** built from a continuo
 
 - **Header Bar**  
   - Top structural element with the LCARS-style title and decorative top band.
+  - The `ZANDER` title in the header acts as a **Home control**, returning to the main Bookmarks view when clicked or when the `Alt+H` keyboard shortcut is used.
 - **Sidebar (Right Frame Column)**  
   - Vertical track containing:
     - Decorative caps (`.sidebar-top-cap`, `.sidebar-bottom-cap`) forming LCARS “elbows”.
