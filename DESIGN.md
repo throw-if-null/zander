@@ -394,17 +394,17 @@ Bookmarks are represented as `.bookmark-tile` elements rendered inside `.bookmar
 ```
 
 The tile uses a 3-row CSS grid layout:
-- **Row 1 (auto)**: Title (theme-colored block spanning full width with category-colored text)
-- **Row 2 (auto)**: Description (truncated to 100 characters on tile; full text in edit mode)
-- **Row 3 (auto)**: URL footer (theme-colored strip with pronounced LCARS cutout)
+- **Row 1 (auto)**: Title (black text on category-colored background).
+- **Row 2 (1fr)**: Description (category-colored text on black background, with rounded top-left corner).
+- **Row 3 (auto)**: URL footer (category-colored text on black background).
 
 A `::before` pseudo-element creates the signature LCARS rounded notch in the top-left corner using a radial gradient.
 
 Content breakdown:
 
-- **`.bookmark-title`**: The bookmark's title (max 64 characters). Spans full width (`grid-column: 1 / -1`). Displayed in uppercase on the theme color background (`--theme-main`) with category-colored text. Creates bold LCARS-style visual separation from the description area.
-- **`.bookmark-description`**: Description text (max 512 characters stored, but truncated to first 100 characters on the tile with ellipsis). Full description viewable in edit mode. Black text on category color ensures readability.
-- **`.bookmark-url-footer`**: Compact theme-colored footer strip with pronounced LCARS rounded top-left corner cutout (`border-top-left-radius: 30px`).
+- **`.bookmark-title`**: The bookmark's title (max 64 characters). Spans full width (`grid-column: 1 / -1`). Displayed in uppercase with black text on the category color background.
+- **`.bookmark-description`**: Description text (max 512 characters). Displayed in category color on a black background. Uses `border-top-left-radius: 15px` to create an "elbow" shape against the left strip. Truncated via CSS line-clamping (4 lines).
+- **`.bookmark-url-footer`**: Compact footer strip with black background.
   - **`.bookmark-url-text`**: The URL in category color, truncated with ellipsis. Full URL shown on hover via `title` attribute.
 - **`.bookmark-edit-icon`**: Edit pencil icon, revealed on hover.
 
@@ -416,10 +416,10 @@ Content breakdown:
   - Bottom-right: `border-bottom-right-radius: 30px`
   - Min-height: `140px` — compact height since description is truncated.
 - **Color zones**:
-  - **Title area (row 1)**: Theme color background (`--theme-main`) with category-colored text — creates bold LCARS separation. Spans full tile width.
-  - **Description area (row 2)**: Category color (via `--cat-color`) with black text for high contrast.
-  - **URL footer (row 3)**: Theme color background (`--theme-main`) with pronounced LCARS rounded cutout (`border-top-left-radius: 30px`). URL text uses category color for visual connection.
-  - **Left stripe**: 15px column in category color, maintains classic LCARS panel aesthetic (visible in rows 2-3).
+  - **Title area (row 1)**: Category color background (via `--cat-color`) with black text.
+  - **Description area (row 2)**: Black background with category-colored text. The top-left corner is rounded (`15px`) to create the inner curve of the LCARS elbow shape.
+  - **URL footer (row 3)**: Black background with category-colored text.
+  - **Left stripe**: 15px column in category color, visible in rows 2-3 as the "handle" of the elbow.
 - **On hover**:
   - Slight scale up (`transform: scale(1.02)`).
   - Slightly brighter background (`filter: brightness(1.1)`).
