@@ -341,7 +341,7 @@ When there is disagreement between documentation, this glossary, and the impleme
 
 - **Meaning**: Fictional time representation inspired by *Star Trek: The Next Generation*.
 - **Implementation**:
-  - Stored as a `number` (e.g., `41153.7`) in `createdAt` fields.
+  - Stored as a string in `createdAt` fields using the format `YYYYDDD.MMMM` (e.g., `2025352.1200`).
   - Computed via `calculateStardate()` from the current Earth date.
 - **Usage**:
   - Bookmark and category creation timestamps.
@@ -450,7 +450,20 @@ When there is disagreement between documentation, this glossary, and the impleme
 
 ---
 
-### 8.2 Category Color
+### 8.2 Theme
+
+- **Meaning**: A named LCARS visual variant that changes colors and accents while keeping the same layout and data.
+- **Implementation**:
+  - A small set of theme definitions in `index.html` (e.g., `PICKARD`, `DATA`, `DOCTOR`, `SPOCK`, `SEVEN OF NINE`).
+  - Applied via a `data-theme` attribute on `<body>` (for example, `body[data-theme="pickard"]`).
+  - The active theme id is stored in `localStorage` under a dedicated theme storage key.
+- **Usage**:
+  - Lets users switch between different LCARS-inspired palettes.
+  - Affects only visual styling (colors, some accents), not bookmarks, categories, or layout.
+
+---
+
+### 8.3 Category Color
 
 - **Meaning**: The specific LCARS palette color assigned to a category.
 - **Implementation**:
