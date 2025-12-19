@@ -1692,6 +1692,31 @@
                 return date;
             }
 
+            // Generic category tree walker used by config, lookups, etc.
+            // visitor(cat, parent, depth, index, siblings) can return a non-undefined
+            // value to short-circuit traversal with that value.
+            function walkCategories(rootCategories, visitor, parent = null, depth = 0) {
+                for (let i = 0; i < rootCategories.length; i++) {
+                    const cat = rootCategories[i];
+                    const result = visitor(cat, parent, depth, i, rootCategories);
+                    if (result !== undefined) {
+                        return result;
+                    }
+                    if (cat.children && cat.children.length > 0) {
+                        const childResult = walkCategories(
+                            cat.children,
+                            visitor,
+                            cat,
+                            depth + 1,
+                        );
+                        if (childResult !== undefined) {
+                            return childResult;
+                        }
+                    }
+                }
+                return undefined;
+            }
+
             function getCategoryPath(id, cats, path = []) {
                 for (const cat of cats) {
                     const newPath = [...path, cat];
@@ -1884,25 +1909,21 @@
             // --- Category Management ---
 
             function findCategoryAndParent(id, cats, parent) {
-                for (let i = 0; i < cats.length; i++) {
-                    if (cats[i].id === id) {
-                        return {
-                            category: cats[i],
-                            parent: parent,
-                            siblings: cats,
-                            index: i,
-                        };
-                    }
-                    if (cats[i].children) {
-                        const result = findCategoryAndParent(
-                            id,
-                            cats[i].children,
-                            cats[i],
-                        );
-                        if (result) return result;
-                    }
-                }
-                return null;
+                return walkCategories(
+                    cats,
+                    (cat, parentNode, depth, index, siblings) => {
+                        if (cat.id === id) {
+                            return {
+                                category: cat,
+                                parent: parentNode,
+                                siblings,
+                                index,
+                            };
+                        }
+                        return undefined;
+                    },
+                    parent,
+                ) || null;
             }
 
             function renderCategoryConfig() {
@@ -1988,16 +2009,12 @@
                     categoryConfigList.appendChild(row);
                 }
 
-                function processCategories(cats, parent, level) {
-                    cats.forEach((cat, index) => {
-                        renderConfigRow(cat, parent, index, cats, level);
-                        if (cat.children) {
-                            processCategories(cat.children, cat, level + 1);
-                        }
-                    });
-                }
-
-                processCategories(state.categories, null, 1);
+                walkCategories(state.categories, (cat, parent, depth, index, siblings) => {
+                    // depth is 0-based from root; config UI levels start at 1
+                    const level = depth + 1;
+                    renderConfigRow(cat, parent, index, siblings, level);
+                    return undefined;
+                });
             }
 
             function addCategory(parentId = null) {
