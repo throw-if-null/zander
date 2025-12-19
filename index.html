@@ -280,6 +280,7 @@
                 width: 4px;
                 background-color: #ffffff;
             }
+
             /* Nested Categories */
             .cat-wrapper {
                 position: relative;
@@ -563,8 +564,6 @@
                 background-color: #ffffff;
             }
 
-
-
             /* Theme selector layout */
             #themeControlsContainer {
                 display: flex;
@@ -581,8 +580,6 @@
                 background-color: var(--lcars-red);
                 color: #000;
             }
-
-
 
             .settings-panel .btn-primary:focus-visible,
             .settings-panel .btn-secondary:focus-visible {
@@ -1048,7 +1045,7 @@
                                         <!-- Rows injected via JS -->
                                     </div>
                                     <button
-                                        class="btn-primary lcars-btn lcars-btn-primary"
+                                        class="btn-primary"
                                         id="addCategoryBtnMain"
                                         style="width: 100%; margin-bottom: 20px"
                                     >
@@ -1082,7 +1079,7 @@
 </h2>                                <div id="settingsDataSectionMain">
                                     <div class="form-group">
                                         <button
-                                            class="btn-primary lcars-btn lcars-btn-primary"
+                                            class="btn-primary"
                                             id="exportBtnMain"
                                             style="
                                                 width: 100%;
@@ -1092,7 +1089,7 @@
                                             EXPORT DATABASE
                                         </button>
                                         <button
-                                            class="btn-primary lcars-btn lcars-btn-primary"
+                                            class="btn-primary"
                                             id="importBtnMain"
                                             style="
                                                 width: 100%;
@@ -1108,7 +1105,7 @@
                                             style="display: none"
                                         />
                                         <button
-                                            class="btn-secondary lcars-btn lcars-btn-secondary reset"
+                                            class="btn-secondary reset"
                                             id="resetBtnMain"
                                             style="width: 100%"
                                         >
@@ -1195,7 +1192,7 @@
                     <div class="lcars-dialog-footer">
                         <button
                             type="button"
-                            class="btn-secondary lcars-btn lcars-btn-secondary delete"
+                            class="btn-secondary delete"
                             id="deleteBtn"
                             style="display: none"
                         >
@@ -1203,7 +1200,7 @@
                         </button>
                         <button
                             type="button"
-                            class="btn-secondary lcars-btn lcars-btn-secondary"
+                            class="btn-secondary"
                             onclick="
                                 document
                                     .getElementById('bookmarkDialog')
@@ -1212,7 +1209,7 @@
                         >
                             CANCEL
                         </button>
-                        <button type="submit" class="btn-primary lcars-btn lcars-btn-primary">
+                        <button type="submit" class="btn-primary">
                             ENGAGE
                         </button>
                     </div>
@@ -1238,10 +1235,10 @@
                     </div>
                 </div>
                 <div class="lcars-dialog-footer">
-                    <button class="btn-secondary lcars-btn lcars-btn-secondary" id="confirmCancelBtn">
+                    <button class="btn-secondary" id="confirmCancelBtn">
                         CANCEL
                     </button>
-                    <button class="btn-primary lcars-btn lcars-btn-primary" id="confirmOkBtn">
+                    <button class="btn-primary" id="confirmOkBtn">
                         PROCEED
                     </button>
                 </div>
