@@ -43,8 +43,12 @@ The entire app runs in your browser as a single `index.html` file:
   - **About View** – System info, stardate, and credits.
 
 - **Stardates**
-  - TNG‑style stardate calculator used for `createdAt`.
+  - LCARS-style stardate string stored in `createdAt` (format `YYYYDDD.MMMM`, e.g. `2025352.1200`).
   - Human‑readable Earth date shown alongside the stardate in dialogs.
+
+- **Themes**
+  - Multiple LCARS themes (e.g. PICKARD, DATA, DOCTOR, SPOCK, SEVEN OF NINE).
+  - Theme choice affects colors and accents only; data and layout stay the same.
 
 - **Import/Export**
   - Export full bookmark+category state to JSON.
@@ -288,11 +292,15 @@ Browser or OS‑level shortcuts may conflict; when they do, those take precedenc
 
 ### Data Model
 
-**Local Storage Key**
+**Local Storage Keys**
 
-- All data is saved under:
+- Bookmark and category data is saved under:
 
   - `zander-lcars:v1`
+
+- Theme selection is saved separately under:
+
+  - `zander-lcars-theme:v1`
 
 **Bookmark**
 
@@ -304,7 +312,7 @@ Browser or OS‑level shortcuts may conflict; when they do, those take precedenc
   "title": "Example Site",
   "url": "https://example.com",
   "categoryId": "uuid-of-category",
-  "createdAt": 41153.7
+  "createdAt": "2025352.1200"
 }
 ```
 
@@ -315,13 +323,13 @@ Browser or OS‑level shortcuts may conflict; when they do, those take precedenc
   "id": "uuid",
   "name": "DATABANKS",
   "color": "#ff9900",
-  "createdAt": 41153.6,
+  "createdAt": "2025352.1200",
   "children": [
     {
       "id": "child-uuid",
       "name": "LCARS",
       "color": "#cc99cc",
-      "createdAt": 41153.7,
+      "createdAt": "2025352.1200",
       "children": []
     }
   ]
@@ -342,9 +350,9 @@ Browser or OS‑level shortcuts may conflict; when they do, those take precedenc
 
 - **Stardates**
   - `calculateStardate()`:
-    - Computes a TNG‑era stardate from the current Earth date/time.
+    - Computes a stardate string in the form `YYYYDDD.MMMM` (year + day-of-year + minutes).
   - `parseStardate()`:
-    - Converts a stored stardate back to an approximate Earth date.
+    - Converts a stored stardate string back to an approximate Earth `Date`.
 
 - **Category Tree Operations**
   - `findCategoryAndParent()`:
