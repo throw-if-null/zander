@@ -260,6 +260,36 @@
                 gap: 20px;
             }
 
+            .bookmark-location {
+                display: flex;
+                align-items: center;
+                margin-bottom: 10px;
+                font-size: 0.9rem;
+                letter-spacing: 1px;
+                color: var(--lcars-beige);
+                opacity: 0.85;
+            }
+
+            .bookmark-location-label {
+                color: var(--lcars-orange);
+                margin-right: 8px;
+            }
+
+            .bookmark-location-path {
+                display: inline-flex;
+                gap: 6px;
+                align-items: center;
+                flex-wrap: wrap;
+            }
+
+            .bookmark-location-path span {
+                white-space: nowrap;
+            }
+
+            .bookmark-location-separator {
+                opacity: 0.6;
+            }
+
             /* Main view containers */
             .main-view {
                 display: none;
@@ -837,6 +867,7 @@
 
             <main class="main-content">
                 <div id="bookmarksView" class="main-view active">
+                    <div id="bookmarkLocation" class="bookmark-location"></div>
                     <div id="bookmarkGrid" class="bookmark-grid">
                         <!-- Bookmarks injected here -->
                     </div>
@@ -1300,6 +1331,7 @@
                 addOptions(state.categories, 1);
 
                 updateSystemStatus();
+                updateBookmarkLocation();
             }
 
             function renderGrid() {
@@ -1362,6 +1394,7 @@
                     });
                 }
                 updateSystemStatus();
+                updateBookmarkLocation();
             }
 
             function updateAboutStardate() {
@@ -1424,6 +1457,49 @@
                 date.setHours(Math.floor(minutes / 60));
                 date.setMinutes(minutes % 60);
                 return date;
+            }
+
+            function getCategoryPath(id, cats, path = []) {
+                for (const cat of cats) {
+                    const newPath = [...path, cat];
+                    if (cat.id === id) {
+                        return newPath;
+                    }
+                    if (cat.children && cat.children.length > 0) {
+                        const childPath = getCategoryPath(
+                            id,
+                            cat.children,
+                            newPath,
+                        );
+                        if (childPath) return childPath;
+                    }
+                }
+                return null;
+            }
+
+            function updateBookmarkLocation() {
+                const locEl = document.getElementById("bookmarkLocation");
+                if (!locEl) return;
+
+                const path = getCategoryPath(
+                    state.currentCategory,
+                    state.categories,
+                );
+                if (!path || path.length === 0) {
+                    locEl.innerHTML = "";
+                    return;
+                }
+
+                const parts = path
+                    .map((cat) => `<span>${escapeHtml(cat.name)}</span>`)
+                    .join('<span class="bookmark-location-separator">▸</span>');
+
+                locEl.innerHTML = `
+                    <span class="bookmark-location-label">LOCATION:</span>
+                    <span class="bookmark-location-path">
+                        ${parts}
+                    </span>
+                `;
             }
 
             function generateUUID() {
