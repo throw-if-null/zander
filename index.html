@@ -1599,17 +1599,7 @@
                     btn.className = `cat-btn ${state.currentCategory === cat.id ? "active" : ""}`;
                     btn.textContent = cat.name;
                     btn.style.setProperty("--cat-color", cat.color);
-
-                    btn.onclick = (e) => {
-                        // Ensure main view is bookmarks when switching category
-                        bookmarksView.classList.add("active");
-                        settingsView.classList.remove("active");
-                        aboutView.classList.remove("active");
-                        e.stopPropagation();
-                        state.currentCategory = cat.id;
-                        renderCategories();
-                        renderGrid();
-                    };
+                    btn.dataset.id = cat.id;
 
                     wrapper.appendChild(btn);
 
@@ -1665,6 +1655,7 @@
             function createBookmarkTile(bookmark) {
                 const tile = document.createElement("a");
                 tile.className = "bookmark-tile";
+                tile.dataset.id = bookmark.id;
 
                 // Use category color for tile if available
                 const cat = state.categories.find(
@@ -1684,22 +1675,6 @@
                 tile.href = bookmark.url;
                 tile.target = "_blank";
                 tile.rel = "noopener noreferrer";
-
-                // Edit button click
-                const editIcon = tile.querySelector(".bookmark-edit-icon");
-                editIcon.onclick = (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    openEditDialog(bookmark);
-                };
-
-
-
-                // Right click (context menu) or long press to edit
-                tile.oncontextmenu = (e) => {
-                    e.preventDefault();
-                    openEditDialog(bookmark);
-                };
 
                 return tile;
             }
@@ -2535,6 +2510,50 @@
 
             // --- Event Listeners ---
             function setupEventListeners() {
+                // Category Sidebar Delegation
+                if (sidebar) {
+                    sidebar.addEventListener("click", (e) => {
+                        const btn = e.target.closest(".cat-btn");
+                        if (btn && btn.dataset.id) {
+                            // Ensure main view is bookmarks when switching category
+                            bookmarksView.classList.add("active");
+                            settingsView.classList.remove("active");
+                            aboutView.classList.remove("active");
+
+                            state.currentCategory = btn.dataset.id;
+                            renderCategories();
+                            renderGrid();
+                        }
+                    });
+                }
+
+                // Bookmark Grid Delegation
+                if (grid) {
+                    grid.addEventListener("click", (e) => {
+                        const tile = e.target.closest(".bookmark-tile");
+                        if (!tile) return;
+
+                        // Check if edit icon was clicked
+                        if (e.target.closest(".bookmark-edit-icon")) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const id = tile.dataset.id;
+                            const bookmark = state.bookmarks.find((b) => b.id === id);
+                            if (bookmark) openEditDialog(bookmark);
+                        }
+                    });
+
+                    grid.addEventListener("contextmenu", (e) => {
+                        const tile = e.target.closest(".bookmark-tile");
+                        if (tile) {
+                            e.preventDefault();
+                            const id = tile.dataset.id;
+                            const bookmark = state.bookmarks.find((b) => b.id === id);
+                            if (bookmark) openEditDialog(bookmark);
+                        }
+                    });
+                }
+
                 if (homeBtn) {
                     homeBtn.style.cursor = "pointer";
                     homeBtn.addEventListener("click", () => {
