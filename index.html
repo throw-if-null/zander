@@ -269,17 +269,75 @@
                 display: block;
             }
 
+            /* Settings / About panels share LCARS framing */
+            .settings-panel,
             .about-panel {
                 color: var(--lcars-orange);
-                max-width: 800px;
+                max-width: 900px;
                 margin: 0 auto;
                 text-align: left;
+                height: 100%;
             }
 
+            .settings-panel {
+                display: grid;
+                grid-template-columns: 16px 1fr;
+                column-gap: 20px;
+                height: 100%;
+            }
+
+            .settings-accent {
+                grid-row: 1 / span 3;
+                background-color: var(--lcars-purple);
+                border-radius: 20px;
+            }
+
+            .settings-content {
+                grid-column: 2;
+            }
+
+            .settings-panel h1,
             .about-panel h1 {
                 font-size: 2rem;
-                margin-bottom: 10px;
+                margin-bottom: 15px;
                 letter-spacing: 2px;
+            }
+
+            .settings-section {
+                margin-top: 20px;
+                padding-top: 10px;
+                border-top: 2px solid var(--lcars-blue);
+            }
+
+            /* Layout for settings content: top section grows, bottom sticks near bottom */
+            .settings-content {
+                grid-column: 2;
+                display: flex;
+                flex-direction: column;
+                height: 100%;
+            }
+
+            .settings-content .settings-section:first-of-type {
+                /* Category Configuration section takes remaining height */
+                flex: 1 1 auto;
+                display: flex;
+                flex-direction: column;
+            }
+
+            #settingsCategorySectionMain {
+                flex: 1 1 auto;
+                display: flex;
+                flex-direction: column;
+            }
+
+            #settingsCategorySectionMain .category-config-list {
+                flex: 1 1 auto;
+            }
+
+            .settings-section h2 {
+                font-size: 1.1rem;
+                margin: 0 0 10px 0;
+                letter-spacing: 1px;
             }
 
             .about-panel p {
@@ -291,6 +349,71 @@
                 font-size: 0.9rem;
                 opacity: 0.8;
                 margin-top: 20px;
+            }
+
+            .settings-status {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-size: 0.8rem;
+                opacity: 0.8;
+                margin-bottom: 10px;
+                letter-spacing: 1px;
+            }
+
+            /* Settings buttons use LCARS control-tab style */
+            .settings-panel .btn-primary,
+            .settings-panel .btn-secondary {
+                background-color: var(--lcars-beige);
+                color: #000;
+                border: none;
+                padding: 0 15px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+                font-family: var(--lcars-font);
+                font-size: 1.1rem;
+                font-weight: bold;
+                text-transform: uppercase;
+                border-radius: 20px;
+                cursor: pointer;
+                position: relative;
+            }
+
+            .settings-panel .btn-primary {
+                background-color: var(--lcars-orange);
+            }
+
+            .settings-panel .btn-secondary {
+                background-color: #444;
+                color: var(--lcars-beige);
+            }
+
+            .settings-panel .btn-secondary.reset {
+                background-color: var(--lcars-red);
+                color: #000;
+            }
+
+            .settings-panel .btn-primary:hover,
+            .settings-panel .btn-secondary:hover {
+                filter: brightness(1.1);
+            }
+
+            .settings-panel .btn-primary:focus-visible,
+            .settings-panel .btn-secondary:focus-visible {
+                outline: none;
+            }
+
+            .settings-panel .btn-primary:focus-visible::after,
+            .settings-panel .btn-secondary:focus-visible::after {
+                content: "";
+                position: absolute;
+                top: -9px;
+                left: 0;
+                right: 0;
+                height: 4px;
+                background-color: #ffffff;
             }
 
             .bookmark-tile {
@@ -504,26 +627,30 @@
                 flex-direction: column;
                 gap: 10px;
                 margin-bottom: 10px;
-                max-height: 300px;
                 overflow-y: auto;
                 border: 1px solid var(--lcars-blue);
                 padding: 10px;
-                border-radius: 10px;
+                border-radius: 20px;
+                background-color: #000;
             }
 
             .category-config-row {
                 display: grid;
-                grid-template-columns: 40px 1fr 40px 40px 40px 40px;
-                gap: 5px;
+                grid-template-columns: 70px 1fr 40px 40px 40px 40px;
+                gap: 8px;
                 align-items: center;
+                padding: 6px 8px;
+                border-radius: 20px;
+                background-color: #111;
             }
 
             .category-color-swatch {
                 width: 100%;
                 height: 40px;
                 border: none;
-                border-radius: 20px;
+                border-radius: 20px 0 0 20px;
                 cursor: pointer;
+                box-shadow: inset 0 0 0 2px #000;
             }
 
             .color-grid {
@@ -558,7 +685,8 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                font-size: 1.2rem;
+                font-size: 1.1rem;
+                box-shadow: inset 0 0 0 2px #000;
             }
 
             .category-config-btn:hover {
@@ -635,63 +763,82 @@
                         NO ENTRIES FOUND
                     </div>
                 </div>
-                <div id="settingsView" class="main-view" style="padding: 20px">
+                <div
+                    id="settingsView"
+                    class="main-view"
+                    style="padding: 20px; height: 100%"
+                >
                     <div class="settings-panel">
-                        <h1>SYSTEM SETTINGS</h1>
-
-                        <section class="settings-section">
-                            <h2>CATEGORY CONFIGURATION</h2>
-                            <div id="settingsCategorySectionMain">
-                                <div
-                                    id="categoryConfigList"
-                                    class="category-config-list"
+                        <div class="settings-accent"></div>
+                        <div class="settings-content">
+                            <div class="settings-status">
+                                <span>CONFIGURATION MODE</span>
+                                <span id="settingsStardate"
+                                    >STARDATE 0000000.0000</span
                                 >
-                                    <!-- Rows injected via JS -->
-                                </div>
-                                <button
-                                    class="btn-primary"
-                                    id="addCategoryBtnMain"
-                                    style="width: 100%; margin-bottom: 20px"
-                                >
-                                    ADD CATEGORY
-                                </button>
                             </div>
-                        </section>
+                            <h1>SYSTEM SETTINGS</h1>
 
-                        <section class="settings-section">
-                            <h2>DATA MANAGEMENT</h2>
-                            <div id="settingsDataSectionMain">
-                                <div class="form-group">
+                            <section class="settings-section">
+                                <h2>CATEGORY CONFIGURATION</h2>
+                                <div id="settingsCategorySectionMain">
+                                    <div
+                                        id="categoryConfigList"
+                                        class="category-config-list"
+                                    >
+                                        <!-- Rows injected via JS -->
+                                    </div>
                                     <button
                                         class="btn-primary"
-                                        id="exportBtnMain"
-                                        style="width: 100%; margin-bottom: 10px"
+                                        id="addCategoryBtnMain"
+                                        style="width: 100%; margin-bottom: 20px"
                                     >
-                                        EXPORT DATABASE
-                                    </button>
-                                    <button
-                                        class="btn-primary"
-                                        id="importBtnMain"
-                                        style="width: 100%; margin-bottom: 10px"
-                                    >
-                                        IMPORT DATABASE
-                                    </button>
-                                    <input
-                                        type="file"
-                                        id="importInput"
-                                        accept=".json"
-                                        style="display: none"
-                                    />
-                                    <button
-                                        class="btn-secondary"
-                                        id="resetBtnMain"
-                                        style="width: 100%"
-                                    >
-                                        SYSTEM RESET
+                                        ADD CATEGORY
                                     </button>
                                 </div>
-                            </div>
-                        </section>
+                            </section>
+
+                            <section class="settings-section">
+                                <h2>DATA MANAGEMENT</h2>
+                                <div id="settingsDataSectionMain">
+                                    <div class="form-group">
+                                        <button
+                                            class="btn-primary"
+                                            id="exportBtnMain"
+                                            style="
+                                                width: 100%;
+                                                margin-bottom: 10px;
+                                            "
+                                        >
+                                            EXPORT DATABASE
+                                        </button>
+                                        <button
+                                            class="btn-primary"
+                                            id="importBtnMain"
+                                            style="
+                                                width: 100%;
+                                                margin-bottom: 10px;
+                                            "
+                                        >
+                                            IMPORT DATABASE
+                                        </button>
+                                        <input
+                                            type="file"
+                                            id="importInput"
+                                            accept=".json"
+                                            style="display: none"
+                                        />
+                                        <button
+                                            class="btn-secondary reset"
+                                            id="resetBtnMain"
+                                            style="width: 100%"
+                                        >
+                                            SYSTEM RESET
+                                        </button>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
                     </div>
                 </div>
                 <div id="aboutView" class="main-view" style="padding: 20px">
@@ -869,6 +1016,8 @@
             const settingsView = document.getElementById("settingsView");
             const aboutView = document.getElementById("aboutView");
             const aboutStardateEl = document.getElementById("aboutStardate");
+            const settingsStardateEl =
+                document.getElementById("settingsStardate");
             const categoryInput = document.getElementById("categoryInput");
             const bookmarkDialog = document.getElementById("bookmarkDialog");
             const bookmarkForm = document.getElementById("bookmarkForm");
@@ -939,6 +1088,7 @@
                 renderGrid();
                 setupEventListeners();
                 updateAboutStardate();
+                updateSettingsStardate();
             }
 
             function loadData() {
@@ -1132,6 +1282,16 @@
                 const date = parseStardate(sd);
                 if (date) {
                     aboutStardateEl.title = date.toLocaleString();
+                }
+            }
+
+            function updateSettingsStardate() {
+                if (!settingsStardateEl) return;
+                const sd = calculateStardate();
+                settingsStardateEl.textContent = `STARDATE ${sd}`;
+                const date = parseStardate(sd);
+                if (date) {
+                    settingsStardateEl.title = date.toLocaleString();
                 }
             }
 
@@ -1375,6 +1535,11 @@
                     nameInput.type = "text";
                     nameInput.value = cat.name;
                     nameInput.style.width = "100%";
+                    nameInput.style.backgroundColor = "#222";
+                    nameInput.style.border = "1px solid var(--lcars-blue)";
+                    nameInput.style.color = "var(--lcars-beige)";
+                    nameInput.style.borderRadius = "20px";
+                    nameInput.style.padding = "8px 12px";
                     nameInput.onchange = (e) => {
                         cat.name = e.target.value.toUpperCase();
                         saveData();
@@ -1662,6 +1827,7 @@
                         aboutView.classList.remove("active");
                         settingsView.classList.add("active");
                         renderCategoryConfig();
+                        updateSettingsStardate();
                     });
                 document
                     .getElementById("addBtn")
@@ -1707,6 +1873,7 @@
                                 aboutView.classList.remove("active");
                                 settingsView.classList.add("active");
                                 renderCategoryConfig();
+                                updateSettingsStardate();
                                 break;
                             case "c":
                                 e.preventDefault();
