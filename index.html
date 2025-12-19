@@ -1276,6 +1276,7 @@
                     btn.onclick = (e) => {
                         // Ensure main view is bookmarks when switching category
                         bookmarksView.classList.add("active");
+                        settingsView.classList.remove("active");
                         aboutView.classList.remove("active");
                         e.stopPropagation();
                         state.currentCategory = cat.id;
