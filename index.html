@@ -1271,21 +1271,119 @@
             // Default Data
             const DEFAULT_CATEGORIES = [
                 {
-                    id: "cat-databanks",
-                    name: "DATABANKS",
+                    id: "cat-root-startrek",
+                    name: "STAR TREK",
                     color: "#ff9900",
                     createdAt: "2025352.1200",
-                    children: [],
+                    children: [
+                        {
+                            id: "cat-tng",
+                            name: "The Next Generation",
+                            color: "#ffcc00",
+                            createdAt: "2025352.1201",
+                            children: [
+                                {
+                                    id: "cat-tng-s1",
+                                    name: "Season 1",
+                                    color: "#ffcc99",
+                                    createdAt: "2025352.1202",
+                                    children: [],
+                                },
+                                {
+                                    id: "cat-tng-s2",
+                                    name: "Season 2",
+                                    color: "#cc99cc",
+                                    createdAt: "2025352.1203",
+                                    children: [],
+                                },
+                            ],
+                        },
+                        {
+                            id: "cat-ds9",
+                            name: "Deep Space Nine",
+                            color: "#cc9966",
+                            createdAt: "2025352.1204",
+                            children: [
+                                {
+                                    id: "cat-ds9-s1",
+                                    name: "Season 1",
+                                    color: "#9999cc",
+                                    createdAt: "2025352.1205",
+                                    children: [],
+                                },
+                                {
+                                    id: "cat-ds9-s2",
+                                    name: "Season 2",
+                                    color: "#99ccff",
+                                    createdAt: "2025352.1206",
+                                    children: [],
+                                },
+                            ],
+                        },
+                    ],
                 },
             ];
 
             const DEFAULT_BOOKMARKS = [
+                // TNG Season 1
                 {
-                    id: "bm-lcars",
-                    title: "LCARS INTERFACE",
-                    url: "https://www.thelcars.com",
-                    categoryId: "cat-databanks",
-                    createdAt: "2025352.1200",
+                    id: "bm-tng-s1-captain",
+                    title: "TNG S1 – Captain Picard",
+                    url: "https://memory-alpha.fandom.com/wiki/Jean-Luc_Picard",
+                    categoryId: "cat-tng-s1",
+                    createdAt: "2025352.1300",
+                },
+                {
+                    id: "bm-tng-s1-ship",
+                    title: "TNG S1 – USS Enterprise-D",
+                    url: "https://memory-alpha.fandom.com/wiki/USS_Enterprise_(NCC-1701-D)",
+                    categoryId: "cat-tng-s1",
+                    createdAt: "2025352.1301",
+                },
+                // TNG Season 2
+                {
+                    id: "bm-tng-s2-captain",
+                    title: "TNG S2 – Captain Picard",
+                    url: "https://example.com/tng/season2/captain",
+                    categoryId: "cat-tng-s2",
+                    createdAt: "2025352.1302",
+                },
+                {
+                    id: "bm-tng-s2-ship",
+                    title: "TNG S2 – USS Enterprise-D",
+                    url: "https://example.com/tng/season2/ship",
+                    categoryId: "cat-tng-s2",
+                    createdAt: "2025352.1303",
+                },
+                // DS9 Season 1
+                {
+                    id: "bm-ds9-s1-captain",
+                    title: "DS9 S1 – Commander Sisko",
+                    url: "https://memory-alpha.fandom.com/wiki/Benjamin_Sisko",
+                    categoryId: "cat-ds9-s1",
+                    createdAt: "2025352.1304",
+                },
+                {
+                    id: "bm-ds9-s1-ship",
+                    title: "DS9 S1 – Deep Space 9",
+                    url: "https://memory-alpha.fandom.com/wiki/Deep_Space_9",
+                    categoryId: "cat-ds9-s1",
+                    createdAt: "2025352.1305",
+                },
+                // DS9 Season 2
+                {
+                    id: "bm-ds9-s2-captain",
+                    title: "DS9 S2 – Commander Sisko",
+                    url: "https://example.com/ds9/season2/captain",
+                    categoryId: "cat-ds9-s2",
+                    createdAt: "2025352.1306",
+                },
+                {
+                    id: "bm-ds9-s2-ship",
+                    title: "DS9 S2 – USS Defiant",
+                    url: "https://example.com/ds9/season2/ship",
+                    categoryId: "cat-ds9-s2",
+                    createdAt: "2025352.1307",
                 },
             ];
             const LCARS_PALETTE = [
@@ -1314,7 +1412,7 @@
             let state = {
                 bookmarks: JSON.parse(JSON.stringify(DEFAULT_BOOKMARKS)),
                 categories: JSON.parse(JSON.stringify(DEFAULT_CATEGORIES)),
-                currentCategory: "cat-databanks",
+                currentCategory: "cat-root-startrek",
             };
 
             // Theme state is intentionally separate from bookmark/category state
