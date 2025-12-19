@@ -260,6 +260,39 @@
                 gap: 20px;
             }
 
+            /* Main view containers */
+            .main-view {
+                display: none;
+            }
+
+            .main-view.active {
+                display: block;
+            }
+
+            .about-panel {
+                color: var(--lcars-orange);
+                max-width: 800px;
+                margin: 0 auto;
+                text-align: left;
+            }
+
+            .about-panel h1 {
+                font-size: 2rem;
+                margin-bottom: 10px;
+                letter-spacing: 2px;
+            }
+
+            .about-panel p {
+                line-height: 1.5;
+                margin: 5px 0;
+            }
+
+            .about-meta {
+                font-size: 0.9rem;
+                opacity: 0.8;
+                margin-top: 20px;
+            }
+
             .bookmark-tile {
                 position: relative;
                 background-color: var(--cat-color, var(--lcars-orange));
@@ -590,15 +623,34 @@
             </aside>
 
             <main class="main-content">
-                <div id="bookmarkGrid" class="bookmark-grid">
-                    <!-- Bookmarks injected here -->
+                <div id="bookmarksView" class="main-view active">
+                    <div id="bookmarkGrid" class="bookmark-grid">
+                        <!-- Bookmarks injected here -->
+                    </div>
+                    <div
+                        id="emptyState"
+                        class="empty-state"
+                        style="display: none; text-align: center; padding: 50px"
+                    >
+                        NO ENTRIES FOUND
+                    </div>
                 </div>
-                <div
-                    id="emptyState"
-                    class="empty-state"
-                    style="display: none; text-align: center; padding: 50px"
-                >
-                    NO ENTRIES FOUND
+                <div id="aboutView" class="main-view" style="padding: 20px">
+                    <div class="about-panel">
+                        <h1>ABOUT ZANDER</h1>
+                        <p>
+                            <strong>ZANDER BOOKMARK TECHNOLOGIES</strong><br />
+                            UNITED FEDERATION OF PLANETS<br />
+                            <span id="aboutStardate"
+                                >STARDATE 0000000.0000</span
+                            >
+                        </p>
+                        <p>A SINGLE-FILE, OFFLINE-CAPABLE PERSONAL ARCHIVE.</p>
+                        <p class="about-meta">
+                            DATA PERSISTENCE: LOCAL STORAGE<br />
+                            NETWORK STATUS: OFFLINE MODE AVAILABLE
+                        </p>
+                    </div>
                 </div>
             </main>
 
@@ -782,30 +834,6 @@
             </div>
         </dialog>
 
-        <dialog id="aboutDialog">
-            <h2>ABOUT ZANDER</h2>
-            <div style="line-height: 1.5; margin-bottom: 20px">
-                <p>
-                    <strong>ZANDER BOOKMARK TECHNOLOGIES</strong><br />
-                    UNITED FEDERATION OF PLANETS<br />
-                    STARDATE 2025352.1342
-                </p>
-                <p>A SINGLE-FILE, OFFLINE-CAPABLE PERSONAL ARCHIVE.</p>
-                <p style="font-size: 0.9rem; opacity: 0.8">
-                    DATA PERSISTENCE: LOCAL STORAGE<br />
-                    NETWORK STATUS: OFFLINE MODE AVAILABLE
-                </p>
-            </div>
-            <div class="dialog-actions">
-                <button
-                    class="btn-primary"
-                    onclick="document.getElementById('aboutDialog').close()"
-                >
-                    ACKNOWLEDGE
-                </button>
-            </div>
-        </dialog>
-
         <script>
             const STORAGE_KEY = "zander-lcars:v1";
 
@@ -851,6 +879,9 @@
             const grid = document.getElementById("bookmarkGrid");
             const emptyState = document.getElementById("emptyState");
             const sidebar = document.getElementById("categorySidebar");
+            const bookmarksView = document.getElementById("bookmarksView");
+            const aboutView = document.getElementById("aboutView");
+            const aboutStardateEl = document.getElementById("aboutStardate");
             const categoryInput = document.getElementById("categoryInput");
             const bookmarkDialog = document.getElementById("bookmarkDialog");
             const bookmarkForm = document.getElementById("bookmarkForm");
@@ -921,6 +952,7 @@
                 renderCategories();
                 renderGrid();
                 setupEventListeners();
+                updateAboutStardate();
             }
 
             function loadData() {
@@ -986,6 +1018,9 @@
                     btn.style.setProperty("--cat-color", cat.color);
 
                     btn.onclick = (e) => {
+                        // Ensure main view is bookmarks when switching category
+                        bookmarksView.classList.add("active");
+                        aboutView.classList.remove("active");
                         e.stopPropagation();
                         state.currentCategory = cat.id;
                         renderCategories();
@@ -1102,6 +1137,16 @@
                     });
                 }
                 updateSystemStatus();
+            }
+
+            function updateAboutStardate() {
+                if (!aboutStardateEl) return;
+                const sd = calculateStardate();
+                aboutStardateEl.textContent = `STARDATE ${sd}`;
+                const date = parseStardate(sd);
+                if (date) {
+                    aboutStardateEl.title = date.toLocaleString();
+                }
             }
 
             function updateSystemStatus() {
@@ -1637,13 +1682,20 @@
                     });
                 document
                     .getElementById("addBtn")
-                    .addEventListener("click", openAddDialog);
+                    .addEventListener("click", () => {
+                        // Ensure main view is bookmarks when adding an entry
+                        bookmarksView.classList.add("active");
+                        aboutView.classList.remove("active");
+                        openAddDialog();
+                    });
 
                 document
                     .getElementById("aboutBtn")
-                    .addEventListener("click", () =>
-                        document.getElementById("aboutDialog").showModal(),
-                    );
+                    .addEventListener("click", () => {
+                        bookmarksView.classList.remove("active");
+                        aboutView.classList.add("active");
+                        updateAboutStardate();
+                    });
 
                 document
                     .getElementById("addCategoryBtn")
@@ -1657,10 +1709,16 @@
                         switch (e.key.toLowerCase()) {
                             case "n":
                                 e.preventDefault();
+                                // Switch back to bookmarks view on New Entry
+                                bookmarksView.classList.add("active");
+                                aboutView.classList.remove("active");
                                 openAddDialog();
                                 break;
                             case "s":
                                 e.preventDefault();
+                                // Ensure main view is bookmarks when opening settings
+                                aboutView.classList.remove("active");
+                                bookmarksView.classList.add("active");
                                 document.getElementById(
                                     "settingsCategorySection",
                                 ).style.display = "block";
