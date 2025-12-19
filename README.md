@@ -48,7 +48,7 @@ The entire app runs in your browser as a single `index.html` file:
   - Human‑readable Earth date shown alongside the stardate in dialogs.
 
 - **Themes**
-  - Multiple LCARS themes (e.g. PICKARD, DATA, DOCTOR, SPOCK, SEVEN OF NINE).
+  - Multiple LCARS themes (e.g. LA'AN, DATA, THE DOCTOR, CHAPEL, SPOCK, M'BENGA, SEVEN OF NINE, SHRAN).
   - Theme choice affects colors and accents only; data and layout stay the same.
 
 - **Import/Export**

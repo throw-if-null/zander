@@ -36,7 +36,7 @@
                - --theme-secondary drives bookmark body accents
                - Background (black) and base text color remain fixed */
             body {
-                --theme-main: #830025; /* default: pickard */
+                --theme-main: #830025; /* default: La'An */
                 --shape-color: var(--theme-main);
                 /* Secondary color used for bookmark body & footer buttons */
                 --theme-secondary: color-mix(
@@ -47,7 +47,7 @@
             }
 
             /* Theme variants applied on the <body> element via data-theme */
-            body[data-theme="pickard"] {
+            body[data-theme="laan"] {
                 --theme-main: #830025;
                 --shape-color: var(--theme-main);
                 --theme-secondary: color-mix(
@@ -77,6 +77,12 @@
                 );
             }
 
+            body[data-theme="chapel"] {
+                --theme-main: #ffffff;
+                --shape-color: var(--theme-main);
+                --theme-secondary: #999999;
+            }
+
             body[data-theme="spock"] {
                 --theme-main: #003366;
                 --shape-color: var(--theme-main);
@@ -93,6 +99,18 @@
                 --shape-color: var(--theme-main);
                 /* Borg green secondary accent computed to match footer/buttons */
                 --theme-secondary: #7fff00;
+            }
+
+            body[data-theme="mbenga"] {
+                --theme-main: #92b7dd;
+                --shape-color: var(--theme-main);
+                --theme-secondary: #ffffff;
+            }
+
+            body[data-theme="shran"] {
+                --theme-main: #282b29;
+                --shape-color: var(--theme-main);
+                --theme-secondary: #78bff5;
             }
 
             * {
@@ -411,7 +429,7 @@
             .settings-section {
                 margin-top: 20px;
                 padding-top: 10px;
-                border-top: 2px solid var(--lcars-blue);
+                border-top: 2px solid var(--theme-main);
             }
 
             /* Layout for settings content: top section grows, bottom sticks near bottom */
@@ -540,12 +558,12 @@
             #themeControlsContainer .btn-secondary {
                 min-width: 140px;
                 justify-content: center;
-                background-color: var(--lcars-blue);
+                background-color: var(--theme-secondary);
                 color: #000;
             }
 
             #themeControlsContainer .btn-secondary.theme-active {
-                background-color: var(--theme-secondary, var(--lcars-beige));
+                background-color: var(--theme-main, var(--lcars-beige));
                 color: #000;
                 box-shadow: 0 0 0 2px #fff;
             }
@@ -825,9 +843,10 @@
                 width: 100%;
                 padding: 10px;
                 background-color: #222;
-                border: 1px solid var(--lcars-blue);
+                border: 1px solid var(--theme-main);
                 color: var(--lcars-beige);
                 border-radius: 5px;
+                border-width: 3px;
                 font-family: var(--lcars-font);
             }
 
@@ -1058,7 +1077,7 @@
                                             letter-spacing: 1px;
                                         "
                                     >
-                                        ACTIVE THEME: PICKARD
+                                        ACTIVE THEME: LA'AN
                                     </div>
                                 </div>
                             </section>
@@ -1269,11 +1288,14 @@
             const THEME_STORAGE_KEY = "zander-lcars-theme:v1";
 
             const THEMES = [
-                { id: "pickard", label: "PICKARD" },
+                { id: "laan", label: "LA'AN" },
                 { id: "data", label: "DATA" },
-                { id: "doctor", label: "DOCTOR" },
+                { id: "doctor", label: "THE DOCTOR" },
+                { id: "chapel", label: "CHAPEL" },
                 { id: "spock", label: "SPOCK" },
+                { id: "mbenga", label: "M'BENGA" },
                 { id: "seven", label: "SEVEN OF NINE" },
+                { id: "shran", label: "SHRAN" },
             ];
 
             // Default Data
@@ -1429,7 +1451,7 @@
 
             // Theme state is intentionally separate from bookmark/category state
             // so we don't disturb the existing import/export format.
-            let currentTheme = "pickard";
+            let currentTheme = "laan";
 
             const grid = document.getElementById("bookmarkGrid");
             const emptyState = document.getElementById("emptyState");
@@ -1621,7 +1643,7 @@
             function setTheme(themeId) {
                 const theme =
                     THEMES.find((t) => t.id === themeId) ||
-                    THEMES.find((t) => t.id === "pickard");
+                    THEMES.find((t) => t.id === "laan");
                 currentTheme = theme.id;
                 document.body.setAttribute("data-theme", currentTheme);
                 localStorage.setItem(THEME_STORAGE_KEY, currentTheme);
@@ -1633,7 +1655,7 @@
                 if (stored && THEMES.some((t) => t.id === stored)) {
                     setTheme(stored);
                 } else {
-                    setTheme("pickard");
+                    setTheme("laan");
                 }
             }
 

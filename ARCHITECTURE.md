@@ -236,11 +236,14 @@ The available themes are defined as a simple array of `{ id, label }` pairs:
 
 ```ts
 const THEMES = [
-  { id: "pickard", label: "PICKARD" },
+  { id: "laan", label: "LA'AN" },
   { id: "data", label: "DATA" },
-  { id: "doctor", label: "DOCTOR" },
+  { id: "doctor", label: "THE DOCTOR" },
+  { id: "chapel", label: "CHAPEL" },
   { id: "spock", label: "SPOCK" },
+  { id: "mbenga", label: "M'BENGA" },
   { id: "seven", label: "SEVEN OF NINE" },
+  { id: "shran", label: "SHRAN" },
 ];
 ```
 

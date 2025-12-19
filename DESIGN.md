@@ -172,30 +172,45 @@ The app supports multiple visual themes that all share the same layout, typograp
 
 Current themes:
 
-- **PICKARD** (`body[data-theme="pickard"]`)
+- **LA'AN** (`body[data-theme="laan"]`)
   - Default, balanced LCARS look.
-  - Warm oranges and beiges dominate the frame.
+  - Deep command red as the primary frame color.
   - Intended as the “baseline” LCARS console.
 
 - **DATA** (`body[data-theme="data"]`)
   - Cooler, more analytical palette.
-  - Increased use of neutral grays and blues.
+  - Amber/operations-inspired main tone with light secondary accents.
   - Evokes an android/operations console feel.
 
-- **DOCTOR** (`body[data-theme="doctor"]`)
-  - Slightly clinical tone with cleaner contrasts.
-  - Uses cooler highlights against neutral frames.
+- **THE DOCTOR** (`body[data-theme="doctor"]`)
+  - Clinical, teal-forward palette.
+  - LCARS-style teal main color with a lighter secondary accent.
   - Inspired by medical/EMH-style LCARS stations.
+
+- **CHAPEL** (`body[data-theme="chapel"]`)
+  - High-contrast medical/diagnostic feel.
+  - Main color: white; secondary color: neutral gray.
+  - Emphasizes clarity, readability, and clean panels.
 
 - **SPOCK** (`body[data-theme="spock"]`)
   - Cooler, more logical color balance.
-  - Emphasizes blues and purples with restrained warms.
+  - Deep science blue main color with a lighter secondary tone.
   - Aims for a calm, high-contrast science console.
+
+- **M'BENGA** (`body[data-theme="mbenga"]`)
+  - Soft medical/science blend.
+  - Main color: `#92b7dd` (muted blue); secondary color: white.
+  - Feels like a calm, modern sickbay console.
 
 - **SEVEN OF NINE** (`body[data-theme="seven"]`)
   - High-contrast, almost Borg-adjacent variation.
-  - Strong highlights and accent overrides (for example, footer and other action buttons using a Borg-green secondary color).
+  - Darker silver main tone with a vivid **Borg green** secondary accent used for footer/buttons.
   - Feels sharper and more “augmented” than the baseline theme.
+
+- **SHRAN** (`body[data-theme="shran"]`)
+  - Cooler Andorian-inspired palette.
+  - Main color: `#282b29` (dark, almost-black green-gray); secondary color: `#78bff5` (icy blue).
+  - Designed to evoke a tactical/bridge console.
 
 Implementation notes:
 
