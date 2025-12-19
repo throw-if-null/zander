@@ -2144,15 +2144,48 @@
                 });
             }
 
+            function getDataBundle() {
+                return {
+                    bookmarks: state.bookmarks,
+                    categories: state.categories,
+                };
+            }
+
+            function applyDataBundle(bundle) {
+                state.bookmarks = Array.isArray(bundle.bookmarks)
+                    ? bundle.bookmarks
+                    : [];
+                state.categories = Array.isArray(bundle.categories)
+                    ? bundle.categories
+                    : [];
+
+                // Backfill createdAt on bookmarks if missing
+                state.bookmarks.forEach((b) => {
+                    if (!b.createdAt) {
+                        b.createdAt = calculateStardate();
+                    }
+                });
+
+                // Backfill createdAt on categories if missing
+                function backfillCategoryCreatedAt(cats) {
+                    cats.forEach((c) => {
+                        if (!c.createdAt) {
+                            c.createdAt = calculateStardate();
+                        }
+                        if (Array.isArray(c.children) && c.children.length > 0) {
+                            backfillCategoryCreatedAt(c.children);
+                        }
+                    });
+                }
+                backfillCategoryCreatedAt(state.categories);
+
+                saveData();
+                renderCategories();
+                renderGrid();
+            }
+
             function exportData() {
-                const dataStr = JSON.stringify(
-                    {
-                        bookmarks: state.bookmarks,
-                        categories: state.categories,
-                    },
-                    null,
-                    2,
-                );
+                const dataStr = JSON.stringify(getDataBundle(), null, 2);
                 const blob = new Blob([dataStr], { type: "application/json" });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement("a");
@@ -2181,28 +2214,15 @@
                             "IMPORT DATA",
                             `IMPORT ${data.bookmarks?.length || 0} ENTRIES? THIS WILL OVERWRITE CURRENT DATA.`,
                             () => {
-                                if (Array.isArray(data.bookmarks)) {
-                                    state.bookmarks = data.bookmarks;
-                                    // Backfill createdAt
-                                    state.bookmarks.forEach((b) => {
-                                        if (!b.createdAt)
-                                            b.createdAt = calculateStardate();
-                                    });
-                                }
-                                if (
-                                    Array.isArray(data.categories) &&
-                                    data.categories.length > 0
-                                ) {
-                                    state.categories = data.categories;
-                                    // Backfill createdAt
-                                    state.categories.forEach((c) => {
-                                        if (!c.createdAt)
-                                            c.createdAt = calculateStardate();
-                                    });
-                                }
-                                saveData();
-                                renderCategories();
-                                renderGrid();
+                                const bundle = {
+                                    bookmarks: Array.isArray(data.bookmarks)
+                                        ? data.bookmarks
+                                        : [],
+                                    categories: Array.isArray(data.categories)
+                                        ? data.categories
+                                        : [],
+                                };
+                                applyDataBundle(bundle);
                             },
                         );
                     } catch (err) {
@@ -2219,15 +2239,15 @@
                     "WARNING: SYSTEM RESET WILL ERASE ALL DATA. PROCEED?",
                     () => {
                         localStorage.removeItem(STORAGE_KEY);
-                        state.bookmarks = JSON.parse(
-                            JSON.stringify(DEFAULT_BOOKMARKS),
-                        );
-                        state.categories = JSON.parse(
-                            JSON.stringify(DEFAULT_CATEGORIES),
-                        );
-                        saveData();
-                        renderCategories();
-                        renderGrid();
+                        const bundle = {
+                            bookmarks: JSON.parse(
+                                JSON.stringify(DEFAULT_BOOKMARKS),
+                            ),
+                            categories: JSON.parse(
+                                JSON.stringify(DEFAULT_CATEGORIES),
+                            ),
+                        };
+                        applyDataBundle(bundle);
                         // Do not reset theme on system reset; theme is a UI preference.
                     },
                 );
