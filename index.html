@@ -556,8 +556,8 @@
                 color: var(--lcars-orange);
                 border: 2px solid var(--lcars-orange);
                 border-radius: 20px;
-                padding: 20px;
-                max-width: 500px;
+                padding: 0;
+                max-width: 540px;
                 width: 90%;
             }
 
@@ -565,13 +565,45 @@
                 background-color: rgba(0, 0, 0, 0.8);
             }
 
-            dialog h2 {
-                margin-top: 0;
-                border-bottom: 2px solid var(--lcars-orange);
-                padding-bottom: 10px;
+            .lcars-dialog {
+                display: flex;
+                flex-direction: column;
+                border-radius: 20px;
+                overflow: hidden;
+            }
+
+            .lcars-dialog-header {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
+                background-color: var(--lcars-orange);
+                color: #000;
+                padding: 10px 16px;
+            }
+
+            .lcars-dialog-title {
+                font-size: 1.2rem;
+                font-weight: bold;
+                letter-spacing: 1px;
+            }
+
+            .lcars-dialog-meta {
+                font-size: 0.75rem;
+                opacity: 0.8;
+                cursor: help;
+            }
+
+            .lcars-dialog-body {
+                padding: 16px 16px 8px 16px;
+                background-color: #000;
+            }
+
+            .lcars-dialog-footer {
+                display: flex;
+                justify-content: flex-end;
+                gap: 10px;
+                padding: 8px 16px 16px 16px;
+                background-color: #000;
             }
 
             .form-group {
@@ -589,8 +621,8 @@
                 width: 100%;
                 padding: 10px;
                 background-color: #222;
-                border: 1px solid var(--lcars-orange);
-                color: #fff;
+                border: 1px solid var(--lcars-blue);
+                color: var(--lcars-beige);
                 border-radius: 5px;
                 font-family: var(--lcars-font);
             }
@@ -602,24 +634,54 @@
                 margin-top: 20px;
             }
 
-            .btn-primary {
-                background-color: var(--lcars-orange);
+            /* Bookmark dialog buttons use LCARS control-tab style */
+            #bookmarkDialog .btn-primary,
+            #bookmarkDialog .btn-secondary {
+                background-color: var(--lcars-beige);
                 color: #000;
                 border: none;
-                padding: 10px 20px;
-                border-radius: 20px;
+                padding: 0 15px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+                font-family: var(--lcars-font);
+                font-size: 1.1rem;
                 font-weight: bold;
+                text-transform: uppercase;
+                border-radius: 20px;
                 cursor: pointer;
+                position: relative;
             }
 
-            .btn-secondary {
+            #bookmarkDialog .btn-primary {
+                background-color: var(--lcars-orange);
+            }
+
+            #bookmarkDialog .btn-secondary {
                 background-color: #444;
-                color: #fff;
-                border: none;
-                padding: 10px 20px;
-                border-radius: 20px;
-                font-weight: bold;
-                cursor: pointer;
+                color: var(--lcars-beige);
+            }
+
+            #bookmarkDialog .btn-primary:hover,
+            #bookmarkDialog .btn-secondary:hover {
+                filter: brightness(1.1);
+            }
+
+            #bookmarkDialog .btn-primary:focus-visible,
+            #bookmarkDialog .btn-secondary:focus-visible {
+                outline: none;
+            }
+
+            #bookmarkDialog .btn-primary:focus-visible::after,
+            #bookmarkDialog .btn-secondary:focus-visible::after {
+                content: "";
+                position: absolute;
+                top: -9px;
+                left: 0;
+                right: 0;
+                height: 4px;
+                background-color: #ffffff;
             }
 
             .category-config-list {
@@ -875,67 +937,71 @@
 
         <!-- Bookmark Dialog -->
         <dialog id="bookmarkDialog">
-            <h2>
-                <span id="dialogTitle">NEW ENTRY</span>
-                <span
-                    id="bookmarkStardate"
-                    style="
-                        font-size: 0.7em;
-                        color: #000;
-                        opacity: 0.7;
-                        cursor: help;
-                    "
-                ></span>
-            </h2>
-            <form id="bookmarkForm" method="dialog">
-                <input type="hidden" id="bookmarkId" />
-                <div class="form-group">
-                    <label for="titleInput">TITLE</label>
-                    <input type="text" id="titleInput" required />
+            <div class="lcars-dialog">
+                <div class="lcars-dialog-header">
+                    <span class="lcars-dialog-title" id="dialogTitle">
+                        NEW ENTRY
+                    </span>
+                    <span class="lcars-dialog-meta" id="bookmarkStardate">
+                        STARDATE 0000000.0000
+                    </span>
                 </div>
-                <div class="form-group">
-                    <label for="urlInput">URL</label>
-                    <div style="display: flex; gap: 10px">
-                        <select id="urlProtocol" style="width: 120px">
-                            <option value="https://">HTTPS://</option>
-                            <option value="http://">HTTP://</option>
-                        </select>
-                        <input
-                            type="text"
-                            id="urlInput"
-                            required
-                            placeholder="example.com"
-                            style="flex: 1"
-                        />
+                <form id="bookmarkForm" method="dialog">
+                    <div class="lcars-dialog-body">
+                        <input type="hidden" id="bookmarkId" />
+                        <div class="form-group">
+                            <label for="titleInput">TITLE</label>
+                            <input type="text" id="titleInput" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="urlInput">URL</label>
+                            <div style="display: flex; gap: 10px">
+                                <select id="urlProtocol" style="width: 120px">
+                                    <option value="https://">HTTPS://</option>
+                                    <option value="http://">HTTP://</option>
+                                </select>
+                                <input
+                                    type="text"
+                                    id="urlInput"
+                                    required
+                                    placeholder="example.com"
+                                    style="flex: 1"
+                                />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="categoryInput">CATEGORY</label>
+                            <select id="categoryInput">
+                                <!-- Options injected -->
+                            </select>
+                        </div>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label for="categoryInput">CATEGORY</label>
-                    <select id="categoryInput">
-                        <!-- Options injected -->
-                    </select>
-                </div>
-                <div class="dialog-actions">
-                    <button
-                        type="button"
-                        class="btn-secondary"
-                        id="deleteBtn"
-                        style="display: none"
-                    >
-                        DELETE
-                    </button>
-                    <button
-                        type="button"
-                        class="btn-secondary"
-                        onclick="
-                            document.getElementById('bookmarkDialog').close()
-                        "
-                    >
-                        CANCEL
-                    </button>
-                    <button type="submit" class="btn-primary">ENGAGE</button>
-                </div>
-            </form>
+                    <div class="lcars-dialog-footer">
+                        <button
+                            type="button"
+                            class="btn-secondary"
+                            id="deleteBtn"
+                            style="display: none"
+                        >
+                            DELETE
+                        </button>
+                        <button
+                            type="button"
+                            class="btn-secondary"
+                            onclick="
+                                document
+                                    .getElementById('bookmarkDialog')
+                                    .close()
+                            "
+                        >
+                            CANCEL
+                        </button>
+                        <button type="submit" class="btn-primary">
+                            ENGAGE
+                        </button>
+                    </div>
+                </form>
+            </div>
         </dialog>
 
         <!-- Settings Dialog (no longer used for full settings UI, kept for potential small overlays if needed) -->
