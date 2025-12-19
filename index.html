@@ -2272,36 +2272,45 @@
                 updateThemeStatus();
             }
 
+            function onClick(id, handler) {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener("click", handler);
+                }
+            }
+
+            function onChange(id, handler) {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener("change", handler);
+                }
+            }
+
             // --- Event Listeners ---
             function setupEventListeners() {
-                document
-                    .getElementById("settingsBtn")
-                    .addEventListener("click", () => {
-                        // Switch to settings main view
-                        bookmarksView.classList.remove("active");
-                        aboutView.classList.remove("active");
-                        settingsView.classList.add("active");
-                        renderCategoryConfig();
-                        updateSettingsStardate();
-                    });
-                document
-                    .getElementById("addBtn")
-                    .addEventListener("click", () => {
-                        // Ensure main view is bookmarks when adding an entry
-                        bookmarksView.classList.add("active");
-                        settingsView.classList.remove("active");
-                        aboutView.classList.remove("active");
-                        openAddDialog();
-                    });
+                onClick("settingsBtn", () => {
+                    // Switch to settings main view
+                    bookmarksView.classList.remove("active");
+                    aboutView.classList.remove("active");
+                    settingsView.classList.add("active");
+                    renderCategoryConfig();
+                    updateSettingsStardate();
+                });
 
-                document
-                    .getElementById("aboutBtn")
-                    .addEventListener("click", () => {
-                        bookmarksView.classList.remove("active");
-                        settingsView.classList.remove("active");
-                        aboutView.classList.add("active");
-                        updateAboutStardate();
-                    });
+                onClick("addBtn", () => {
+                    // Ensure main view is bookmarks when adding an entry
+                    bookmarksView.classList.add("active");
+                    settingsView.classList.remove("active");
+                    aboutView.classList.remove("active");
+                    openAddDialog();
+                });
+
+                onClick("aboutBtn", () => {
+                    bookmarksView.classList.remove("active");
+                    settingsView.classList.remove("active");
+                    aboutView.classList.add("active");
+                    updateAboutStardate();
+                });
 
                 bookmarkForm.addEventListener("submit", saveBookmark);
 
@@ -2328,34 +2337,34 @@
                                 break;
                             case "c":
                                 e.preventDefault();
-                                // Quick-add category while in settings mode
-                                settingsView.classList.add("active");
-                                bookmarksView.classList.remove("active");
-                                aboutView.classList.remove("active");
-                                addCategory();
-                                renderCategoryConfig();
-                                updateSettingsStardate();
+                                // Alt+C: new category while in settings
+                                if (settingsView.classList.contains("active")) {
+                                    addCategory(null);
+                                    renderCategoryConfig();
+                                }
                                 break;
                         }
                     }
                 });
 
-                document
-                    .getElementById("exportBtnMain")
-                    .addEventListener("click", exportData);
-                document
-                    .getElementById("importBtnMain")
-                    .addEventListener("click", triggerImport);
-                importInput.addEventListener("change", handleImport);
-                document
-                    .getElementById("resetBtnMain")
-                    .addEventListener("click", resetSystem);
-                document
-                    .getElementById("addCategoryBtnMain")
-                    .addEventListener("click", () => {
-                        addCategory();
-                        renderCategoryConfig();
-                    });
+                // Settings data actions
+                onClick("exportBtnMain", exportData);
+                onClick("importBtnMain", triggerImport);
+                onClick("resetBtnMain", resetSystem);
+                onClick("addCategoryBtnMain", () => {
+                    addCategory(null);
+                    renderCategoryConfig();
+                });
+                onChange("importInput", handleImport);
+
+                // Theme controls
+                renderThemeControls();
+
+                // Dialog close on ESC
+                bookmarkDialog.addEventListener("cancel", (e) => {
+                    e.preventDefault();
+                    bookmarkDialog.close();
+                });
             }
 
             // Start
