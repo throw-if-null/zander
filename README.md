@@ -14,9 +14,10 @@ The entire app runs in your browser as a single `index.html` file:
 ## Features
 
 - **Authentic LCARS UI**
-  - Continuous LCARS “elbow” frame wrapping header, sidebar, and footer.
+  - Continuous LCARS "elbow" frame wrapping header, sidebar, and footer.
   - Pill buttons, elbow connectors, and a neon‑style focus glow.
   - System status readout, stardates, and console‑like labels.
+  - Built for accessibility (WCAG 2.1 Level AA).
 
 - **Single‑File App**
   - One `index.html` file containing HTML, CSS, and JavaScript.
@@ -56,6 +57,13 @@ The entire app runs in your browser as a single `index.html` file:
 
 - **Keyboard Shortcuts**
   - Power-user hotkeys for common actions (see below), including a dedicated **Home** shortcut (`Alt + H`) that jumps back to the main Bookmarks view.
+  - Full keyboard navigation: Tab through elements, Enter/Space to activate, Escape to close dialogs.
+
+- **Accessibility**
+  - Full keyboard navigation (no mouse required).
+  - High-contrast LCARS palette with neon focus indicators.
+  - Semantic HTML and screen-reader support.
+  - See `ACCESSIBILITY.md` for full details and testing guidelines.
 
 - **Responsive within LCARS Constraints**
   - Layout adapts to various viewport sizes while preserving the LCARS frame and proportions as much as possible.
@@ -398,9 +406,8 @@ You’re expected to customize or delete these entries as you go.
 
 ## Credits
 
-
 Zander is a fan‑made tribute to the LCARS interface from *Star Trek: The Next Generation*.
 
-All trademarks are property of their respective owners. This project is purely for personal and educational use.
+This is a personal project for educational and fan purposes. Star Trek and LCARS are properties of Paramount/CBS.
 
 For definitions of terms used in this README (e.g., “bookmark”, “category”, “LCARS frame”, “view”), see `GLOSSARY.md`. It describes the shared vocabulary used across the app, docs, and code.

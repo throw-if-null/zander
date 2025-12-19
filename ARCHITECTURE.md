@@ -4,6 +4,8 @@ This document describes the high-level architecture, data model, and system beha
 
 For definitions of domain and UI terms used throughout this document, see the shared terminology in `GLOSSARY.md`.
 
+For accessibility standards, implementation requirements, and testing guidelines, see `ACCESSIBILITY.md`. The app targets **WCAG 2.1 Level AA** compliance.
+
 ---
 
 ## 1. High-Level Overview

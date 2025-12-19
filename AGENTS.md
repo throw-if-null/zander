@@ -18,6 +18,7 @@ These documents are the technical and visual source of truth:
 
 - `ARCHITECTURE.md` – System design, data model, storage, import/export behavior, and JS responsibilities.
 - `DESIGN.md` – LCARS UI layout, component appearance, and visual interaction patterns.
+- `ACCESSIBILITY.md` – WCAG 2.1 Level AA standards, a11y requirements, and Frontend Agent testing checklist.
 - `README.md` – How to open and use the app.
 - `GLOSSARY.md` – Ubiquitous language and canonical term definitions.
 
@@ -236,6 +237,7 @@ Agents should defer to these documents for implementation details. If there is a
 - `AGENTS.md` — Roles and responsibilities of the agents.
 - `ARCHITECTURE.md` — System design, data model, storage, import/export behavior.
 - `DESIGN.md` — UI/UX guidelines and LCARS visual rules.
+- `ACCESSIBILITY.md` — A11y standards, requirements, and testing guidelines.
 - `README.md` — User manual and quickstart guide.
 
 Inside `index.html`:

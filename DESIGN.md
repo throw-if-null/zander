@@ -598,6 +598,8 @@ In the bookmark view, `.status-display` presents a more prominent LCARS readout:
 
 ## 9. Accessibility & Interaction
 
+This section covers visual and interaction accessibility. For comprehensive a11y standards, requirements, testing procedures, and screen reader support, see `ACCESSIBILITY.md`.
+
 ### 9.1 Focus States
 
 All interactive elements (links, buttons, tiles, inputs) use a consistent **neon glow** focus style:
@@ -607,7 +609,7 @@ All interactive elements (links, buttons, tiles, inputs) use a consistent **neon
 
 Additional notes:
 
-- Focus styles use `:focus-visible` so pointer users don’t see outlines on click.
+- Focus styles use `:focus-visible` so pointer users don't see outlines on click.
 - This applies to:
   - `.cat-btn`
   - `.bookmark-tile`
