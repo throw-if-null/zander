@@ -1435,23 +1435,16 @@
                         const data = JSON.parse(raw);
                         if (Array.isArray(data.bookmarks)) {
                             state.bookmarks = data.bookmarks;
-                            // Backfill createdAt
-                            state.bookmarks.forEach((b) => {
-                                if (!b.createdAt)
-                                    b.createdAt = calculateStardate();
-                            });
                         }
                         if (
                             Array.isArray(data.categories) &&
                             data.categories.length > 0
                         ) {
                             state.categories = data.categories;
-                            // Backfill createdAt
-                            state.categories.forEach((c) => {
-                                if (!c.createdAt)
-                                    c.createdAt = calculateStardate();
-                            });
                         }
+
+                        backfillBookmarkCreatedAt(state.bookmarks);
+                        backfillCategoryCreatedAt(state.categories);
                     } catch (e) {
                         console.error("Data corruption detected", e);
                     }
@@ -1476,6 +1469,25 @@
                         categories: state.categories,
                     }),
                 );
+            }
+
+            function backfillBookmarkCreatedAt(bookmarks) {
+                bookmarks.forEach((b) => {
+                    if (!b.createdAt) {
+                        b.createdAt = calculateStardate();
+                    }
+                });
+            }
+
+            function backfillCategoryCreatedAt(categories) {
+                categories.forEach((c) => {
+                    if (!c.createdAt) {
+                        c.createdAt = calculateStardate();
+                    }
+                    if (Array.isArray(c.children) && c.children.length > 0) {
+                        backfillCategoryCreatedAt(c.children);
+                    }
+                });
             }
 
             function setTheme(themeId) {
@@ -2182,24 +2194,8 @@
                     ? bundle.categories
                     : [];
 
-                // Backfill createdAt on bookmarks if missing
-                state.bookmarks.forEach((b) => {
-                    if (!b.createdAt) {
-                        b.createdAt = calculateStardate();
-                    }
-                });
-
-                // Backfill createdAt on categories if missing
-                function backfillCategoryCreatedAt(cats) {
-                    cats.forEach((c) => {
-                        if (!c.createdAt) {
-                            c.createdAt = calculateStardate();
-                        }
-                        if (Array.isArray(c.children) && c.children.length > 0) {
-                            backfillCategoryCreatedAt(c.children);
-                        }
-                    });
-                }
+                // Backfill createdAt fields on imported data
+                backfillBookmarkCreatedAt(state.bookmarks);
                 backfillCategoryCreatedAt(state.categories);
 
                 saveData();
