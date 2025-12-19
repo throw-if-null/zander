@@ -209,7 +209,7 @@ const DEFAULT_BOOKMARKS: Bookmark[] = [
 
 ## 4. Storage & Persistence
 
-### 4.1 LocalStorage Keys
+### 4.1 LocalStorage Keys and Themes
 
 All bookmark and category data is persisted under a single `localStorage` key, and theme selection is persisted under a separate key:
 
@@ -219,6 +219,24 @@ THEME_STORAGE_KEY  = "zander-lcars-theme:v1"
 ```
 
 Theme state is intentionally kept separate so that the JSON structure used for import/export remains `{ bookmarks, categories }` and does not need to change when theme support is added.
+
+The available themes are defined as a simple array of `{ id, label }` pairs:
+
+```ts
+const THEMES = [
+  { id: "pickard", label: "PICKARD" },
+  { id: "data", label: "DATA" },
+  { id: "doctor", label: "DOCTOR" },
+  { id: "spock", label: "SPOCK" },
+  { id: "seven", label: "SEVEN OF NINE" },
+];
+```
+
+Rules:
+
+- `id` is the stable key stored under `THEME_STORAGE_KEY`.
+- `label` is the user-facing label shown in theme controls and status readouts.
+- The theme system is intentionally light-weight: themes swap LCARS color variables and minor styling details, but do not alter the data model or import/export format.
 
 ### 4.2 Load Behavior
 

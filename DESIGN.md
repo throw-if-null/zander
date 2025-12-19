@@ -163,6 +163,40 @@ Usage guidelines:
   - Category buttons and footer controls are typically right-aligned to evoke LCARS tabs.
   - Status labels use tight, high-contrast, monospace-like metrics (achieved with letter-spacing).
 
+### 2.3 Themes
+
+The app supports multiple visual themes that all share the same layout, typography, and LCARS structure but vary the palette and emphasis:
+
+- **PICKARD** (`body[data-theme="pickard"]`)
+  - Default, balanced LCARS look.
+  - Warm oranges and beiges dominate the frame.
+  - Intended as the “baseline” LCARS console.
+
+- **DATA** (`body[data-theme="data"]`)
+  - Cooler, more analytical palette.
+  - Increased use of neutral grays and blues.
+  - Evokes an android/operations console feel.
+
+- **DOCTOR** (`body[data-theme="doctor"]`)
+  - Slightly clinical tone with cleaner contrasts.
+  - Uses cooler highlights against neutral frames.
+  - Inspired by medical/EMH-style LCARS stations.
+
+- **SPOCK** (`body[data-theme="spock"]`)
+  - Cooler, more logical color balance.
+  - Emphasizes blues and purples with restrained warms.
+  - Aims for a calm, high-contrast science console.
+
+- **SEVEN OF NINE** (`body[data-theme="seven"]`)
+  - High-contrast, almost Borg-adjacent variation.
+  - Strong highlights and accent overrides (for example, footer action buttons).
+  - Feels sharper and more “augmented” than the baseline theme.
+
+Implementation notes:
+
+- Themes are applied via a `data-theme` attribute on `<body>` and theme-specific CSS variable overrides.
+- The theme system does **not** affect layout or data; it only swaps colors and minor stylistic details.
+
 ---
 
 ## 3. Sidebar & Category Strip
