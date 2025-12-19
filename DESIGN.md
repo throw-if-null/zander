@@ -27,9 +27,9 @@ At a high level, the shell consists of:
 
 ### 1.1 Structural DOM
 
-The outer structure is organized under `.lcars-app`:
+The outer structure is organized under `.lcars-app` and uses native view and dialog elements:
 
-```/dev/null/layout.html#L1-60
+```/dev/null/layout.html#L1-80
 <div class="lcars-app">
   <!-- Header band and title -->
   <div class="header-bar">
@@ -43,7 +43,7 @@ The outer structure is organized under `.lcars-app`:
   <!-- Sidebar + Frame -->
   <aside class="sidebar-container">
     <div class="sidebar-top-cap"></div>
-    <div class="sidebar-track">
+    <div class="sidebar-track" id="categorySidebar">
       <!-- Category buttons and filler -->
     </div>
     <div class="sidebar-bottom-cap"></div>
@@ -52,7 +52,7 @@ The outer structure is organized under `.lcars-app`:
   <!-- Main content (views and grid) -->
   <main class="main-content">
     <!-- Bookmark view -->
-    <section class="main-view main-view--bookmarks active">
+    <section class="main-view" id="bookmarksView">
       <div class="bookmark-location">
         <span class="bookmark-location-label">LOCATION</span>
         <div class="bookmark-location-path">
@@ -60,23 +60,26 @@ The outer structure is organized under `.lcars-app`:
         </div>
       </div>
 
-      <div class="bookmark-grid">
+      <div class="bookmark-grid" id="bookmarkGrid">
         <!-- bookmark tiles -->
-        <div class="bookmark-empty-state">No bookmarks here yet…</div>
+        <div id="emptyState">NO ENTRIES IN THIS CATEGORY</div>
       </div>
 
       <div class="status-display">
-        <!-- status label + blocks -->
+        <div class="status-text">STATUS:</div>
+        <div class="status-info" id="systemStatus">
+          <!-- CT / BM readout -->
+        </div>
       </div>
     </section>
 
     <!-- Settings panel (view) -->
-    <section class="main-view settings-panel">
-      <!-- settings content -->
+    <section class="main-view settings-panel" id="settingsView">
+      <!-- settings content, including category config and theme controls -->
     </section>
 
     <!-- About panel (view) -->
-    <section class="main-view about-panel">
+    <section class="main-view about-panel" id="aboutView">
       <!-- about content -->
     </section>
   </main>
@@ -85,6 +88,21 @@ The outer structure is organized under `.lcars-app`:
   <div class="footer-bar">
     <!-- global action buttons and status summary -->
   </div>
+
+  <!-- Bookmark dialog -->
+  <dialog id="bookmarkDialog">
+    <!-- .lcars-dialog markup (see Dialogs section) -->
+  </dialog>
+
+  <!-- Color picker dialog -->
+  <dialog id="colorPickerDialog">
+    <!-- LCARS color grid -->
+  </dialog>
+
+  <!-- Confirm / alert dialog -->
+  <dialog id="confirmDialog">
+    <!-- overwrite / delete / reset confirmations -->
+  </dialog>
 </div>
 ```
 
@@ -104,8 +122,9 @@ Key properties:
 
 - No gaps between grid cells: the header, sidebar caps, track, and footer visually join into a single continuous element.
 - The sidebar container spans all rows, with top and bottom caps forming the curved “elbow” connectors.
+- The sidebar track (`.sidebar-track`) hosts dynamically created category buttons and a `.sidebar-filler` that visually completes the LCARS band.
 
-The main content sits *inside* the frame, with internal padding and margins to visually float away from the LCARS shell.
+The main content sits *inside* the frame, with internal padding and margins to visually float away from the LCARS shell. The active view is controlled by applying or removing the `.active` class on `.main-view` sections via JavaScript.
 
 ---
 
@@ -160,6 +179,7 @@ The sidebar is embedded in the right-hand frame and divided into:
 - Category buttons (`.cat-btn`) sit inside the track as half-pill overlays:
   - Left side of the button is rounded.
   - Right side aligns with the frame edge.
+  - The background color is driven by a CSS custom property (e.g. `--cat-color`) derived from the category’s `color` field.
 - Typography:
   - Right-aligned, bold, uppercase.
   - Slight tracking to mimic LCARS labels.
@@ -196,20 +216,21 @@ Visually, the flow is:
 
 `HEADER` → `TOP CAP` → `SIDEBAR TRACK` → `BOTTOM CAP` → `FOOTER`.
 
+Category buttons and nested submenus are placed within the `.sidebar-track` but must not break the visual continuity of the frame.
+
 ### 3.3 Category Button States
 
 - **Base**:
-  - Background: semi-transparent overlay on top of the track.
+  - Background: category color (via `--cat-color`) blended with the track.
   - Text: beige or light foreground.
 - **Hover**:
   - Brightened background, increased opacity.
 - **Active** (`.cat-btn.active`):
-  - Beige background (or category color, depending on implementation).
-  - Strong contrast between active category and rest of the track.
+  - Stronger fill using the category color, with clear separation from inactive buttons.
 - **Focus-visible**:
-  - Neon glow outline (see Accessibility).
+  - Neon glow outline (see Accessibility), implemented via `:focus-visible` and an `::after` halo.
 
-Category buttons can have nested submenus (`.cat-submenu`) for child categories. Submenus appear as additional small tabs aligned under the parent, sharing color and focus styles.
+Category buttons can have nested submenus (`.cat-submenu`) for child categories. Submenus are implemented as additional stacks of `.cat-btn` inside `.cat-wrapper` elements, shown on hover or inline depending on viewport and depth.
 
 ---
 
@@ -315,17 +336,15 @@ The About panel uses the same base layout as the Settings panel but is content-f
 
 ## 5. Bookmark Tiles
 
-Bookmarks are represented as `.bookmark-tile` elements rendered inside `.bookmark-grid`. They are usually anchor elements (`<a>`) or `button`-like elements, depending on implementation.
+Bookmarks are represented as `.bookmark-tile` elements rendered inside `.bookmark-grid`. In the current implementation they are anchors (`<a>`) with an embedded edit control.
 
 ### 5.1 Structure
 
 ```/dev/null/bookmark-tile.html#L1-40
-<a class="bookmark-tile" href="https://example.com" target="_blank" rel="noopener">
+<a class="bookmark-tile" href="https://example.com" target="_blank" rel="noopener noreferrer">
   <div class="bookmark-title">EXAMPLE SITE</div>
   <div class="bookmark-url">https://example.com</div>
-  <button class="bookmark-edit-icon" type="button" aria-label="Edit bookmark">
-    ✎
-  </button>
+  <div class="bookmark-edit-icon" title="Edit">✎</div>
 </a>
 ```
 
@@ -337,22 +356,23 @@ Bookmarks are represented as `.bookmark-tile` elements rendered inside `.bookmar
     - `border-radius: 10px;`
     - `border-bottom-right-radius: 30px;`
 - **Color**:
-  - Background: Category color or a blend of category color and neutral LCARS orange.
+  - Background: category color (via `--cat-color`) or a blend of category color and neutral LCARS orange.
   - On hover:
     - Slight scale up (e.g., `transform: translateY(-1px) scale(1.02)`).
     - Slightly brighter background.
 - **Edit Icon**:
   - Positioned in the top-right corner of the tile.
-  - Fades in on hover to reduce noise when browsing.
-  - Always keyboard-focusable.
+  - Revealed on hover of the tile.
+  - Clickable and keyboard-focusable, but rendered as a visual glyph inside the tile rather than a separate button element.
 
 ### 5.3 Behavior
 
-- **Left Click**: Opens the bookmark URL in a new tab/window.
+- **Left Click**:
+  - Opens the bookmark URL in a new tab/window (`target="_blank"`, `rel="noopener noreferrer"`).
 - **Edit Click**:
   - Clicking the pencil icon opens the Bookmark dialog in Edit mode.
 - **Context Menu**:
-  - The tile may intercept right-click to open the Edit dialog directly (optional, but consistent with LCARS terminal metaphors).
+  - The tile intercepts right-click (`contextmenu`) to open the Edit dialog directly.
 - **Focus**:
   - Tiles receive the neon glow focus ring when tabbed to (see Accessibility).
 
@@ -362,13 +382,11 @@ Bookmarks are represented as `.bookmark-tile` elements rendered inside `.bookmar
 
 All modal interactions are implemented using `<dialog>` elements styled with `.lcars-dialog`.
 
-Common dialog types:
+Current dialog types:
 
 - **Bookmark Dialog** (`#bookmarkDialog`).
-- **Settings Dialog** (`#settingsDialog`).
 - **Color Picker Dialog** (`#colorPickerDialog`).
-- **About Dialog** (`#aboutDialog`).
-- **Confirmation Dialog** (`#confirmDialog`).
+- **Confirmation / Alert Dialog** (`#confirmDialog`).
 
 ### 6.1 Shared Dialog Structure
 
@@ -376,22 +394,22 @@ Common dialog types:
 <dialog id="bookmarkDialog">
   <div class="lcars-dialog">
     <header class="lcars-dialog-header">
-      <div class="lcars-dialog-title">ADD ENTRY</div>
+      <div class="lcars-dialog-title" id="dialogTitle">ADD ENTRY</div>
       <div class="lcars-dialog-meta">
         <span class="label">STARDATE</span>
-        <span class="value">41153.7</span>
+        <span class="value" id="bookmarkStardateReadout">2025352.1200</span>
       </div>
     </header>
 
     <div class="lcars-dialog-body">
-      <!-- form fields -->
+      <!-- form fields: title, protocol select, URL, category select -->
     </div>
 
     <footer class="lcars-dialog-footer">
       <div class="dialog-actions">
-        <button class="btn-secondary">CANCEL</button>
-        <button class="btn-secondary delete">DELETE</button>
-        <button class="btn-primary">SAVE ENTRY</button>
+        <button class="btn-secondary" type="button">CANCEL</button>
+        <button class="btn-secondary delete" type="button" id="deleteBtn">DELETE</button>
+        <button class="btn-primary" type="submit">SAVE ENTRY</button>
       </div>
     </footer>
   </div>
@@ -408,19 +426,22 @@ Common dialog types:
   - Full-width colored band (typically orange).
   - Rounded top corners, flat bottom.
   - Contains:
-    - Title on the left (e.g., ADD ENTRY / EDIT ENTRY / SETTINGS).
+    - Title on the left (e.g., ADD ENTRY / EDIT ENTRY).
     - Stardate or meta info on the right.
 - **Body**:
   - Dark panel with beige text.
   - Form fields stacked vertically with consistent spacing.
 - **Footer**:
   - Right-aligned control buttons in LCARS pill style (see Global Controls).
+- **Confirm / Alert Dialog**:
+  - Shares the same `.lcars-dialog` shell but re-uses the button row for both “confirm/cancel” and single-button “ACKNOWLEDGE” alerts.
 
 ---
 
 ## 7. Forms, Inputs & Color Picker
 
 ### 7.1 Form Inputs
+
 
 Inputs in dialogs and settings follow a consistent style:
 
@@ -482,9 +503,10 @@ Design notes:
 
 ---
 
-## 8. Global Action Buttons & Status
+## 8. Global Action Buttons, Status, and Themes
 
 ### 8.1 Footer Bar
+
 
 The footer bar (`.footer-bar`) anchors global controls:
 

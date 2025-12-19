@@ -92,7 +92,7 @@ type Bookmark = {
   title: string;      // User-visible title
   url: string;        // Fully normalized URL, including protocol
   categoryId: string; // Reference to a Category.id
-  createdAt: number;  // Stardate (e.g., 41153.7)
+  createdAt: string;  // Stardate string, e.g. "2025352.1200"
 };
 ```
 
@@ -122,7 +122,7 @@ type Category = {
   id: string;          // UUID
   name: string;        // Display name (generally uppercase)
   color: string;       // Hex color from LCARS palette (e.g., "#ff9966")
-  createdAt: number;   // Stardate at creation time
+  createdAt: string;   // Stardate string at creation time, e.g. "2025352.1200"
   children: Category[];// Nested child categories
 };
 ```
@@ -175,20 +175,12 @@ Shape (non-normative example — subject to design tuning):
 ```ts
 const DEFAULT_CATEGORIES: Category[] = [
   {
-    id: "category-main",
-    name: "MAIN",
-    color: "#ff9966",
-    createdAt: <stardate>,
-    children: []
-  },
-  {
-    id: "category-databanks",
+    id: "cat-databanks",
     name: "DATABANKS",
-    color: "#ffcc99",
-    createdAt: <stardate>,
-    children: []
-  }
-  // Additional built-in categories may be defined.
+    color: "#ff9900",
+    createdAt: "2025352.1200",
+    children: [],
+  },
 ];
 ```
 
@@ -204,12 +196,12 @@ Example:
 ```ts
 const DEFAULT_BOOKMARKS: Bookmark[] = [
   {
-    id: "bookmark-lcars",
+    id: "bm-lcars",
     title: "LCARS INTERFACE",
     url: "https://www.thelcars.com",
-    categoryId: "category-databanks",
-    createdAt: <stardate>
-  }
+    categoryId: "cat-databanks",
+    createdAt: "2025352.1200",
+  },
 ];
 ```
 
@@ -217,13 +209,16 @@ const DEFAULT_BOOKMARKS: Bookmark[] = [
 
 ## 4. Storage & Persistence
 
-### 4.1 LocalStorage Key
+### 4.1 LocalStorage Keys
 
-All data is persisted under a single `localStorage` key:
+All bookmark and category data is persisted under a single `localStorage` key, and theme selection is persisted under a separate key:
 
 ```text
-STORAGE_KEY = "zander-lcars:v1"
+STORAGE_KEY        = "zander-lcars:v1"
+THEME_STORAGE_KEY  = "zander-lcars-theme:v1"
 ```
+
+Theme state is intentionally kept separate so that the JSON structure used for import/export remains `{ bookmarks, categories }` and does not need to change when theme support is added.
 
 ### 4.2 Load Behavior
 
@@ -231,34 +226,36 @@ At startup:
 
 1. Read string from `localStorage.getItem(STORAGE_KEY)`.
 2. If the value is:
-   - **Missing**: load default data (`DEFAULT_BOOKMARKS`, `DEFAULT_CATEGORIES`).
-   - **Present** but **invalid JSON**: fall back to defaults.
+   - **Missing**: keep in-memory defaults (`DEFAULT_BOOKMARKS`, `DEFAULT_CATEGORIES`).
+   - **Present** but **invalid JSON**: log an error, show an LCARS-styled alert, and reset to defaults.
    - **Valid JSON**:
-     - Verify that `bookmarks` and `categories` are arrays.
-     - Coerce/validate nested categories shape (ensure `children` arrays exist).
-     - If critical structure is missing or invalid, fall back to defaults.
-3. Set `state` to the validated data.
-4. If `state.currentCategory` is not set or refers to a non-existing category, default to:
-   - The first available category id, or
-   - `null` for “no category filter” if none exist.
+     - If `bookmarks` is an array, assign it to `state.bookmarks`.
+     - If `categories` is a non-empty array, assign it to `state.categories`.
+3. Run backfill utilities:
+   - `backfillBookmarkCreatedAt(state.bookmarks)` to add `createdAt` to any legacy bookmarks that are missing it.
+   - `backfillCategoryCreatedAt(state.categories)` to add `createdAt` to any legacy categories (recursively across `children`).
+4. Ensure `state.currentCategory` refers to an existing category:
+   - If the current id is missing or invalid, fall back to the first available category id, or `cat-databanks` if none are found.
 
 ### 4.3 Save Behavior
 
-On any state mutation:
+On any state mutation affecting bookmarks or categories:
 
 1. `state.bookmarks` and `state.categories` are deeply serialized.
-2. `currentCategory` is included in the persisted object.
-3. The full object is saved to `localStorage` in a single write operation.
-
-Key properties of the saved JSON:
+2. Theme is **not** included in this payload (it is stored separately).
+3. The object is saved to `localStorage` in a single write operation:
 
 ```ts
 {
   bookmarks: Bookmark[],
   categories: Category[],
-  currentCategory: string | null
 }
 ```
+
+Notes:
+
+- `currentCategory` is **not** currently persisted; it is recalculated on load to a valid category id (or default).
+- Theme selection is saved independently via `localStorage.setItem(THEME_STORAGE_KEY, currentTheme)`.
 
 ---
 
@@ -272,12 +269,27 @@ Import/export is a **contract** for backing up and restoring the full bookmark s
 - Behavior:
   1. Capture current `state.bookmarks` and `state.categories`.
   2. Serialize as JSON:
+
      ```ts
      const data = {
        bookmarks: state.bookmarks,
-       categories: state.categories
+       categories: state.categories,
      };
      ```
+
+  3. Create a Blob and trigger a download of a `.json` file (e.g. `lcars-bookmarks-YYYY-MM-DD.json`).
+
+Notes:
+
+- Theme selection and any other UI-only metadata are **not** included in export.
+- The exported structure is intentionally minimal to keep the contract stable:
+
+```ts
+type ExportBundle = {
+  bookmarks: Bookmark[];
+  categories: Category[];
+};
+```
   3. Create a Blob and transient `<a>` element to download the file.
 - Filename format:
   - `lcars-bookmarks-YYYY-MM-DD.json`
@@ -287,6 +299,37 @@ Import/export is a **contract** for backing up and restoring the full bookmark s
   - This format is intended to remain stable for `v1`. Any breaking change requires explicit documentation.
 
 ### 5.2 Import
+
+- Triggered from the Settings panel via the `IMPORT DATA` button.
+- Behavior:
+  1. User selects a JSON file from disk.
+  2. The file is read as text and parsed as JSON.
+  3. Basic validation ensures:
+     - `bookmarks` is an array.
+     - `categories` is an array.
+  4. A confirmation dialog (“overwrite” style) is shown summarizing counts.
+  5. On confirmation, an internal helper:
+
+     ```ts
+     function applyDataBundle(bundle: ExportBundle) {
+       state.bookmarks = bundle.bookmarks;
+       state.categories = bundle.categories;
+       backfillBookmarkCreatedAt(state.bookmarks);
+       backfillCategoryCreatedAt(state.categories);
+       saveData();
+       renderCategories();
+       renderGrid();
+       updateAboutStardate();
+       updateSettingsStardate();
+     }
+     ```
+
+  6. `applyDataBundle` is called and all primary views are re-rendered.
+
+Notes:
+
+- Import is a **full overwrite** of bookmarks and categories.
+- Existing theme selection is preserved; import does not affect `THEME_STORAGE_KEY`.
 
 - Triggered from the Settings panel via the `IMPORT DATA` button and hidden file input.
 - Behavior:
@@ -347,32 +390,34 @@ Semantics:
 
 ### 6.2 Views & Rendering Responsibilities
 
-The app uses a simple view toggling approach rather than a routing framework:
+The app uses a simple view toggling approach rather than a routing framework. Even though the exact class names are implementation details of `index.html`, the responsibilities are stable:
 
-- **Bookmarks View (`.main-view.bookmarks-view`)**
+- **Bookmarks View**
   - Controlled by:
     - `renderCategories()` (sidebar)
     - `renderGrid()` (bookmarks)
     - `updateBookmarkLocation()` (location path)
     - `updateSystemStatus()` (status block)
-  - Visible when it has the `.active` class.
+  - Visible when its `.main-view` container has the `.active` class.
 
-- **Settings View (`.main-view.settings-view`)**
+- **Settings View**
   - Controlled by:
     - `renderCategoryConfig()` (category configuration list)
     - `updateSettingsStardate()` (settings header stardate)
+    - `renderThemeControls()` (theme selection UI)
+    - `updateThemeStatus()` (theme readout)
   - Contains:
     - Category tree editor.
     - Color picker triggers.
     - Import/export/reset buttons.
   - Also toggled via `.active` class.
 
-- **About View (`.main-view.about-view`)**
+- **About View**
   - Controlled by:
     - `updateAboutStardate()` (about panel stardate and Earth date).
   - Shows read-only meta information and shortcuts.
 
-Visibility of each view is controlled by an internal helper that adds/removes `.active` on `.main-view` elements based on the currently selected “mode” (BOOKMARKS, SETTINGS, ABOUT).
+Visibility of each view is controlled by logic that adds/removes `.active` on `.main-view` elements based on the currently selected “mode” (BOOKMARKS, SETTINGS, ABOUT).
 
 ---
 
@@ -384,19 +429,34 @@ Visibility of each view is controlled by an internal helper that adds/removes `.
   - Called once on page load.
   - Responsibilities:
     - Load data from storage (`loadData()`).
-    - Initialize state if storage is empty/invalid.
-    - Render sidebar, bookmark grid, system status, and location.
+    - Load theme from storage (`loadTheme()`).
+    - Apply the current theme (`applyTheme()` / `setTheme()`).
+    - Render sidebar, bookmark grid, and status.
     - Render settings and about views.
+    - Render theme controls and theme status.
     - Setup event listeners and keyboard shortcuts.
+    - Initialize stardate readouts in About and Settings.
 
 - `loadData()`  
   - Reads from `localStorage` using `STORAGE_KEY`.
-  - Parses and validates JSON.
-  - Initializes `state`.
+  - Parses JSON and selectively adopts `bookmarks` and `categories` arrays.
+  - Runs `backfillBookmarkCreatedAt()` and `backfillCategoryCreatedAt()` to ensure missing `createdAt` values are filled with a current stardate.
+  - Ensures `state.currentCategory` points to a valid category id, or falls back to a default.
 
 - `saveData()`  
-  - Serializes `state` (bookmarks, categories, currentCategory) to JSON.
-  - Writes to `localStorage`.
+  - Serializes `{ bookmarks: state.bookmarks, categories: state.categories }` to JSON.
+  - Writes to `localStorage` under `STORAGE_KEY`.
+
+- `loadTheme()`  
+  - Reads `THEME_STORAGE_KEY` from `localStorage`.
+  - If the stored id matches one of the configured `THEMES`, applies it via `setTheme()`.
+  - Otherwise, defaults to the primary theme (e.g. `"pickard"`).
+
+- `setTheme(themeId)` / `applyTheme(themeId)`  
+  - Validates the requested theme against `THEMES`.
+  - Sets `currentTheme`, updates the `data-theme` attribute on `<body>`.
+  - Persists the selection under `THEME_STORAGE_KEY`.
+  - Updates the theme status readout.
 
 - `setupEventListeners()`  
   - Wires:
@@ -407,17 +467,67 @@ Visibility of each view is controlled by an internal helper that adds/removes `.
     - Keyboard shortcuts (`Alt+N`, `Alt+S`, `Alt+C`, `Esc`).
     - Category sidebar clicks.
     - Category config controls (up/down/add/delete/color).
+    - Theme selection buttons in Settings.
 
 ### 7.2 Rendering
 
 - `renderCategories()`  
   - Rebuilds the sidebar from `state.categories` (tree).
-  - Uses helper `createCategoryButton()` to:
+  - Uses helper `createCategoryButton(cat, level)` to:
     - Create `.cat-wrapper` with:
       - `.cat-btn` for each category.
-      - Optional `.cat-submenu` for children.
-    - Wire category selection events.
-  - Also updates category `<select>` elements in forms via `addOptions()` helper.
+      - Optional `.cat-submenu` for children (up to a configured depth).
+    - Wire category selection events:
+      - Selecting a category forces the Bookmarks view active.
+      - Updates `state.currentCategory`, then re-renders categories and grid.
+    - Apply the category’s `color` via a CSS custom property.
+  - Also updates category `<select>` elements in forms via `addOptions()` helper, which indents nested categories using non‑breaking spaces and a tree branch glyph.
+  - Calls `updateSystemStatus()` and `updateBookmarkLocation()` after rendering.
+
+- `renderGrid()`  
+  - Filters `state.bookmarks` by `state.currentCategory`.
+  - Creates `.bookmark-tile` elements via `createBookmarkTile(bookmark)`:
+    - Uses the category’s color (if available) as the tile accent color.
+    - Renders title, URL, and an edit icon.
+    - Makes the tile an anchor with `target="_blank"` and `rel="noopener noreferrer"`.
+    - Attaches handlers for:
+      - Edit icon click (open edit dialog).
+      - Context menu/right‑click (optional edit shortcut).
+  - Shows or hides the empty‑state message depending on results.
+  - Calls `updateSystemStatus()` and `updateBookmarkLocation()`.
+
+- `renderCategoryConfig()`  
+  - Builds the Settings “Category Configuration” list from the category tree.
+  - Renders one `.category-config-row` per category via `renderConfigRow()`, including:
+    - Name input field.
+    - Color swatch (opens Color Picker).
+    - Up/Down movement controls.
+    - Add‑child button.
+    - Delete button.
+  - Typically uses a tree traversal helper (`walkCategories`) to visit categories in depth-first order for rendering.
+
+- `renderThemeControls()`  
+  - Renders a set of theme selection buttons in the Settings view.
+  - Iterates over `THEMES` to produce one control per theme.
+  - Applies a visual “selected” state to the active theme.
+  - Wires click events that call `setTheme(theme.id)`.
+
+- `updateSystemStatus()`  
+  - Computes:
+    - Category count (currently total of root categories; in some versions this may be flattened across the tree).
+    - Bookmark count (`state.bookmarks.length`).
+  - Updates `.status-display` (e.g. `CT: <catCount> · BM: <bmCount>`).
+
+- `formatCurrentStardateDisplay()`  
+  - Helper that:
+    - Calls `calculateStardate()` for the current time.
+    - Calls `parseStardate()` to get an approximate `Date`.
+    - Returns `{ stardate, label, tooltip }` where:
+      - `label` is a string like `"STARDATE 2025352.1200"`.
+      - `tooltip` is a localized date string (or `""` if parsing fails).
+
+- `updateAboutStardate()` / `updateSettingsStardate()`  
+  - Use `formatCurrentStardateDisplay()` to update the stardate/tooltip fields in About and Settings.
 
 - `renderGrid()`  
   - Filters `state.bookmarks` by `state.currentCategory`:
@@ -454,8 +564,17 @@ Visibility of each view is controlled by an internal helper that adds/removes `.
 
 ### 7.3 Category Tree Operations
 
+- `walkCategories(rootCategories, visitor, parent = null, depth = 0)`  
+  - Generic tree-walk used by multiple features.
+  - Iterates categories depth‑first, calling `visitor(cat, parent, depth, index, siblings)`.
+  - If `visitor` returns a non‑`undefined` value, traversal halts and that value is returned.
+  - Used for:
+    - Searching for a category and its parent.
+    - Building flattened lists for config UI.
+    - Computing paths.
+
 - `findCategoryAndParent(id, categories)`  
-  - Recursively searches the category tree.
+  - Uses `walkCategories` internally.
   - Returns:
     - `category`: found `Category`
     - `parent`: parent `Category` or `null` if root
@@ -496,48 +615,100 @@ Visibility of each view is controlled by an internal helper that adds/removes `.
 ### 7.4 Bookmarks
 
 - `openAddDialog()`  
-  - Prepares empty bookmark form with defaults:
-    - Category set to `currentCategory` if available.
-    - Protocol defaulted to `https://`.
-    - Stardate label for creation.
-  - Shows `#bookmarkDialog`.
+  - Prepares the bookmark form for creating a new bookmark:
+    - Clears existing form values.
+    - Sets the category to `state.currentCategory` if available.
+    - Sets the protocol select (e.g. `https://`).
+    - Updates the stardate label using `formatCurrentStardateDisplay()`.
+  - Hides the Delete button in the dialog.
+  - Shows `#bookmarkDialog` as a modal.
 
 - `openEditDialog(bookmark)`  
-  - Populates form fields from existing bookmark.
-  - Splits URL into protocol + remainder for the protocol selector.
-  - Displays bookmark’s `createdAt` stardate and Earth date.
+  - Populates form fields from an existing bookmark:
+    - Fills title and URL.
+    - Splits the URL into protocol and remainder for the protocol selector.
+    - Selects the bookmark’s category.
+  - Displays bookmark’s `createdAt` stardate and its derived Earth date (via `parseStardate()`).
+  - Shows the Delete button in the dialog.
+  - Opens `#bookmarkDialog` in edit mode.
 
 - `saveBookmark(event)`  
   - Prevents default form submission.
-  - Extracts values from form:
+  - Extracts values from the form:
     - Title
     - Protocol
-    - URL
+    - URL (body)
     - Category id
-  - Constructs normalized URL via `normalizeUrl(protocol, rawUrl)`.
-  - If editing:
-    - Updates existing bookmark in `state.bookmarks`.
-  - If adding:
-    - Creates new `Bookmark` with:
-      - New `id`
-      - `createdAt` from `calculateStardate()`
-  - Saves and rerenders categories/grid/status/location.
-  - Closes dialog.
+  - Normalizes the URL via `normalizeUrl(protocol, rawUrl)`:
+    - Ensures a protocol is always present.
+  - If an existing `id` is present:
+    - Updates the bookmark in `state.bookmarks` in‑place (keeping its `createdAt`).
+  - Otherwise:
+    - Creates a new `Bookmark`:
+      - `id` from `generateUUID()`.
+      - `createdAt` from `calculateStardate()`.
+  - Saves data and re-renders categories, grid, status, and location.
+  - Closes the dialog.
 
 - `deleteBookmark(id)`  
   - Removes the bookmark from `state.bookmarks`.
-  - Saves and rerenders.
+  - Saves and re-renders.
+  - Typically invoked from the bookmark dialog or a context menu action.
 
 ### 7.5 Utilities
 
 - `calculateStardate(date = new Date())`  
-  - Converts an Earth datetime to a TNG-era stardate:
-    - Uses a base epoch (e.g., 41000.0).
-    - Advances by ~1000 units per Earth year.
-    - Returns a numeric stardate, typically with one decimal.
+  - Converts an Earth datetime to a stardate string in the form `YYYYDDD.MMMM`:
+    - `YYYY`: four‑digit year.
+    - `DDD`: day of year (1–365/366) zero‑padded to 3 digits.
+    - `MMMM`: minutes since midnight zero‑padded to 4 digits.
+  - Example: `"2025352.1200"`.
+
 - `parseStardate(stardate)`  
-  - Inverse helper to approximate Earth date from stardate.
-  - Used for display in tooltips / dialogs alongside the numeric stardate.
+  - Parses a stardate string of the form `YYYYDDD.MMMM` back into a `Date`:
+    - Extracts year, day of year, and minutes.
+    - Returns `null` if parsing fails.
+  - Used for display in tooltips and dialogs alongside `createdAt`.
+
+- `getCategoryPath(categoryId)`  
+  - Traverses from the category to the root (using the tree structure) to produce its path.
+  - Used by `updateBookmarkLocation()` to render the location/breadcrumb bar.
+
+- `generateUUID()`  
+  - Simple unique id generator for bookmarks and categories (not cryptographically strong).
+
+- `escapeHtml(text)`  
+  - Basic XSS protection when injecting user text via `innerHTML`.
+
+- `normalizeUrl(protocol, value)`  
+  - Trims the URL, removes any leading protocol/body mismatch, and re-applies the chosen `protocol`.
+  - Ensures that saved URLs always include a protocol.
+
+- `isProbablyUrl(value)`  
+  - Heuristic to decide whether the user’s input looks like a URL.
+  - Used to decide when to auto‑prefix `https://` for convenience.
+
+- `showConfirm(title, message, onOk)`  
+  - Abstraction over the LCARS confirmation dialog (`#confirmDialog`).
+  - Wires OK/Cancel handlers and resets them after the dialog closes.
+
+- `showAlert(title, message)`  
+  - LCARS-styled alert built on top of the same confirm dialog, temporarily hiding the Cancel button and changing the OK label.
+
+- `openColorPicker(currentColor, onSelect)`  
+  - Opens the Color Picker dialog.
+  - Renders one `.color-option` per entry in `LCARS_PALETTE`.
+  - Highlights the currently selected color.
+  - Calls `onSelect(color)` when a color is chosen, then closes the dialog.
+
+- `exportData()`  
+  - Implements the export flow described in section 5.1.
+
+- `triggerImport()` / `handleImport(event)`  
+  - Implement the import flow described in section 5.2.
+
+- `resetSystem()`  
+  - Confirms with the user, then restores the default data bundle and re-renders all views.
 
 - `getCategoryPath(categoryId)`  
   - Traverses up from the category to the root, producing:
