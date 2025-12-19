@@ -109,6 +109,8 @@ The main content sits *inside* the frame, with internal padding and margins to v
 
 ---
 
+For term definitions and ubiquitous language across the system (what “category”, “bookmark”, “frame”, “view”, etc. mean), see `GLOSSARY.md`. If this document and `GLOSSARY.md` ever disagree on a term, `GLOSSARY.md` is the source of truth for naming and meaning.
+
 ## 2. Color & Typography System
 
 The color palette is defined via CSS variables on `:root`. The palette is shared between LCARS frame elements, category accents, and the color picker.

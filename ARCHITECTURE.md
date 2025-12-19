@@ -2,6 +2,8 @@
 
 This document describes the high-level architecture, data model, and system behavior of the Zander LCARS Bookmark System. It is the technical source of truth for how the app is structured and how data flows.
 
+For definitions of domain and UI terms used throughout this document, see the shared terminology in `GLOSSARY.md`.
+
 ---
 
 ## 1. High-Level Overview

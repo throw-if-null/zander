@@ -388,6 +388,9 @@ You’re expected to customize or delete these entries as you go.
 
 ## Credits
 
+
 Zander is a fan‑made tribute to the LCARS interface from *Star Trek: The Next Generation*.
 
 All trademarks are property of their respective owners. This project is purely for personal and educational use.
+
+For definitions of terms used in this README (e.g., “bookmark”, “category”, “LCARS frame”, “view”), see `GLOSSARY.md`. It describes the shared vocabulary used across the app, docs, and code.

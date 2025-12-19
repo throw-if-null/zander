@@ -19,7 +19,9 @@ These documents are the technical and visual source of truth:
 - `ARCHITECTURE.md` – System design, data model, storage, import/export behavior, and JS responsibilities.
 - `DESIGN.md` – LCARS UI layout, component appearance, and visual interaction patterns.
 - `README.md` – How to open and use the app.
+- `GLOSSARY.md` – Ubiquitous language and canonical term definitions.
 
+Agents should defer to these documents for implementation details. For terminology, `GLOSSARY.md` is the source of truth; if a term in any doc is ambiguous, `GLOSSARY.md` defines the intended meaning.
 Agents should defer to these documents for implementation details. If there is a mismatch between documentation and `index.html`, `index.html` is the ground truth, and the docs should be updated to match it.
 
 ---
@@ -52,8 +54,8 @@ Agents should defer to these documents for implementation details. If there is a
   - Maintain clear IDs and classes for JS hooks and styling.
 - Maintain meta documentation:
   - Keep this `AGENTS.md` aligned with reality.
-  - Ensure `ARCHITECTURE.md`, `DESIGN.md`, and `README.md` match the actual implementation and constraints.
-  - When the runtime behavior in `index.html` changes (layout, dialogs, data shape, keyboard shortcuts), drive corresponding documentation updates.
+  - Ensure `ARCHITECTURE.md`, `DESIGN.md`, `README.md`, and `GLOSSARY.md` match the actual implementation and constraints.
+  - When the runtime behavior in `index.html` changes (layout, dialogs, data shape, keyboard shortcuts), drive corresponding documentation updates, including term definitions in `GLOSSARY.md` where needed.
 
 **Inputs:**
 
