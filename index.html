@@ -33,37 +33,66 @@
                - Defined on body so per-theme overrides always apply
                - --theme-main drives the LCARS frame & primary accents
                - --shape-color derives from --theme-main
+               - --theme-secondary drives bookmark body accents
                - Background (black) and base text color remain fixed */
             body {
                 --theme-main: #830025; /* default: pickard */
                 --shape-color: var(--theme-main);
+                /* Secondary color used for bookmark body & footer buttons */
+                --theme-secondary: color-mix(
+                    in srgb,
+                    var(--shape-color) 30%,
+                    #ffffff 70%
+                );
             }
 
             /* Theme variants applied on the <body> element via data-theme */
             body[data-theme="pickard"] {
                 --theme-main: #830025;
                 --shape-color: var(--theme-main);
+                --theme-secondary: color-mix(
+                    in srgb,
+                    var(--shape-color) 30%,
+                    #ffffff 70%
+                );
             }
 
             body[data-theme="data"] {
                 --theme-main: #da9706;
                 --shape-color: var(--theme-main);
+                --theme-secondary: color-mix(
+                    in srgb,
+                    var(--shape-color) 30%,
+                    #ffffff 70%
+                );
             }
 
             body[data-theme="doctor"] {
                 --theme-main: #008b8b; /* LCARS-ish teal */
                 --shape-color: var(--theme-main);
+                --theme-secondary: color-mix(
+                    in srgb,
+                    var(--shape-color) 30%,
+                    #ffffff 70%
+                );
             }
 
             body[data-theme="spock"] {
                 --theme-main: #003366;
                 --shape-color: var(--theme-main);
+                --theme-secondary: color-mix(
+                    in srgb,
+                    var(--shape-color) 30%,
+                    #ffffff 70%
+                );
             }
 
             body[data-theme="seven"] {
                 /* LCARS-friendly silver main tone */
                 --theme-main: #c0c0c0;
                 --shape-color: var(--theme-main);
+                /* Borg green secondary accent computed to match footer/buttons */
+                --theme-secondary: #7fff00;
             }
 
             * {
@@ -544,7 +573,8 @@
             .bookmark-url {
                 grid-column: 2;
                 grid-row: 2;
-                background-color: #444;
+                /* Match footer button color */
+                background-color: var(--theme-secondary, #444);
                 border-top-left-radius: 20px;
                 margin-top: 5px;
                 margin-left: 5px;
@@ -558,6 +588,7 @@
                 align-self: stretch;
                 display: flex;
                 align-items: flex-end;
+                color: #000;
             }
 
             .bookmark-edit-icon {
@@ -583,12 +614,12 @@
 
             /* Footer Actions */
             .action-btn {
-                /* Light variant of the current theme color (overridden per-theme where needed) */
-                background-color: color-mix(
+                /* Uses theme secondary so bookmarks & footer buttons match */
+                background-color: var(--theme-secondary, color-mix(
                     in srgb,
                     var(--shape-color) 30%,
                     #ffffff 70%
-                );
+                ));
                 color: #000;
                 border: none;
                 padding: 0 15px;
@@ -629,7 +660,7 @@
 
             /* Borg green footer buttons when SEVEN OF NINE theme is active */
             body[data-theme="seven"] .action-btn {
-                background-color: #7fff00;
+                background-color: var(--theme-secondary);
             }
 
             /* Settings Menu */
