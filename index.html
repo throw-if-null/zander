@@ -2331,12 +2331,51 @@
             }
 
             function applyDataBundle(bundle) {
-                state.bookmarks = Array.isArray(bundle.bookmarks)
-                    ? bundle.bookmarks
+                // Validate and filter bookmarks: ensure URLs are valid
+                const validBookmarks = Array.isArray(bundle.bookmarks)
+                    ? bundle.bookmarks.filter(b => {
+                        // Check required fields exist
+                        if (!b || typeof b !== 'object') return false;
+                        if (typeof b.url !== 'string' || !b.url.trim()) return false;
+                        if (typeof b.id !== 'string' || !b.id.trim()) return false;
+                        if (typeof b.title !== 'string') return false;
+
+                        // Validate URL using existing validation function
+                        const normalized = normalizeUrl(b.url);
+                        return isProbablyUrl(normalized);
+                    })
                     : [];
-                state.categories = Array.isArray(bundle.categories)
-                    ? bundle.categories
+
+                // Validate and filter categories: ensure required fields exist and colors are valid
+                const validCategories = Array.isArray(bundle.categories)
+                    ? bundle.categories.filter(c => {
+                        // Check required fields
+                        if (!c || typeof c !== 'object') return false;
+                        if (typeof c.id !== 'string' || !c.id.trim()) return false;
+                        if (typeof c.name !== 'string' || !c.name.trim()) return false;
+                        if (typeof c.color !== 'string' || !c.color.trim()) return false;
+                        // Validate color is in LCARS palette
+                        if (!LCARS_PALETTE.includes(c.color)) return false;
+                        return true;
+                    })
                     : [];
+
+                // Report filtered bookmarks to user
+                const originalBookmarkCount = Array.isArray(bundle.bookmarks) ? bundle.bookmarks.length : 0;
+                const filteredBookmarkCount = originalBookmarkCount - validBookmarks.length;
+                if (filteredBookmarkCount > 0) {
+                    showAlert("IMPORT WARNING", `FILTERED OUT ${filteredBookmarkCount} BOOKMARK(S) WITH INVALID URLS OR MISSING FIELDS.`);
+                }
+
+                // Report filtered categories to user
+                const originalCategoryCount = Array.isArray(bundle.categories) ? bundle.categories.length : 0;
+                const filteredCategoryCount = originalCategoryCount - validCategories.length;
+                if (filteredCategoryCount > 0) {
+                    showAlert("IMPORT WARNING", `FILTERED OUT ${filteredCategoryCount} CATEGORY(IES) WITH INVALID COLORS OR MISSING FIELDS.`);
+                }
+
+                state.bookmarks = validBookmarks;
+                state.categories = validCategories;
 
                 // Backfill createdAt fields on imported data
                 backfillBookmarkCreatedAt(state.bookmarks);
