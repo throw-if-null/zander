@@ -387,8 +387,8 @@ Bookmarks are represented as `.bookmark-tile` elements rendered inside `.bookmar
   <div class="bookmark-title">EXAMPLE SITE</div>
   <div class="bookmark-description">Optional description text here...</div>
   <div class="bookmark-url-footer">
-    <div class="bookmark-edit-icon" title="Edit">✎</div>
-    <span class="bookmark-url-icon" title="https://example.com">🔗</span>
+    <div class="bookmark-footer-btn bookmark-edit-icon" title="Edit"></div>
+    <span class="bookmark-footer-btn bookmark-url-icon" title="https://example.com"></span>
   </div>
 </a>
 ```
@@ -396,7 +396,7 @@ Bookmarks are represented as `.bookmark-tile` elements rendered inside `.bookmar
 The tile uses a 3-row CSS grid layout:
 - **Row 1 (auto)**: Title (black text on main theme-colored background).
 - **Row 2 (1fr)**: Description (secondary theme-colored text on black background, with rounded top-left corner).
-- **Row 3 (auto)**: Footer (black background containing Edit and Link icons).
+- **Row 3 (auto)**: Footer (black background containing circular Edit and Link buttons).
 
 A `::before` pseudo-element creates the signature LCARS rounded notch in the top-left corner using a radial gradient.
 
@@ -404,9 +404,9 @@ Content breakdown:
 
 - **`.bookmark-title`**: The bookmark's title (max 64 characters). Spans full width (`grid-column: 1 / -1`). Displayed in uppercase with black text on the main theme color background.
 - **`.bookmark-description`**: Description text (max 512 characters). Displayed in secondary theme color on a black background. Uses `border-top-left-radius: 15px` to create an "elbow" shape against the left strip. Truncated via CSS line-clamping (4 lines).
-- **`.bookmark-url-footer`**: Compact footer strip with black background. Flex container for actions.
-  - **`.bookmark-edit-icon`**: Edit pencil icon on the left.
-  - **`.bookmark-url-icon`**: A link icon (🔗) on the right. Full URL shown on hover via `title` attribute.
+- **`.bookmark-url-footer`**: Compact footer strip with black background. Flex container for actions, aligned to the right.
+  - **`.bookmark-edit-icon`**: Circular button in LCARS orange (`--lcars-orange`).
+  - **`.bookmark-url-icon`**: Circular button in main theme color. Full URL shown on hover via `title` attribute.
 
 ### 5.2 Visual Design
 
@@ -418,15 +418,17 @@ Content breakdown:
 - **Color zones**:
   - **Title area (row 1)**: Main theme color background (via `--theme-main`) with black text.
   - **Description area (row 2)**: Black background with secondary theme-colored text (via `--theme-secondary`). The top-left corner is rounded (`15px`) to create the inner curve of the LCARS elbow shape.
-  - **URL footer (row 3)**: Black background with secondary theme-colored text.
+  - **URL footer (row 3)**: Black background with circular action buttons.
   - **Left stripe**: 15px column in main theme color, visible in rows 2-3 as the "handle" of the elbow.
 - **On hover**:
   - Slight scale up (`transform: scale(1.02)`).
   - Slightly brighter background (`filter: brightness(1.1)`).
-- **Edit Icon**:
-  - Positioned in the bottom-left corner of the tile (inside footer).
-  - Always visible (dimmed by default, opaque on hover).
-  - Clickable and keyboard-focusable.
+- **Action Buttons**:
+  - Replaces text/icons with 18px circular buttons (`border-radius: 50%`).
+  - Grouped on the right side of the footer.
+  - **Edit**: LCARS Orange (`--lcars-orange`).
+  - **Link**: Main theme color (`--theme-main`).
+  - **Hover**: Scale up (`1.2`) and brightness increase.
 
 ### 5.3 Behavior
 
