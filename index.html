@@ -1395,7 +1395,25 @@
             }
 
             function showAlert(title, message) {
-                alert(`${title}: ${message}`);
+                confirmTitle.textContent = title;
+                confirmMessage.textContent = message;
+
+                // For alerts, we present a single-acknowledge LCARS dialog.
+                const previousOkLabel = confirmOkBtn.textContent;
+                const previousCancelDisplay = confirmCancelBtn.style.display;
+
+                confirmOkBtn.textContent = "ACKNOWLEDGE";
+                confirmCancelBtn.style.display = "none";
+
+                const handleOk = () => {
+                    confirmOkBtn.removeEventListener("click", handleOk);
+                    confirmOkBtn.textContent = previousOkLabel;
+                    confirmCancelBtn.style.display = previousCancelDisplay;
+                    confirmDialog.close();
+                };
+
+                confirmOkBtn.addEventListener("click", handleOk);
+                confirmDialog.showModal();
             }
 
             function init() {
@@ -2212,26 +2230,43 @@
                 reader.onload = async (event) => {
                     try {
                         const data = JSON.parse(event.target.result);
-                        const count = Array.isArray(data.bookmarks)
-                            ? data.bookmarks.length
-                            : 0;
+
+                        // Basic structure validation
+                        if (typeof data !== "object" || data === null) {
+                            showAlert("ERROR", "INVALID DATA FORMAT (expected an object).");
+                            return;
+                        }
+
+                        const bookmarks = Array.isArray(data.bookmarks)
+                            ? data.bookmarks
+                            : [];
+                        const categories = Array.isArray(data.categories)
+                            ? data.categories
+                            : [];
+
+                        if (!Array.isArray(data.bookmarks) && !Array.isArray(data.categories)) {
+                            showAlert(
+                                "ERROR",
+                                "INVALID DATA FORMAT (missing bookmarks and categories arrays).",
+                            );
+                            return;
+                        }
+
+                        const count = bookmarks.length;
+
                         showConfirm(
                             "IMPORT DATA",
-                            `IMPORT ${data.bookmarks?.length || 0} ENTRIES? THIS WILL OVERWRITE CURRENT DATA.`,
+                            `IMPORT ${count} ENTRIES? THIS WILL OVERWRITE CURRENT DATA.`,
                             () => {
                                 const bundle = {
-                                    bookmarks: Array.isArray(data.bookmarks)
-                                        ? data.bookmarks
-                                        : [],
-                                    categories: Array.isArray(data.categories)
-                                        ? data.categories
-                                        : [],
+                                    bookmarks,
+                                    categories,
                                 };
                                 applyDataBundle(bundle);
                             },
                         );
                     } catch (err) {
-                        showAlert("ERROR", "INVALID DATA FORMAT");
+                        showAlert("ERROR", "INVALID DATA FORMAT (could not parse JSON).");
                     }
                 };
                 reader.readAsText(file);
