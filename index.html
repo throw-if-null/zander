@@ -477,6 +477,62 @@
                 white-space: nowrap;
             }
 
+            /* Generic LCARS dialog buttons (used by bookmark & confirm dialogs) */
+            .lcars-dialog-footer .btn-primary,
+            .lcars-dialog-footer .btn-secondary {
+                background-color: var(--lcars-beige);
+                color: #000;
+                border: none;
+                padding: 0 15px;
+                height: 40px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                font-family: var(--lcars-font);
+                font-size: 1.1rem;
+                font-weight: bold;
+                text-transform: uppercase;
+                border-radius: 20px;
+                cursor: pointer;
+                position: relative;
+                white-space: nowrap;
+            }
+
+            .lcars-dialog-footer .btn-primary {
+                background-color: var(--lcars-orange);
+            }
+
+            .lcars-dialog-footer .btn-secondary {
+                background-color: #444;
+                color: var(--lcars-beige);
+            }
+
+            .lcars-dialog-footer .btn-secondary.delete {
+                background-color: var(--lcars-red);
+                color: #000;
+            }
+
+            .lcars-dialog-footer .btn-primary:hover,
+            .lcars-dialog-footer .btn-secondary:hover {
+                filter: brightness(1.1);
+            }
+
+            .lcars-dialog-footer .btn-primary:focus-visible,
+            .lcars-dialog-footer .btn-secondary:focus-visible {
+                outline: none;
+            }
+
+            .lcars-dialog-footer .btn-primary:focus-visible::after,
+            .lcars-dialog-footer .btn-secondary:focus-visible::after {
+                content: "";
+                position: absolute;
+                top: -9px;
+                left: 0;
+                right: 0;
+                height: 4px;
+                background-color: #ffffff;
+            }
+
             .settings-panel .btn-primary {
                 background-color: var(--lcars-orange);
             }
@@ -795,59 +851,11 @@
                 margin-top: 20px;
             }
 
-            /* Bookmark dialog buttons use LCARS control-tab style */
+            /* Bookmark dialog buttons use generic LCARS dialog button style */
             #bookmarkDialog .btn-primary,
             #bookmarkDialog .btn-secondary {
-                background-color: var(--lcars-beige);
-                color: #000;
-                border: none;
-                padding: 0 15px;
-                height: 40px;
-                display: flex;
-                align-items: center;
-                justify-content: flex-end;
-                font-family: var(--lcars-font);
-                font-size: 1.1rem;
-                font-weight: bold;
-                text-transform: uppercase;
-                border-radius: 20px;
-                cursor: pointer;
-                position: relative;
-            }
-
-            #bookmarkDialog .btn-primary {
-                background-color: var(--lcars-orange);
-            }
-
-            #bookmarkDialog .btn-secondary {
-                background-color: #444;
-                color: var(--lcars-beige);
-            }
-
-            #bookmarkDialog .btn-secondary.delete {
-                background-color: var(--lcars-red);
-                color: #000;
-            }
-
-            #bookmarkDialog .btn-primary:hover,
-            #bookmarkDialog .btn-secondary:hover {
-                filter: brightness(1.1);
-            }
-
-            #bookmarkDialog .btn-primary:focus-visible,
-            #bookmarkDialog .btn-secondary:focus-visible {
-                outline: none;
-            }
-
-            #bookmarkDialog .btn-primary:focus-visible::after,
-            #bookmarkDialog .btn-secondary:focus-visible::after {
-                content: "";
-                position: absolute;
-                top: -9px;
-                left: 0;
-                right: 0;
-                height: 4px;
-                background-color: #ffffff;
+                display: inline-flex;
+                justify-content: center;
             }
 
             .category-config-list {
@@ -1195,15 +1203,28 @@
         <!-- Settings Dialog (no longer used for full settings UI, kept for potential small overlays if needed) -->
 
         <dialog id="confirmDialog">
-            <h2 id="confirmTitle">CONFIRM</h2>
-            <div style="margin: 20px 0; font-size: 1.2rem" id="confirmMessage">
-                ARE YOU SURE?
-            </div>
-            <div class="dialog-actions">
-                <button class="btn-secondary" id="confirmCancelBtn">
-                    CANCEL
-                </button>
-                <button class="btn-primary" id="confirmOkBtn">PROCEED</button>
+            <div class="lcars-dialog">
+                <div class="lcars-dialog-header">
+                    <span class="lcars-dialog-title" id="confirmTitle">
+                        CONFIRM
+                    </span>
+                </div>
+                <div class="lcars-dialog-body">
+                    <div
+                        id="confirmMessage"
+                        style="margin: 10px 0 0 0; font-size: 1.2rem"
+                    >
+                        ARE YOU SURE?
+                    </div>
+                </div>
+                <div class="lcars-dialog-footer">
+                    <button class="btn-secondary" id="confirmCancelBtn">
+                        CANCEL
+                    </button>
+                    <button class="btn-primary" id="confirmOkBtn">
+                        PROCEED
+                    </button>
+                </div>
             </div>
         </dialog>
 
