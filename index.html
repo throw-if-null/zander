@@ -1553,6 +1553,48 @@
                 updateBookmarkLocation();
             }
 
+            function createBookmarkTile(bookmark) {
+                const tile = document.createElement("a");
+                tile.className = "bookmark-tile";
+
+                // Use category color for tile if available
+                const cat = state.categories.find(
+                    (c) => c.id === bookmark.categoryId,
+                );
+                const catColor = cat ? cat.color : "var(--lcars-orange)";
+
+                tile.style.setProperty("--cat-color", catColor);
+
+                tile.innerHTML = `
+                    <div class="bookmark-title">${escapeHtml(bookmark.title)}</div>
+                    <div class="bookmark-url">${escapeHtml(bookmark.url)}</div>
+                    <div class="bookmark-edit-icon" title="Edit">✎</div>
+                `;
+
+                // Left click opens
+                tile.href = bookmark.url;
+                tile.target = "_blank";
+                tile.rel = "noopener noreferrer";
+
+                // Edit button click
+                const editIcon = tile.querySelector(".bookmark-edit-icon");
+                editIcon.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openEditDialog(bookmark);
+                };
+
+
+
+                // Right click (context menu) or long press to edit
+                tile.oncontextmenu = (e) => {
+                    e.preventDefault();
+                    openEditDialog(bookmark);
+                };
+
+                return tile;
+            }
+
             function renderGrid() {
                 grid.innerHTML = "";
                 const filtered = state.bookmarks.filter(
@@ -1564,51 +1606,7 @@
                 } else {
                     emptyState.style.display = "none";
                     filtered.forEach((b) => {
-                        const tile = document.createElement("a");
-                        tile.className = "bookmark-tile";
-                        // Use category color for tile if available
-                        const cat = state.categories.find(
-                            (c) => c.id === b.categoryId,
-                        );
-                        const catColor = cat
-                            ? cat.color
-                            : "var(--lcars-orange)";
-
-                        tile.style.setProperty("--cat-color", catColor);
-
-                        tile.innerHTML = `
-                    <div class="bookmark-title">${escapeHtml(b.title)}</div>
-                    <div class="bookmark-url">${escapeHtml(b.url)}</div>
-                    <div class="bookmark-edit-icon" title="Edit">✎</div>
-                `;
-
-                        // Left click opens
-                        tile.href = b.url;
-                        tile.target = "_blank";
-                        tile.rel = "noopener noreferrer";
-
-                        // Edit button click
-                        const editIcon = tile.querySelector(
-                            ".bookmark-edit-icon",
-                        );
-                        editIcon.onclick = (e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            openEditDialog(b);
-                        };
-
-                        // Double click to edit
-                        tile.ondblclick = (e) => {
-                            e.preventDefault();
-                            openEditDialog(b);
-                        };
-
-                        // Right click (context menu) or long press to edit
-                        tile.oncontextmenu = (e) => {
-                            e.preventDefault();
-                            openEditDialog(b);
-                        };
-
+                        const tile = createBookmarkTile(b);
                         grid.appendChild(tile);
                     });
                 }
