@@ -212,16 +212,34 @@
                 height: 100%;
             }
 
-            /* Top Elbow Connector */
-            .sidebar-top-cap {
+            /* Generic LCARS elbow component */
+            .lcars-elbow {
                 height: 70px;
                 width: 100%;
+
+                /* Default orientation and radii (can be overridden per use) */
+                --elbow-position: bottom left;
+                --elbow-radius-top-left: 0;
+                --elbow-radius-top-right: 0;
+                --elbow-radius-bottom-right: 0;
+                --elbow-radius-bottom-left: 0;
+
                 background: radial-gradient(
-                    circle at bottom left,
+                    circle at var(--elbow-position),
                     var(--lcars-bg) 30px,
                     var(--shape-color) 30.5px
                 );
-                border-top-right-radius: var(--radius);
+
+                border-top-left-radius: var(--elbow-radius-top-left);
+                border-top-right-radius: var(--elbow-radius-top-right);
+                border-bottom-right-radius: var(--elbow-radius-bottom-right);
+                border-bottom-left-radius: var(--elbow-radius-bottom-left);
+            }
+
+            /* Top Elbow Connector (right side, opening downward) */
+            .sidebar-top-cap {
+                --elbow-position: bottom left;
+                --elbow-radius-top-right: var(--radius);
             }
 
             /* Middle Sidebar Track */
@@ -231,7 +249,7 @@
                 display: flex;
                 flex-direction: column;
                 gap: 5px;
-                padding: 5px 0 0 30px;
+                padding: 5px 0 0 31px;
             }
 
             /* Bottom Elbow Connector */
@@ -241,15 +259,10 @@
                 width: 100%;
             }
 
+            /* Bottom Elbow Connector (right side, opening upward) */
             .sidebar-bottom-cap {
-                height: 70px;
-                width: 100%;
-                background: radial-gradient(
-                    circle at top left,
-                    var(--lcars-bg) 30px,
-                    var(--shape-color) 30.5px
-                );
-                border-bottom-right-radius: var(--radius);
+                --elbow-position: top left;
+                --elbow-radius-bottom-right: var(--radius);
             }
 
             .footer-bar {
@@ -1014,7 +1027,7 @@
             <!-- Sidebar (Right - Full Height) -->
             <aside class="sidebar-container">
                 <!-- Top Elbow -->
-                <div class="sidebar-top-cap"></div>
+                <div class="lcars-elbow sidebar-top-cap"></div>
 
                 <!-- Middle Track -->
                 <div class="sidebar-track" id="categorySidebar">
@@ -1022,7 +1035,7 @@
                 </div>
 
                 <!-- Bottom Elbow -->
-                <div class="sidebar-bottom-cap"></div>
+                <div class="lcars-elbow sidebar-bottom-cap"></div>
             </aside>
 
             <main class="main-content">
