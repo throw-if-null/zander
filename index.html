@@ -663,16 +663,12 @@
             #themeControlsContainer .btn-secondary {
                 min-width: 140px;
                 justify-content: center;
-                background-color: var(--theme-secondary);
-                color: #000;
-                border-radius: var(--lcars-button-radius, 20px);
             }
 
             #themeControlsContainer .btn-secondary.theme-active {
                 background-color: var(--theme-main, var(--lcars-beige));
                 color: #000;
                 box-shadow: 0 0 0 2px #fff;
-                border-radius: var(--lcars-button-radius, 20px);
             }
 
 
@@ -2699,7 +2695,8 @@
                 THEMES.forEach((theme) => {
                     const btn = document.createElement("button");
                     btn.type = "button";
-                    btn.className = "btn-secondary";
+                    btn.className =
+                        "lcars-button lcars-pill lcars-focus btn-secondary";
                     if (theme.id === currentTheme) {
                         btn.classList.add("theme-active");
                     }
