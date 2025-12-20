@@ -588,7 +588,9 @@
 
             /* Dialog button variants built on LCARS primitives */
             .btn-primary,
-            .btn-secondary {
+            .btn-secondary,
+            .btn-primary.action-btn,
+            .btn-secondary.action-btn {
                 /* Base LCARS button */
                 display: inline-flex;
                 align-items: center;
@@ -663,12 +665,14 @@
                 justify-content: center;
                 background-color: var(--theme-secondary);
                 color: #000;
+                border-radius: var(--lcars-button-radius, 20px);
             }
 
             #themeControlsContainer .btn-secondary.theme-active {
                 background-color: var(--theme-main, var(--lcars-beige));
                 color: #000;
                 box-shadow: 0 0 0 2px #fff;
+                border-radius: var(--lcars-button-radius, 20px);
             }
 
 
@@ -1165,7 +1169,7 @@
                                         <!-- Rows injected via JS -->
                                     </div>
                                     <button
-                                        class="btn-primary action-btn action-btn--small"
+                                        class="lcars-button lcars-pill lcars-focus btn-primary action-btn action-btn--small"
                                         id="addCategoryBtnMain"
                                         style="width: 100%; margin-bottom: 20px"
                                     >
@@ -1199,7 +1203,7 @@
 </h2>                                <div id="settingsDataSectionMain">
                                     <div class="form-group">
                                         <button
-                                            class="btn-primary action-btn action-btn--small"
+                                            class="lcars-button lcars-pill lcars-focus btn-primary action-btn action-btn--small"
                                             id="exportBtnMain"
                                             style="
                                                 width: 100%;
@@ -1209,7 +1213,7 @@
                                             EXPORT DATABASE
                                         </button>
                                         <button
-                                            class="btn-primary action-btn action-btn--small"
+                                            class="lcars-button lcars-pill lcars-focus btn-primary action-btn action-btn--small"
                                             id="importBtnMain"
                                             style="
                                                 width: 100%;
@@ -1233,7 +1237,7 @@
 </h2>                                <div id="settingsDataSectionMain">
                                     <div class="form-group">
                                         <button
-                                            class="btn-secondary reset"
+                                            class="lcars-button lcars-pill lcars-focus btn-secondary reset"
                                             id="resetBtnMain"
                                             style="width: 100%"
                                         >
