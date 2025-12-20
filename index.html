@@ -296,20 +296,35 @@
 
             /* Sidebar Buttons */
             .cat-btn {
-                background-color: var(--cat-color, var(--shape-color));
-                color: #000;
-                border: none;
-                height: 50px;
+                /* Base LCARS button */
+                display: inline-flex;
+                align-items: center;
+                justify-content: flex-end;
+                min-height: 50px;
                 width: 100%;
+                border: none;
+                border-radius: var(--lcars-button-radius, 0px);
+                cursor: pointer;
+                position: relative;
+
+                /* Typography */
                 font-family: var(--lcars-font);
                 font-size: 1.2rem;
                 font-weight: bold;
                 text-transform: uppercase;
-                text-align: right;
+                white-space: nowrap;
+
+                /* Colors */
+                --lcars-button-bg: var(--cat-color, var(--shape-color));
+                --lcars-button-fg: #000;
+                background-color: var(--lcars-button-bg);
+                color: var(--lcars-button-fg);
+
+                /* Layout */
                 padding-right: 15px;
-                cursor: pointer;
+                text-align: right;
+
                 transition: background-color 0.2s;
-                position: relative;
             }
 
             .cat-btn:hover,
@@ -328,7 +343,7 @@
                 top: 0;
                 bottom: 0;
                 width: 4px;
-                background-color: #ffffff;
+                background-color: var(--lcars-focus-bar-color, #ffffff);
             }
 
             /* Nested Categories */
@@ -513,68 +528,131 @@
                 letter-spacing: 1px;
             }
 
-            /* Shared LCARS button base style */
-            .lcars-btn,
-            .btn-primary,
-            .btn-secondary {
-                background-color: var(--lcars-beige);
-                color: #000;
-                border: none;
-                padding: 0 15px;
-                height: 40px;
+            /* Base LCARS button primitive */
+            .lcars-button {
+                /* Layout */
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
+
+                /* Box */
+                min-height: 32px;
+                padding: 0 15px;
+                border: none;
+                border-radius: var(--lcars-button-radius, 0px);
+                background-color: var(--lcars-button-bg, var(--lcars-beige));
+                color: var(--lcars-button-fg, #000);
+
+                /* Text */
                 font-family: var(--lcars-font);
                 font-size: 1.1rem;
                 font-weight: bold;
                 text-transform: uppercase;
-                border-radius: 20px;
+                white-space: nowrap;
+
+                /* Behavior */
                 cursor: pointer;
                 position: relative;
-                white-space: nowrap;
             }
 
-            .lcars-btn-primary,
-            .btn-primary {
-                background-color: var(--lcars-orange);
-                color: #000;
+            /* Hover behavior (can be disabled per-variant) */
+            .lcars-button:hover {
+                filter: var(--lcars-button-hover-filter, brightness(1.1));
             }
 
-            .lcars-btn-secondary,
+            /* Global LCARS focus bar helper (top edge by default) */
+            .lcars-focus:focus-visible {
+                outline: none;
+            }
+
+            .lcars-focus:focus-visible::after {
+                content: "";
+                position: absolute;
+
+                /* Edge selection via custom properties */
+                top: var(--lcars-focus-bar-top, -10px);
+                bottom: var(--lcars-focus-bar-bottom, auto);
+                left: var(--lcars-focus-bar-left, 0);
+                right: var(--lcars-focus-bar-right, 0);
+
+                /* Size + color */
+                height: var(--lcars-focus-bar-height, 4px);
+                width: var(--lcars-focus-bar-width, auto);
+                background-color: var(--lcars-focus-bar-color, #ffffff);
+            }
+
+            /* Dialog button variants built on LCARS primitives */
+            .btn-primary,
             .btn-secondary {
-                background-color: #444;
-                color: var(--lcars-beige);
+                /* Base LCARS button */
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 40px;
+                padding: 0 15px;
+                border: none;
+                border-radius: var(--lcars-button-radius, 0px);
+                cursor: pointer;
+                position: relative;
+
+                /* Typography */
+                font-family: var(--lcars-font);
+                font-size: 1.1rem;
+                font-weight: bold;
+                text-transform: uppercase;
+                white-space: nowrap;
+
+                /* Default colors (overridden per variant) */
+                background-color: var(--lcars-beige);
+                color: #000;
+
+                /* Hover (uses same mechanism as .lcars-button) */
+                filter: var(--lcars-button-hover-filter, none);
+            }
+
+            .btn-primary {
+                --lcars-button-bg: var(--lcars-orange);
+                --lcars-button-fg: #000;
+                background-color: var(--lcars-button-bg);
+                color: var(--lcars-button-fg);
+            }
+
+            .btn-secondary {
+                --lcars-button-bg: #444;
+                --lcars-button-fg: var(--lcars-beige);
+                background-color: var(--lcars-button-bg);
+                color: var(--lcars-button-fg);
             }
 
             .btn-secondary.delete,
             .btn-secondary.reset {
-                background-color: var(--lcars-red);
-                color: #000;
+                --lcars-button-bg: var(--lcars-red);
+                --lcars-button-fg: #000;
+                background-color: var(--lcars-button-bg);
+                color: var(--lcars-button-fg);
             }
 
-            .lcars-btn:hover,
             .btn-primary:hover,
             .btn-secondary:hover {
-                filter: brightness(1.1);
+                filter: var(--lcars-button-hover-filter, brightness(1.1));
             }
 
-            .lcars-btn:focus-visible,
             .btn-primary:focus-visible,
             .btn-secondary:focus-visible {
                 outline: none;
             }
 
-            .lcars-btn:focus-visible::after,
             .btn-primary:focus-visible::after,
             .btn-secondary:focus-visible::after {
                 content: "";
                 position: absolute;
-                top: -10px;
-                left: 0;
-                right: 0;
-                height: 4px;
-                background-color: #ffffff;
+                top: var(--lcars-focus-bar-top, -10px);
+                bottom: var(--lcars-focus-bar-bottom, auto);
+                left: var(--lcars-focus-bar-left, 0);
+                right: var(--lcars-focus-bar-right, 0);
+                height: var(--lcars-focus-bar-height, 4px);
+                width: var(--lcars-focus-bar-width, auto);
+                background-color: var(--lcars-focus-bar-color, #ffffff);
             }
 
             /* Theme selector layout */
@@ -699,28 +777,36 @@
                 background-color: var(--lcars-orange);
             }
 
-            /* Footer Actions */
+            /* Footer Actions: LCARS buttons with footer-specific layout */
             .action-btn {
-                /* Uses theme secondary so bookmarks & footer buttons match */
-                background-color: var(--theme-secondary, color-mix(
-                    in srgb,
-                    var(--shape-color) 30%,
-                    #ffffff 70%
-                ));
-                color: #000;
-                border: none;
-                padding: 0 15px;
-                height: 40px;
-                width: 150px;
-                display: flex;
+                /* Base LCARS button */
+                display: inline-flex;
                 align-items: center;
                 justify-content: flex-end;
+                min-height: 40px;
+                padding: 0 15px;
+                width: 150px;
+                border: none;
+                border-radius: var(--lcars-button-radius, 0px);
+                cursor: pointer;
+                position: relative;
+
+                /* Typography */
                 font-family: var(--lcars-font);
                 font-size: 1.2rem;
                 font-weight: bold;
                 text-transform: uppercase;
-                cursor: pointer;
-                position: relative;
+                white-space: nowrap;
+
+                /* Footer-specific colors */
+                --lcars-button-bg: var(--theme-secondary, color-mix(
+                    in srgb,
+                    var(--shape-color) 30%,
+                    #ffffff 70%
+                ));
+                --lcars-button-fg: #000;
+                background-color: var(--lcars-button-bg);
+                color: var(--lcars-button-fg);
             }
 
             .action-btn:hover {
@@ -735,6 +821,7 @@
                 justify-content: center;
             }
 
+            /* Footer buttons use the shared LCARS focus helper */
             .action-btn:focus-visible {
                 outline: none;
             }
@@ -745,8 +832,8 @@
                 left: 0;
                 right: 0;
                 top: -9px;
-                height: 4px;
-                background-color: #ffffff;
+                height: var(--lcars-focus-bar-height, 4px);
+                background-color: var(--lcars-focus-bar-color, #ffffff);
                 border-radius: 0;
             }
 
@@ -1192,13 +1279,13 @@
 
             <div class="footer-bar">
                 <div id="systemStatus" class="status-display"></div>
-                <button class="action-btn" id="addBtn" aria-label="Add Entry (Alt+N)">ADD ENTRY</button>
+                <button class="lcars-button lcars-focus action-btn" id="addBtn" aria-label="Add Entry (Alt+N)">ADD ENTRY</button>
                 <div class="settings-wrapper">
-                    <button class="action-btn" id="settingsBtn" aria-label="Settings (Alt+S)">
+                    <button class="lcars-button lcars-focus action-btn" id="settingsBtn" aria-label="Settings (Alt+S)">
                         SETTINGS
                     </button>
                 </div>
-                <button class="action-btn" id="aboutBtn" aria-label="About Zander">ABOUT</button>
+                <button class="lcars-button lcars-focus action-btn" id="aboutBtn" aria-label="About Zander">ABOUT</button>
             </div>
         </div>
 
@@ -1252,7 +1339,7 @@
                     <div class="lcars-dialog-footer">
                         <button
                             type="button"
-                            class="btn-secondary delete"
+                            class="lcars-button lcars-focus btn-secondary delete"
                             id="deleteBtn"
                             style="display: none"
                             aria-label="Delete Bookmark"
@@ -1261,7 +1348,7 @@
                         </button>
                         <button
                             type="button"
-                            class="btn-secondary"
+                            class="lcars-button lcars-focus btn-secondary"
                             onclick="
                                 document
                                     .getElementById('bookmarkDialog')
@@ -1271,7 +1358,7 @@
                         >
                             CANCEL
                         </button>
-                        <button type="submit" class="btn-primary" aria-label="Save Bookmark">
+                        <button type="submit" class="lcars-button lcars-focus btn-primary" aria-label="Save Bookmark">
                             MAKE IT SO
                         </button>
                     </div>
@@ -1298,10 +1385,10 @@
                     </div>
                 </div>
                 <div class="lcars-dialog-footer">
-                    <button class="btn-secondary" id="confirmCancelBtn" aria-label="Cancel">
+                    <button class="lcars-button lcars-focus btn-secondary" id="confirmCancelBtn" aria-label="Cancel">
                         CANCEL
                     </button>
-                    <button class="btn-primary" id="confirmOkBtn" aria-label="Proceed">
+                    <button class="lcars-button lcars-focus btn-primary" id="confirmOkBtn" aria-label="Proceed">
                         PROCEED
                     </button>
                 </div>
