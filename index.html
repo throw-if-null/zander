@@ -281,8 +281,8 @@
                 align-self: end;
             }
 
-            .footer-bar > .action-btn,
-            .footer-bar > .settings-wrapper > .action-btn {
+            .footer-bar > .lcars-footer-bar-button,
+            .footer-bar > .settings-wrapper > .lcars-footer-bar-button {
                 height: 100%;
                 border-radius: 0;
                 margin: 0;
@@ -294,33 +294,24 @@
                 display: flex;
             }
 
-            /* Sidebar Buttons */
+            /* Sidebar Buttons (LCARS category actions) */
             .cat-btn {
-                /* Base LCARS button (conceptually .lcars-button) */
+                /* Rely on lcars-button defaults for most behavior, but keep sidebar-specific layout */
+                --lcars-button-bg: var(--cat-color, var(--shape-color));
+                --lcars-button-fg: #000;
+                --lcars-button-radius: 0px;
+
                 display: inline-flex;
                 align-items: center;
                 justify-content: flex-end;
-                min-height: 50px;
+                height: 50px;
                 width: 100%;
-                border: none;
-                border-radius: var(--lcars-button-radius, 0px);
-                cursor: pointer;
-                position: relative;
 
-                /* Typography */
                 font-family: var(--lcars-font);
-                font-size: 1.2rem;
+                font-size: 1.1rem;
                 font-weight: bold;
                 text-transform: uppercase;
-                white-space: nowrap;
 
-                /* Colors */
-                --lcars-button-bg: var(--cat-color, var(--shape-color));
-                --lcars-button-fg: #000;
-                background-color: var(--lcars-button-bg);
-                color: var(--lcars-button-fg);
-
-                /* Layout */
                 padding-right: 15px;
                 text-align: right;
 
@@ -332,18 +323,14 @@
                 background-color: var(--lcars-beige);
             }
 
-            .cat-btn:focus-visible {
-                outline: none;
-            }
-
-            .cat-btn:focus-visible::after {
-                content: "";
-                position: absolute;
-                left: -10px;
-                top: 0;
-                bottom: 0;
-                width: 4px;
-                background-color: var(--lcars-focus-bar-color, #ffffff);
+            /* Use lcars-focus helper with a left-edge focus bar for category buttons */
+            .cat-btn {
+                --lcars-focus-bar-top: 0;
+                --lcars-focus-bar-bottom: 0;
+                --lcars-focus-bar-left: -10px;
+                --lcars-focus-bar-right: auto;
+                --lcars-focus-bar-width: 4px;
+                --lcars-focus-bar-height: 100%;
             }
 
             /* Nested Categories */
@@ -548,7 +535,8 @@
                 font-size: 1.1rem;
                 font-weight: bold;
                 text-transform: uppercase;
-                white-space: nowrap;
+                white-space: normal;
+                word-break: break-word;
 
                 /* Behavior */
                 cursor: pointer;
@@ -741,25 +729,14 @@
             }
 
             /* Footer Actions: LCARS buttons with footer-specific layout */
-            .action-btn,
-            .lcars-footer-action {
-                /* Base LCARS button (conceptually .lcars-button) */
+            .lcars-footer-bar-button {
+                /* Rely on lcars-button for core shape/typography */
                 display: inline-flex;
                 align-items: center;
                 justify-content: flex-end;
                 min-height: 40px;
                 padding: 0 15px;
                 width: 150px;
-                border: none;
-                border-radius: var(--lcars-button-radius, 0px);
-                cursor: pointer;
-                position: relative;
-
-                /* Typography */
-                font-family: var(--lcars-font);
-                font-size: 1.2rem;
-                font-weight: bold;
-                text-transform: uppercase;
                 white-space: nowrap;
 
                 /* Footer-specific colors */
@@ -773,7 +750,7 @@
                 color: var(--lcars-button-fg);
             }
 
-            .action-btn:hover {
+            .lcars-footer-bar-button:hover {
                 background-color: #fff;
             }
 
@@ -786,13 +763,11 @@
             }
 
             /* Footer buttons use the shared LCARS focus helper */
-            .action-btn:focus-visible,
-            .lcars-footer-action:focus-visible {
+            .lcars-footer-bar-button:focus-visible {
                 outline: none;
             }
 
-            .action-btn:focus-visible::after,
-            .lcars-footer-action:focus-visible::after {
+            .lcars-footer-bar-button:focus-visible::after {
                 content: "";
                 position: absolute;
                 left: 0;
@@ -1245,13 +1220,13 @@
 
             <div class="footer-bar">
                 <div id="systemStatus" class="status-display"></div>
-                <button class="lcars-button lcars-focus lcars-color-orange lcars-footer-action action-btn" id="addBtn" aria-label="Add Entry (Alt+N)">ADD ENTRY</button>
+                <button class="lcars-button lcars-focus lcars-color-orange lcars-footer-bar-button" id="addBtn" aria-label="Add Entry (Alt+N)">ADD ENTRY</button>
                 <div class="settings-wrapper">
-                    <button class="lcars-button lcars-focus lcars-color-orange lcars-footer-action action-btn" id="settingsBtn" aria-label="Settings (Alt+S)">
+                    <button class="lcars-button lcars-focus lcars-color-orange lcars-footer-bar-button" id="settingsBtn" aria-label="Settings (Alt+S)">
                         SETTINGS
                     </button>
                 </div>
-                <button class="lcars-button lcars-focus lcars-color-orange lcars-footer-action action-btn" id="aboutBtn" aria-label="About Zander">ABOUT</button>
+                <button class="lcars-button lcars-focus lcars-color-orange lcars-footer-bar-button" id="aboutBtn" aria-label="About Zander">ABOUT</button>
             </div>
         </div>
 
@@ -1760,7 +1735,7 @@
                     wrapper.className = "cat-wrapper";
 
                     const btn = document.createElement("button");
-                    btn.className = `cat-btn ${state.currentCategory === cat.id ? "active" : ""}`;
+                    btn.className = `lcars-button lcars-focus cat-btn ${state.currentCategory === cat.id ? "active" : ""}`;
                     btn.textContent = cat.name;
                     btn.style.setProperty("--cat-color", cat.color);
                     btn.dataset.id = cat.id;
