@@ -296,7 +296,7 @@
 
             /* Sidebar Buttons */
             .cat-btn {
-                /* Base LCARS button */
+                /* Base LCARS button (conceptually .lcars-button) */
                 display: inline-flex;
                 align-items: center;
                 justify-content: flex-end;
@@ -555,6 +555,11 @@
                 position: relative;
             }
 
+            /* Derived LCARS pill variant (rounded button) */
+            .lcars-pill {
+                --lcars-button-radius: 20px;
+            }
+
             /* Hover behavior (can be disabled per-variant) */
             .lcars-button:hover {
                 filter: var(--lcars-button-hover-filter, brightness(1.1));
@@ -603,33 +608,24 @@
                 white-space: nowrap;
 
                 /* Default colors (overridden per variant) */
-                background-color: var(--lcars-beige);
-                color: #000;
-
-                /* Hover (uses same mechanism as .lcars-button) */
-                filter: var(--lcars-button-hover-filter, none);
+                background-color: var(--lcars-button-bg, var(--lcars-beige));
+                color: var(--lcars-button-fg, #000);
             }
 
             .btn-primary {
                 --lcars-button-bg: var(--lcars-orange);
                 --lcars-button-fg: #000;
-                background-color: var(--lcars-button-bg);
-                color: var(--lcars-button-fg);
             }
 
             .btn-secondary {
                 --lcars-button-bg: #444;
                 --lcars-button-fg: var(--lcars-beige);
-                background-color: var(--lcars-button-bg);
-                color: var(--lcars-button-fg);
             }
 
             .btn-secondary.delete,
             .btn-secondary.reset {
                 --lcars-button-bg: var(--lcars-red);
                 --lcars-button-fg: #000;
-                background-color: var(--lcars-button-bg);
-                color: var(--lcars-button-fg);
             }
 
             .btn-primary:hover,
@@ -779,7 +775,7 @@
 
             /* Footer Actions: LCARS buttons with footer-specific layout */
             .action-btn {
-                /* Base LCARS button */
+                /* Base LCARS button (conceptually .lcars-button) */
                 display: inline-flex;
                 align-items: center;
                 justify-content: flex-end;
@@ -1339,7 +1335,7 @@
                     <div class="lcars-dialog-footer">
                         <button
                             type="button"
-                            class="lcars-button lcars-focus btn-secondary delete"
+                            class="lcars-button lcars-pill lcars-focus btn-secondary delete"
                             id="deleteBtn"
                             style="display: none"
                             aria-label="Delete Bookmark"
@@ -1348,7 +1344,7 @@
                         </button>
                         <button
                             type="button"
-                            class="lcars-button lcars-focus btn-secondary"
+                            class="lcars-button lcars-pill lcars-focus btn-secondary"
                             onclick="
                                 document
                                     .getElementById('bookmarkDialog')
@@ -1358,7 +1354,7 @@
                         >
                             CANCEL
                         </button>
-                        <button type="submit" class="lcars-button lcars-focus btn-primary" aria-label="Save Bookmark">
+                        <button type="submit" class="lcars-button lcars-pill lcars-focus btn-primary" aria-label="Save Bookmark">
                             MAKE IT SO
                         </button>
                     </div>
@@ -1385,10 +1381,10 @@
                     </div>
                 </div>
                 <div class="lcars-dialog-footer">
-                    <button class="lcars-button lcars-focus btn-secondary" id="confirmCancelBtn" aria-label="Cancel">
+                    <button class="lcars-button lcars-pill lcars-focus btn-secondary" id="confirmCancelBtn" aria-label="Cancel">
                         CANCEL
                     </button>
-                    <button class="lcars-button lcars-focus btn-primary" id="confirmOkBtn" aria-label="Proceed">
+                    <button class="lcars-button lcars-pill lcars-focus btn-primary" id="confirmOkBtn" aria-label="Proceed">
                         PROCEED
                     </button>
                 </div>
