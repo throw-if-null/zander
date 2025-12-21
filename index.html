@@ -721,9 +721,21 @@
             }
 
             .bookmark-footer-btn {
-                width: 18px;
-                height: 18px;
+                /* LCARS pin variant for bookmark footer actions */
+                --lcars-pin-size: 18px;
+
+                width: var(--lcars-pin-size);
+                height: var(--lcars-pin-size);
                 border-radius: 50%;
+                border: none;
+                padding: 0;
+
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+
+                background-color: var(--lcars-pin-bg, var(--theme-main));
+                color: #000;
                 cursor: pointer;
                 transition: transform 0.2s, filter 0.2s;
             }
@@ -734,11 +746,11 @@
             }
 
             .bookmark-url-icon {
-                background-color: var(--theme-main);
+                --lcars-pin-bg: var(--theme-main);
             }
 
             .bookmark-edit-icon {
-                background-color: var(--lcars-orange);
+                --lcars-pin-bg: var(--lcars-orange);
             }
 
             /* Footer Actions: LCARS buttons with footer-specific layout */
@@ -1008,31 +1020,114 @@
                 outline-offset: 2px;
             }
 
-            .category-config-btn {
-                background-color: var(--theme-secondary, var(--lcars-blue));
-                color: #000;
+            /* LCARS pin primitive: small circular action control */
+            .lcars-pin {
+                --lcars-pin-size: 20px;
+                --lcars-pin-bg: var(--theme-secondary, var(--lcars-blue));
+                --lcars-pin-fg: #000;
+
+                width: var(--lcars-pin-size);
+                height: var(--lcars-pin-size);
+                border-radius: 50%;
                 border: none;
-                height: 40px;
-                border-radius: 20px;
-                cursor: pointer;
-                font-weight: bold;
-                display: flex;
+                padding: 0;
+
+                display: inline-flex;
                 align-items: center;
                 justify-content: center;
-                font-size: 1.1rem;
+
+                background-color: var(--lcars-pin-bg);
+                color: var(--lcars-pin-fg);
+                font-family: var(--lcars-font);
+                font-weight: bold;
+                font-size: 1rem;
+                line-height: 1;
+
+                cursor: pointer;
+                position: relative;
+            }
+
+            .lcars-pin:hover {
+                filter: brightness(1.1);
+                transform: scale(1.05);
+            }
+
+            .lcars-pin:focus-visible {
+                outline: 2px solid #ffffff;
+                outline-offset: 2px;
+            }
+
+            .category-config-btn {
+                /* Category config buttons as LCARS pins */
+                --lcars-pin-size: 40px;
+                --lcars-pin-bg: var(--theme-secondary, var(--lcars-blue));
+                --lcars-pin-fg: #000;
+
+                width: var(--lcars-pin-size);
+                height: var(--lcars-pin-size);
+                border-radius: 50%;
+                border: none;
+                padding: 0;
+
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+
+                background-color: var(--lcars-pin-bg);
+                color: var(--lcars-pin-fg);
+                font-family: var(--lcars-font);
+                font-weight: bold;
+                font-size: 1.25rem;
+                line-height: 1.1;
+                letter-spacing: 0.03em;
+
+                cursor: pointer;
+                position: relative;
                 box-shadow: inset 0 0 0 2px #000;
             }
 
             .category-config-btn:hover {
                 background-color: color-mix(
                     in srgb,
-                    var(--theme-secondary, var(--lcars-blue)) 70%,
+                    var(--lcars-pin-bg, var(--theme-secondary, var(--lcars-blue))) 70%,
                     #ffffff 30%
                 );
             }
 
             .category-config-btn.delete {
-                background-color: var(--lcars-red);
+                --lcars-pin-bg: var(--lcars-red);
+                background-color: var(--lcars-pin-bg);
+            }
+
+            /* Category pin icons (SVG) */
+            .category-config-btn svg {
+                width: 70%;
+                height: 70%;
+                display: block;
+                margin: auto;
+                fill: currentColor;
+            }
+
+            .category-config-btn[data-glyph="up"] svg {
+                width: 87%;
+                height: 87%;
+                transform: translateY(-2px);
+            }
+
+            .category-config-btn[data-glyph="down"] svg {
+                width: 87%;
+                height: 87%;
+                transform: translateY(2px);
+            }
+
+            .category-config-btn[data-glyph="plus"] svg {
+                width: 72%;
+                height: 72%;
+            }
+
+            .category-config-btn[data-glyph="delete"] svg {
+                width: 80%;
+                height: 80%;
             }
 
             /* System Status Display */
@@ -2262,7 +2357,12 @@
                     // Move Up
                     const upBtn = document.createElement("button");
                     upBtn.className = "category-config-btn";
-                    upBtn.innerHTML = "↑";
+                    upBtn.dataset.glyph = "up";
+                    upBtn.innerHTML = `
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <polygon points="12,6 6,18 18,18" />
+                        </svg>
+                    `;
                     upBtn.setAttribute("aria-label", `Move ${cat.name} category up`);
                     upBtn.disabled = index === 0;
                     if (index === 0) upBtn.style.opacity = "0.5";
@@ -2271,7 +2371,12 @@
                     // Move Down
                     const downBtn = document.createElement("button");
                     downBtn.className = "category-config-btn";
-                    downBtn.innerHTML = "↓";
+                    downBtn.dataset.glyph = "down";
+                    downBtn.innerHTML = `
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <polygon points="6,6 18,6 12,18" />
+                        </svg>
+                    `;
                     downBtn.setAttribute("aria-label", `Move ${cat.name} category down`);
                     downBtn.disabled = index === siblings.length - 1;
                     if (index === siblings.length - 1)
@@ -2281,7 +2386,13 @@
                     // Add Subcategory (New)
                     const addBtn = document.createElement("button");
                     addBtn.className = "category-config-btn";
-                    addBtn.innerHTML = "+";
+                    addBtn.dataset.glyph = "plus";
+                    addBtn.innerHTML = `
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <rect x="11" y="5" width="2" height="14" />
+                            <rect x="5" y="11" width="14" height="2" />
+                        </svg>
+                    `;
                     addBtn.setAttribute("aria-label", `Add subcategory to ${cat.name}`);
                     if (level >= 3) {
                         addBtn.disabled = true;
@@ -2292,7 +2403,13 @@
                     // Delete
                     const delBtn = document.createElement("button");
                     delBtn.className = "category-config-btn delete";
-                    delBtn.innerHTML = "×";
+                    delBtn.dataset.glyph = "delete";
+                    delBtn.innerHTML = `
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <rect x="6" y="11" width="12" height="2" transform="rotate(45 12 12)" />
+                            <rect x="6" y="11" width="12" height="2" transform="rotate(-45 12 12)" />
+                        </svg>
+                    `;
                     delBtn.setAttribute("aria-label", `Delete ${cat.name} category`);
                     delBtn.onclick = () => deleteCategory(cat.id);
 
