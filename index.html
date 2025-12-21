@@ -12,48 +12,82 @@
         />
         <style>
             :root {
-                --lcars-bg: #000000;
+                /* ==============================================
+                   DESIGN SYSTEM TOKENS
+                   ============================================== */
+
+                /* Color Palette: Core LCARS colors */
+                --lcars-black: #000000;
+                --lcars-white: #ffffff;
                 --lcars-orange: #ff9900;
                 --lcars-purple: #cc99cc;
                 --lcars-red: #cc6666;
                 --lcars-blue: #9999cc;
                 --lcars-beige: #ffcc99;
                 --lcars-gray: #999999;
+
+                /* Color Palette: Dark shades for surfaces */
+                --lcars-dark-1: #111111;
+                --lcars-dark-2: #222222;
+                --lcars-dark-3: #444444;
+
+                /* Legacy alias (prefer --lcars-black) */
+                --lcars-bg: var(--lcars-black);
+
+                /* Typography */
                 --lcars-font: "Antonio", sans-serif;
-                --gutter: 5px;
-                --radius: 30px;
+
+                /* Spacing */
+                --lcars-gutter: 5px;
+                --lcars-gap: 10px;
+
+                /* Border Radii */
+                --lcars-radius-xs: 5px;
+                --lcars-radius-sm: 16px;
+                --lcars-radius-md: 20px;
+                --lcars-radius-lg: 30px;
+
+                /* Legacy aliases (prefer --lcars-radius-*) */
+                --gutter: var(--lcars-gutter);
+                --radius: var(--lcars-radius-lg);
+                --gap: var(--lcars-gap);
 
                 /* Layout variables */
                 --sidebar-width: 160px;
                 --header-height: 80px;
-                --gap: 10px;
+
+                /* Focus system */
+                --lcars-focus-outline-width: 3px;
+                --lcars-focus-outline-color: var(--lcars-white);
+                --lcars-focus-outline-offset: 2px;
+
+                /* ==============================================
+                   COMPONENT-LEVEL VARIABLE DOCUMENTATION
+                   These are set inline by JS or via component CSS:
+
+                   --cat-color: Category button background (set by JS)
+                   --lcars-button-bg: Button background color
+                   --lcars-button-fg: Button foreground color
+                   --lcars-button-radius: Button border radius
+                   --lcars-button-hover-filter: Hover effect filter
+                   --lcars-pin-size: Pin/circular button size
+                   --lcars-pin-bg: Pin background color
+                   --lcars-pin-fg: Pin foreground color
+                   --lcars-focus-bar-*: Focus bar positioning vars
+                   ============================================== */
             }
 
-            /* THEME VARIABLES
-               - Defined on body so per-theme overrides always apply
-               - --theme-main drives the LCARS frame & primary accents
-               - --shape-color derives from --theme-main
-               - --theme-secondary drives bookmark body accents
-               - Background (black) and base text color remain fixed */
-            body {
-                --theme-main: #830025; /* default: La'An */
-                --shape-color: var(--theme-main);
-                /* Secondary color used for bookmark body & footer buttons */
-                --theme-secondary: color-mix(
-                    in srgb,
-                    var(--shape-color) 30%,
-                    #ffffff 70%
-                );
-            }
-
-            /* Theme variants applied on the <body> element via data-theme */
+            /* ==============================================
+               THEME VARIANTS
+               Applied via data-theme attribute on <body>
+               ============================================== */
             body[data-theme="laan"] {
                 --theme-main: #830025;
                 --shape-color: var(--theme-main);
                 --theme-secondary: color-mix(
                     in srgb,
                     var(--shape-color) 30%,
-                    #ffffff 70%
+                    var(--lcars-white) 70%
                 );
             }
 
@@ -63,7 +97,7 @@
                 --theme-secondary: color-mix(
                     in srgb,
                     var(--shape-color) 30%,
-                    #ffffff 70%
+                    var(--lcars-white) 70%
                 );
             }
 
@@ -73,14 +107,14 @@
                 --theme-secondary: color-mix(
                     in srgb,
                     var(--shape-color) 30%,
-                    #ffffff 70%
+                    var(--lcars-white) 70%
                 );
             }
 
             body[data-theme="chapel"] {
-                --theme-main: #ffffff;
+                --theme-main: var(--lcars-white);
                 --shape-color: var(--theme-main);
-                --theme-secondary: #999999;
+                --theme-secondary: var(--lcars-gray);
             }
 
             body[data-theme="spock"] {
@@ -89,7 +123,7 @@
                 --theme-secondary: color-mix(
                     in srgb,
                     var(--shape-color) 30%,
-                    #ffffff 70%
+                    var(--lcars-white) 70%
                 );
             }
 
@@ -97,14 +131,14 @@
                 /* LCARS-friendly darker silver main tone */
                 --theme-main: #8c8c8c;
                 --shape-color: var(--theme-main);
-                /* Borg green secondary accent computed to match footer/buttons */
+                /* Borg green secondary accent */
                 --theme-secondary: #7fff00;
             }
 
             body[data-theme="mbenga"] {
                 --theme-main: #92b7dd;
                 --shape-color: var(--theme-main);
-                --theme-secondary: #ffffff;
+                --theme-secondary: var(--lcars-white);
             }
 
             body[data-theme="shran"] {
@@ -117,18 +151,25 @@
                 box-sizing: border-box;
             }
 
+            /* ==============================================
+               FOCUS SYSTEM
+               Unified to 3px for strong a11y contrast
+               ============================================== */
+
+            /* Default focus style for all interactive elements */
             :focus-visible {
-                outline: 2px solid #fff;
-                outline-offset: 2px;
+                outline: var(--lcars-focus-outline-width) solid var(--lcars-focus-outline-color);
+                outline-offset: var(--lcars-focus-outline-offset);
                 box-shadow: none;
             }
 
-            /* LCARS focus helpers */
+            /* Explicit helper class for outline focus (same as default, for clarity) */
             .lcars-focus-outline:focus-visible {
-                outline: 3px solid #ffffff;
-                outline-offset: 2px;
+                outline: var(--lcars-focus-outline-width) solid var(--lcars-focus-outline-color);
+                outline-offset: var(--lcars-focus-outline-offset);
             }
 
+            /* Focus bar helper: draws a directional bar using ::after pseudo-element */
             .lcars-focus-bar:focus-visible::after {
                 content: "";
                 position: absolute;
@@ -142,21 +183,34 @@
                 /* Size + color */
                 height: var(--lcars-focus-bar-height, 4px);
                 width: var(--lcars-focus-bar-width, auto);
-                background-color: var(--lcars-focus-bar-color, #ffffff);
+                background-color: var(--lcars-focus-bar-color, var(--lcars-white));
             }
 
-            /* Pill buttons, inputs, and config buttons use a strong white outline on focus */
+            /* Pill buttons, inputs, and config buttons use outline focus */
             .lcars-pill:focus-visible,
             input:focus-visible,
             select:focus-visible,
             textarea:focus-visible,
             .category-config-btn:focus-visible {
-                outline: 3px solid #ffffff;
-                outline-offset: 2px;
+                outline: var(--lcars-focus-outline-width) solid var(--lcars-focus-outline-color);
+                outline-offset: var(--lcars-focus-outline-offset);
             }
 
+            /* ==============================================
+               BODY: Layout + Theme Variables (merged)
+               ============================================== */
             body {
-                background-color: #000;
+                /* Theme variables (can be overridden by data-theme) */
+                --theme-main: #830025; /* default: La'An */
+                --shape-color: var(--theme-main);
+                --theme-secondary: color-mix(
+                    in srgb,
+                    var(--shape-color) 30%,
+                    var(--lcars-white) 70%
+                );
+
+                /* Layout */
+                background-color: var(--lcars-black);
                 color: var(--lcars-orange);
                 font-family: var(--lcars-font);
                 margin: 0;
@@ -218,7 +272,7 @@
 
             .app-title {
                 color: var(--lcars-orange);
-                background-color: #000;
+                background-color: var(--lcars-black);
                 font-size: 44px;
                 line-height: 1;
                 font-weight: bold;
@@ -246,7 +300,7 @@
                 right: 0;
                 bottom: -10px;
                 height: 4px;
-                background-color: #ffffff;
+                background-color: var(--lcars-white);
             }
 
             /* Sidebar (Full Height Column) */
@@ -330,7 +384,7 @@
                 height: 100%;
                 border-radius: 0;
                 margin: 0;
-                border-left: 5px solid #000;
+                border-left: 5px solid var(--lcars-black);
             }
 
             .footer-bar .settings-wrapper {
@@ -342,7 +396,7 @@
             .cat-btn {
                 /* Rely on lcars-button defaults for most behavior, but keep sidebar-specific layout */
                 --lcars-button-bg: var(--cat-color, var(--shape-color));
-                --lcars-button-fg: #000;
+                --lcars-button-fg: var(--lcars-black);
                 --lcars-button-radius: 0px;
 
                 display: inline-flex;
@@ -418,7 +472,7 @@
                 overflow-y: auto;
                 padding: 20px;
                 border: none;
-                border-radius: 30px;
+                border-radius: var(--lcars-radius-lg);
                 margin-right: -25px;
                 margin-top: 42px;
                 margin-bottom: 42px;
@@ -489,11 +543,15 @@
             .settings-accent {
                 grid-row: 1 / span 3;
                 background-color: var(--shape-color);
-                border-radius: 20px;
+                border-radius: var(--lcars-radius-md);
             }
 
+            /* Settings content: flex column for section layout */
             .settings-content {
                 grid-column: 2;
+                display: flex;
+                flex-direction: column;
+                height: 100%;
             }
 
             .settings-panel h1,
@@ -507,14 +565,6 @@
                 margin-top: 20px;
                 padding-top: 10px;
                 border-top: 2px solid var(--theme-main);
-            }
-
-            /* Layout for settings content: top section grows, bottom sticks near bottom */
-            .settings-content {
-                grid-column: 2;
-                display: flex;
-                flex-direction: column;
-                height: 100%;
             }
 
             .settings-content .settings-section:first-of-type {
@@ -574,7 +624,7 @@
                 border: none;
                 border-radius: var(--lcars-button-radius, 0px);
                 background-color: var(--lcars-button-bg, var(--lcars-beige));
-                color: var(--lcars-button-fg, #000);
+                color: var(--lcars-button-fg, var(--lcars-black));
 
                 /* Text */
                 font-family: var(--lcars-font);
@@ -591,7 +641,7 @@
 
             /* Derived LCARS pill variant (rounded button) */
             .lcars-pill {
-                --lcars-button-radius: 20px;
+                --lcars-button-radius: var(--lcars-radius-md);
             }
 
             /* Hover behavior (can be disabled per-variant) */
@@ -602,35 +652,39 @@
             /* LCARS color utility classes for buttons */
             .lcars-color-orange {
                 --lcars-button-bg: var(--lcars-orange);
-                --lcars-button-fg: #000;
+                --lcars-button-fg: var(--lcars-black);
             }
 
             .lcars-color-dark {
-                --lcars-button-bg: #444;
+                --lcars-button-bg: var(--lcars-dark-3);
                 --lcars-button-fg: var(--lcars-beige);
             }
 
             .lcars-color-danger {
                 --lcars-button-bg: var(--lcars-red);
-                --lcars-button-fg: #000;
+                --lcars-button-fg: var(--lcars-black);
             }
 
             .lcars-color-beige {
                 --lcars-button-bg: var(--lcars-beige);
-                --lcars-button-fg: #000;
+                --lcars-button-fg: var(--lcars-black);
             }
 
-            /* LCARS action role helpers */
+            /* ==============================================
+               LCARS ACTION ROLE HELPERS
+               Extension points for context-specific button styling.
+               These are intentionally minimal - add overrides as needed.
+               ============================================== */
             .lcars-dialog-action {
-                /* uses base lcars-button sizing, only dialog-specific tweaks if needed */
+                /* Extension point: dialog-specific button tweaks */
             }
 
             .lcars-settings-action {
-                /* used for settings view action buttons (category, import/export, reset) */
+                /* Extension point: settings panel button tweaks */
             }
 
             .lcars-footer-action {
-                /* footer-specific layout already handled by .action-btn */
+                /* Extension point: footer bar button tweaks */
             }
 
             /* Theme selector layout */
@@ -647,8 +701,8 @@
 
             #themeControlsContainer .lcars-settings-action.theme-active {
                 background-color: var(--theme-main, var(--lcars-beige));
-                color: #000;
-                box-shadow: 0 0 0 2px #fff;
+                color: var(--lcars-black);
+                box-shadow: 0 0 0 2px var(--lcars-white);
             }
 
 
@@ -656,10 +710,10 @@
             .bookmark-tile {
                 position: relative;
                 background-color: var(--theme-main);
-                color: #000;
+                color: var(--lcars-black);
                 padding: 0;
                 border-radius: 0;
-                border-bottom-right-radius: 30px;
+                border-bottom-right-radius: var(--lcars-radius-lg);
                 cursor: default;
                 text-decoration: none;
                 display: grid;
@@ -679,9 +733,9 @@
                 position: absolute;
                 top: 0;
                 left: 0;
-                width: 20px;
-                height: 20px;
-                background: radial-gradient(circle at 100% 100%, transparent 20px, #000 20px);
+                width: var(--lcars-radius-md);
+                height: var(--lcars-radius-md);
+                background: radial-gradient(circle at 100% 100%, transparent var(--lcars-radius-md), var(--lcars-black) var(--lcars-radius-md));
                 z-index: 10;
             }
 
@@ -698,7 +752,7 @@
                 line-height: 1.2;
                 text-transform: uppercase;
                 padding: 10px 15px 8px 25px;
-                color: #000;
+                color: var(--lcars-black);
                 background-color: var(--theme-main);
             }
 
@@ -707,8 +761,8 @@
                 grid-row: 2;
                 font-size: 0.78rem;
                 line-height: 1.35;
-                color: var(--theme-secondary, #999);
-                background-color: #000;
+                color: var(--theme-secondary, var(--lcars-gray));
+                background-color: var(--lcars-black);
                 padding: 10px 15px 10px 10px;
                 border-top-left-radius: 15px;
                 overflow: hidden;
@@ -722,7 +776,7 @@
             .bookmark-url-footer {
                 grid-column: 2;
                 grid-row: 3;
-                background-color: #000;
+                background-color: var(--lcars-black);
                 margin-left: 0;
                 z-index: 2;
                 padding: 8px 12px;
@@ -747,14 +801,14 @@
                 justify-content: center;
 
                 background-color: var(--lcars-pin-bg, var(--theme-main));
-                color: #000;
+                color: var(--lcars-black);
                 cursor: pointer;
                 transition: transform 0.2s, filter 0.2s;
             }
 
             .bookmark-footer-btn:focus-visible {
-                outline: 2px solid #ffffff;
-                outline-offset: 2px;
+                outline: var(--lcars-focus-outline-width) solid var(--lcars-focus-outline-color);
+                outline-offset: var(--lcars-focus-outline-offset);
             }
 
             .bookmark-footer-btn:hover {
@@ -785,9 +839,9 @@
                 --lcars-button-bg: var(--theme-secondary, color-mix(
                     in srgb,
                     var(--shape-color) 30%,
-                    #ffffff 70%
+                    var(--lcars-white) 70%
                 ));
-                --lcars-button-fg: #000;
+                --lcars-button-fg: var(--lcars-black);
                 background-color: var(--lcars-button-bg);
                 color: var(--lcars-button-fg);
 
@@ -800,7 +854,7 @@
             }
 
             .lcars-footer-bar-button:hover {
-                background-color: #fff;
+                background-color: var(--lcars-white);
             }
 
             .action-btn--small {
@@ -825,7 +879,7 @@
                 top: var(--lcars-focus-bar-top, -9px);
                 bottom: var(--lcars-focus-bar-bottom, auto);
                 height: var(--lcars-focus-bar-height, 4px);
-                background-color: var(--lcars-focus-bar-color, #ffffff);
+                background-color: var(--lcars-focus-bar-color, var(--lcars-white));
                 border-radius: 0;
             }
 
@@ -833,7 +887,7 @@
 
 
             #aboutBtn {
-                border-right: 5px solid #000;
+                border-right: 5px solid var(--lcars-black);
             }
 
             /* Borg green footer buttons when SEVEN OF NINE theme is active */
@@ -850,10 +904,10 @@
 
             /* Dialogs */
             dialog {
-                background-color: #000;
+                background-color: var(--lcars-black);
                 color: var(--lcars-orange);
                 border: 2px solid var(--shape-color);
-                border-radius: 20px;
+                border-radius: var(--lcars-radius-md);
                 padding: 0;
                 max-width: 540px;
                 width: 90%;
@@ -866,32 +920,33 @@
             .lcars-dialog {
                 display: flex;
                 flex-direction: column;
-                border-radius: 20px;
+                border-radius: var(--lcars-radius-md);
                 overflow: hidden;
             }
 
             /* Color picker specific overlay */
+            /* Color picker uses slightly larger radius for visual distinction */
             #colorPickerDialog {
                 max-width: 520px;
-                border-radius: 26px;
+                border-radius: calc(var(--lcars-radius-md) + 6px);
                 border-color: var(--shape-color);
             }
 
             #colorPickerDialog .lcars-dialog-header {
                 background-color: var(--shape-color);
-                color: #000;
+                color: var(--lcars-black);
             }
 
             #colorPickerDialog .lcars-dialog-body {
                 padding: 20px;
-                background-color: #000;
+                background-color: var(--lcars-black);
             }
 
             #colorPickerDialog .lcars-dialog-footer {
                 display: flex;
                 justify-content: flex-end;
                 padding: 10px 20px 18px 20px;
-                background-color: #000;
+                background-color: var(--lcars-black);
             }
 
             .lcars-dialog-header {
@@ -899,7 +954,7 @@
                 justify-content: space-between;
                 align-items: center;
                 background-color: var(--shape-color);
-                color: #000;
+                color: var(--lcars-black);
                 padding: 10px 16px;
             }
 
@@ -917,7 +972,7 @@
 
             .lcars-dialog-body {
                 padding: 16px 16px 8px 16px;
-                background-color: #000;
+                background-color: var(--lcars-black);
             }
 
             .lcars-dialog-footer {
@@ -925,7 +980,7 @@
                 justify-content: flex-end;
                 gap: 10px;
                 padding: 8px 16px 16px 16px;
-                background-color: #000;
+                background-color: var(--lcars-black);
             }
 
             .form-group {
@@ -950,10 +1005,10 @@
             textarea {
                 width: 100%;
                 padding: 10px;
-                background-color: #222;
+                background-color: var(--lcars-dark-2);
                 border: 1px solid var(--theme-main);
                 color: var(--lcars-beige);
-                border-radius: 5px;
+                border-radius: var(--lcars-radius-xs);
                 border-width: 3px;
                 font-family: var(--lcars-font);
             }
@@ -967,7 +1022,7 @@
             /* URL protocol select styled as compact LCARS control */
             #urlProtocol {
                 max-width: 140px;
-                border-radius: 20px;
+                border-radius: var(--lcars-radius-md);
                 text-transform: uppercase;
                 font-weight: bold;
                 letter-spacing: 1px;
@@ -993,7 +1048,7 @@
                 padding: 10px 10px 6px 10px;
                 border-radius: 0px;
                 border-style: none;
-                background-color: #000;
+                background-color: var(--lcars-black);
             }
 
             .category-config-row {
@@ -1002,17 +1057,17 @@
                 gap: 8px;
                 align-items: center;
                 padding: 6px 8px;
-                border-radius: 20px;
-                background-color: #111;
+                border-radius: var(--lcars-radius-md);
+                background-color: var(--lcars-dark-1);
             }
 
             .category-color-swatch {
                 width: 100%;
                 height: 40px;
                 border: none;
-                border-radius: 20px 0 0 20px;
+                border-radius: var(--lcars-radius-md) 0 0 var(--lcars-radius-md);
                 cursor: pointer;
-                box-shadow: inset 0 0 0 2px #000;
+                box-shadow: inset 0 0 0 2px var(--lcars-black);
             }
 
             .color-grid {
@@ -1026,14 +1081,14 @@
                 width: 100%;
                 aspect-ratio: 1.3;
                 border: none;
-                border-radius: 16px;
+                border-radius: var(--lcars-radius-sm);
                 cursor: pointer;
-                box-shadow: inset 0 0 0 2px #000;
+                box-shadow: inset 0 0 0 2px var(--lcars-black);
             }
 
             .color-option:hover {
                 filter: brightness(1.15);
-                outline: 2px solid #fff;
+                outline: 2px solid var(--lcars-white);
                 outline-offset: 2px;
             }
 
@@ -1041,7 +1096,7 @@
             .lcars-pin {
                 --lcars-pin-size: 20px;
                 --lcars-pin-bg: var(--theme-secondary, var(--lcars-blue));
-                --lcars-pin-fg: #000;
+                --lcars-pin-fg: var(--lcars-black);
 
                 width: var(--lcars-pin-size);
                 height: var(--lcars-pin-size);
@@ -1070,15 +1125,15 @@
             }
 
             .lcars-pin:focus-visible {
-                outline: 2px solid #ffffff;
-                outline-offset: 2px;
+                outline: var(--lcars-focus-outline-width) solid var(--lcars-focus-outline-color);
+                outline-offset: var(--lcars-focus-outline-offset);
             }
 
             .category-config-btn {
                 /* Category config buttons as LCARS pins */
                 --lcars-pin-size: 40px;
                 --lcars-pin-bg: var(--theme-secondary, var(--lcars-blue));
-                --lcars-pin-fg: #000;
+                --lcars-pin-fg: var(--lcars-black);
 
                 width: var(--lcars-pin-size);
                 height: var(--lcars-pin-size);
@@ -1100,14 +1155,14 @@
 
                 cursor: pointer;
                 position: relative;
-                box-shadow: inset 0 0 0 2px #000;
+                box-shadow: inset 0 0 0 2px var(--lcars-black);
             }
 
             .category-config-btn:hover {
                 background-color: color-mix(
                     in srgb,
                     var(--lcars-pin-bg, var(--theme-secondary, var(--lcars-blue))) 70%,
-                    #ffffff 30%
+                    var(--lcars-white) 30%
                 );
             }
 
@@ -1157,14 +1212,14 @@
             }
 
             .status-text {
-                color: #000;
+                color: var(--lcars-black);
                 font-weight: bold;
                 margin-right: 10px;
                 font-size: 1.2rem;
             }
 
             .status-info {
-                background-color: #000;
+                background-color: var(--lcars-black);
                 color: var(--lcars-orange);
                 padding: 0 15px;
                 height: 100%;
@@ -1716,7 +1771,7 @@
                     btn.style.backgroundColor = color;
                     btn.setAttribute("aria-label", `Color ${color}`);
                     if (color === current) {
-                        btn.style.outline = "2px solid #fff";
+                        btn.style.outline = "2px solid var(--lcars-white)";
                         btn.setAttribute("aria-current", "true");
                     }
                     btn.onclick = () => {
@@ -2360,10 +2415,10 @@
                     nameInput.type = "text";
                     nameInput.value = cat.name;
                     nameInput.style.width = "100%";
-                    nameInput.style.backgroundColor = "#222";
+                    nameInput.style.backgroundColor = "var(--lcars-dark-2)";
                     nameInput.style.border = "1px solid var(--lcars-blue)";
                     nameInput.style.color = "var(--lcars-beige)";
-                    nameInput.style.borderRadius = "20px";
+                    nameInput.style.borderRadius = "var(--lcars-radius-md)";
                     nameInput.style.padding = "8px 12px";
                     nameInput.setAttribute("aria-label", `Edit name for ${cat.name} category`);
                     nameInput.onchange = (e) => {
