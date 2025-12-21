@@ -572,34 +572,81 @@
                 gap: 20px;
             }
 
-            .bookmark-location {
+            /* ==============================================
+               LCARS BREADCRUMB
+               Reusable location/path readout component.
+               ============================================== */
+
+            .lcars-breadcrumb {
                 display: flex;
                 align-items: center;
+                gap: 8px;
+
                 margin-bottom: 10px;
                 font-size: 0.9rem;
                 letter-spacing: 1px;
+
                 color: var(--lcars-beige);
                 opacity: 0.85;
             }
 
-            .bookmark-location-label {
+            .lcars-breadcrumb-label {
                 color: var(--lcars-orange);
-                margin-right: 8px;
+                text-transform: uppercase;
+                font-weight: bold;
             }
 
-            .bookmark-location-path {
+            .lcars-breadcrumb-path {
                 display: inline-flex;
-                gap: 6px;
-                align-items: center;
                 flex-wrap: wrap;
+                align-items: center;
+                gap: 6px;
             }
 
-            .bookmark-location-path span {
+            .lcars-breadcrumb-segment {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+
+                padding: 2px 6px;
+                border-radius: var(--lcars-radius-xs);
+
+                background-color: transparent;
+                color: inherit;
+
+                font-size: 0.85rem;
+                text-transform: uppercase;
+                border: none;
+                cursor: default;
                 white-space: nowrap;
             }
 
-            .bookmark-location-separator {
+            .lcars-breadcrumb-segment:not(.is-current) {
+                cursor: pointer;
+                background-color: rgba(255, 255, 255, 0.04);
+            }
+
+            .lcars-breadcrumb-segment:not(.is-current):hover {
+                background-color: rgba(255, 255, 255, 0.12);
+            }
+
+            .lcars-breadcrumb-segment.is-current {
+                font-weight: bold;
+                color: var(--lcars-orange);
+            }
+
+            .lcars-breadcrumb-segment.is-root {
+                border-radius: var(--lcars-radius-sm);
+                background-color: rgba(255, 153, 0, 0.18);
+            }
+
+            .lcars-breadcrumb-separator {
                 opacity: 0.6;
+            }
+
+            .lcars-breadcrumb-segment:focus-visible {
+                outline: var(--lcars-focus-outline-width) solid var(--lcars-focus-outline-color);
+                outline-offset: var(--lcars-focus-outline-offset);
             }
 
             /* Main view containers */
@@ -794,6 +841,204 @@
             }
 
 
+
+            /* ==============================================
+               LCARS CATEGORY TILE
+               Reusable component representing a category/folder.
+               Designed to sit alongside .bookmark-tile in .bookmark-grid.
+               ============================================== */
+
+            .lcars-category-tile {
+                display: grid;
+                grid-template-columns: 12px 1fr;
+                grid-template-rows: auto 1fr;
+                min-height: 110px;
+
+                position: relative;
+                border-radius: 0;
+                border-bottom-right-radius: var(--lcars-radius-lg);
+                overflow: hidden;
+                cursor: pointer;
+                text-decoration: none;
+
+                --lcars-category-bg: var(--cat-color, var(--theme-main));
+                --lcars-category-fg: var(--lcars-black);
+                --lcars-category-stripe-bg: var(--lcars-category-bg);
+
+                background-color: var(--lcars-category-bg);
+                color: var(--lcars-category-fg);
+
+                transition:
+                    transform 0.1s ease-out,
+                    filter 0.1s ease-out;
+            }
+
+            .lcars-category-tile::before {
+                content: "";
+                grid-row: 1 / -1;
+                grid-column: 1;
+                background-color: var(--lcars-category-stripe-bg);
+            }
+
+            .lcars-category-tile::after {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: var(--lcars-radius-md);
+                height: var(--lcars-radius-md);
+                background: radial-gradient(
+                    circle at 100% 100%,
+                    transparent var(--lcars-radius-md),
+                    var(--lcars-black) var(--lcars-radius-md)
+                );
+                z-index: 1;
+            }
+
+            /* ==============================================
+               LCARS CATEGORY TILE
+               Reusable component representing a category/folder.
+               Designed to sit alongside .bookmark-tile in .bookmark-grid.
+               ============================================== */
+
+            .lcars-category-tile {
+                display: grid;
+                grid-template-columns: 12px 1fr;
+                grid-template-rows: auto 1fr;
+                min-height: 110px;
+
+                position: relative;
+                border-radius: 0;
+                border-bottom-right-radius: var(--lcars-radius-lg);
+                overflow: hidden;
+                cursor: pointer;
+                text-decoration: none;
+
+                --lcars-category-bg: var(--cat-color, var(--theme-main));
+                --lcars-category-fg: var(--lcars-black);
+                --lcars-category-stripe-bg: var(--lcars-category-bg);
+
+                background-color: var(--lcars-category-bg);
+                color: var(--lcars-category-fg);
+
+                transition:
+                    transform 0.1s ease-out,
+                    filter 0.1s ease-out;
+            }
+
+            .lcars-category-tile::before {
+                content: "";
+                grid-row: 1 / -1;
+                grid-column: 1;
+                background-color: var(--lcars-category-stripe-bg);
+            }
+
+            .lcars-category-tile::after {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: var(--lcars-radius-md);
+                height: var(--lcars-radius-md);
+                background: radial-gradient(
+                    circle at 100% 100%,
+                    transparent var(--lcars-radius-md),
+                    var(--lcars-black) var(--lcars-radius-md)
+                );
+                z-index: 1;
+            }
+
+            .lcars-category-tile:hover {
+                filter: brightness(1.1);
+                transform: scale(1.02);
+            }
+
+            .lcars-category-tile-label {
+                grid-column: 1 / -1;
+                grid-row: 1;
+                padding: 8px 12px 6px 24px;
+                font-size: 0.95rem;
+                font-weight: bold;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                color: var(--lcars-category-fg);
+            }
+
+            .lcars-category-tile-meta {
+                grid-column: 2;
+                grid-row: 2;
+                padding: 8px 12px 10px 8px;
+                font-size: 0.75rem;
+                line-height: 1.3;
+                background-color: var(--lcars-black);
+                color: var(--theme-secondary, var(--lcars-gray));
+                border-top-left-radius: 14px;
+
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-end;
+                gap: 4px;
+            }
+
+            .lcars-category-tile-meta-primary {
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+
+            .lcars-category-tile-meta-secondary {
+                opacity: 0.85;
+            }
+
+            .lcars-category-tile:focus-visible {
+                outline: var(--lcars-focus-outline-width) solid var(--lcars-focus-outline-color);
+                outline-offset: var(--lcars-focus-outline-offset);
+            }
+
+            .lcars-category-tile:hover {
+                filter: brightness(1.1);
+                transform: scale(1.02);
+            }
+
+            .lcars-category-tile-label {
+                grid-column: 1 / -1;
+                grid-row: 1;
+                padding: 8px 12px 6px 24px;
+                font-size: 0.95rem;
+                font-weight: bold;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                color: var(--lcars-category-fg);
+            }
+
+            .lcars-category-tile-meta {
+                grid-column: 2;
+                grid-row: 2;
+                padding: 8px 12px 10px 8px;
+                font-size: 0.75rem;
+                line-height: 1.3;
+                background-color: var(--lcars-black);
+                color: var(--theme-secondary, var(--lcars-gray));
+                border-top-left-radius: 14px;
+
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-end;
+                gap: 4px;
+            }
+
+            .lcars-category-tile-meta-primary {
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+
+            .lcars-category-tile-meta-secondary {
+                opacity: 0.85;
+            }
+
+            .lcars-category-tile:focus-visible {
+                outline: var(--lcars-focus-outline-width) solid var(--lcars-focus-outline-color);
+                outline-offset: var(--lcars-focus-outline-offset);
+            }
 
             .bookmark-tile {
                 position: relative;
@@ -1357,7 +1602,17 @@
 
             <main class="main-content">
                 <div id="bookmarksView" class="main-view active">
-                    <div id="bookmarkLocation" class="bookmark-location" aria-live="polite" aria-label="Current Category Location"></div>
+                    <div
+                        id="bookmarkLocation"
+                        class="lcars-breadcrumb"
+                        aria-live="polite"
+                        aria-label="Current Category Location"
+                    >
+                        <span class="lcars-breadcrumb-label">LOCATION</span>
+                        <nav class="lcars-breadcrumb-path" aria-label="Current location">
+                            <!-- Segments injected via JS -->
+                        </nav>
+                    </div>
                     <div id="bookmarkGrid" class="bookmark-grid" role="list">
                         <!-- Bookmarks injected here -->
                     </div>
@@ -2087,6 +2342,62 @@
                 updateBookmarkLocation();
             }
 
+            function createCategoryTile(category) {
+                const tile = document.createElement("button");
+                tile.type = "button";
+                tile.className = "lcars-category-tile";
+                tile.dataset.id = category.id;
+
+                const color = category.color || "var(--theme-main)";
+                tile.style.setProperty("--cat-color", color);
+
+                let childCount = 0;
+                if (Array.isArray(category.children)) {
+                    childCount = category.children.length;
+                }
+                const bookmarkCount = state.bookmarks.filter(
+                    (b) => b.categoryId === category.id,
+                ).length;
+
+                const primaryMetaParts = [];
+                if (childCount > 0) {
+                    primaryMetaParts.push(
+                        `${childCount} FOLDER${childCount > 1 ? "S" : ""}`,
+                    );
+                }
+                if (bookmarkCount > 0) {
+                    primaryMetaParts.push(
+                        `${bookmarkCount} LINK${bookmarkCount > 1 ? "S" : ""}`,
+                    );
+                }
+                const primaryMeta =
+                    primaryMetaParts.length > 0
+                        ? primaryMetaParts.join(" · ")
+                        : "EMPTY";
+
+                const createdAtLabel = category.createdAt
+                    ? `CREATED ST: ${category.createdAt}`
+                    : "";
+
+                tile.innerHTML = `
+        <div class="lcars-category-tile-label">${escapeHtml(category.name)}</div>
+        <div class="lcars-category-tile-meta">
+            <div class="lcars-category-tile-meta-primary">${primaryMeta}</div>
+            <div class="lcars-category-tile-meta-secondary">${escapeHtml(createdAtLabel)}</div>
+        </div>
+    `;
+
+                tile.setAttribute(
+                    "aria-label",
+                    `Category ${category.name}. ${primaryMeta}${
+                        createdAtLabel ? ". " + createdAtLabel : ""
+                    }`,
+                );
+
+                // Click behavior will be wired when we change the navigation model
+                return tile;
+            }
+
             function createBookmarkTile(bookmark) {
                 const tile = document.createElement("div");
                 tile.className = "bookmark-tile";
@@ -2119,6 +2430,62 @@
                 tile.setAttribute(
                     "aria-label",
                     `Bookmark: ${escapeHtml(bookmark.title)} - ${escapeHtml(bookmark.url)}`
+                );
+
+                return tile;
+            }
+
+            function createCategoryTile(category) {
+                const tile = document.createElement("button");
+                tile.type = "button";
+                tile.className = "lcars-category-tile";
+                tile.dataset.id = category.id;
+
+                const color = category.color || "var(--theme-main)";
+                tile.style.setProperty("--cat-color", color);
+
+                let childCount = 0;
+                if (Array.isArray(category.children)) {
+                    childCount = category.children.length;
+                }
+                const bookmarkCount = state.bookmarks.filter(
+                    (b) => b.categoryId === category.id,
+                ).length;
+
+                const primaryMetaParts = [];
+                if (childCount > 0) {
+                    primaryMetaParts.push(
+                        `${childCount} FOLDER${childCount > 1 ? "S" : ""}`,
+                    );
+                }
+                if (bookmarkCount > 0) {
+                    primaryMetaParts.push(
+                        `${bookmarkCount} LINK${bookmarkCount > 1 ? "S" : ""}`,
+                    );
+                }
+
+                const primaryMeta =
+                    primaryMetaParts.length > 0
+                        ? primaryMetaParts.join(" · ")
+                        : "EMPTY";
+
+                const createdAtLabel = category.createdAt
+                    ? `CREATED ST: ${category.createdAt}`
+                    : "";
+
+                tile.innerHTML = `
+        <div class="lcars-category-tile-label">${escapeHtml(category.name)}</div>
+        <div class="lcars-category-tile-meta">
+            <div class="lcars-category-tile-meta-primary">${primaryMeta}</div>
+            <div class="lcars-category-tile-meta-secondary">${escapeHtml(createdAtLabel)}</div>
+        </div>
+    `;
+
+                tile.setAttribute(
+                    "aria-label",
+                    `Category ${category.name}. ${primaryMeta}${
+                        createdAtLabel ? ". " + createdAtLabel : ""
+                    }`,
                 );
 
                 return tile;
@@ -2260,11 +2627,22 @@
             }
 
             function updateBookmarkLocation() {
-                const locEl = document.getElementById("bookmarkLocation");
-                if (!locEl) return;
+                const container = document.getElementById("bookmarkLocation");
+                if (!container) return;
+
+                const pathEl = container.querySelector(
+                    ".lcars-breadcrumb-path",
+                );
+                if (!pathEl) return;
+
+                pathEl.innerHTML = "";
 
                 if (!state.currentCategory) {
-                    locEl.innerHTML = "";
+                    const seg = document.createElement("span");
+                    seg.className = "lcars-breadcrumb-segment is-current";
+                    seg.textContent = "ALL BOOKMARKS";
+                    seg.setAttribute("aria-current", "location");
+                    pathEl.appendChild(seg);
                     return;
                 }
 
@@ -2273,20 +2651,47 @@
                     state.categories,
                 );
                 if (!path || path.length === 0) {
-                    locEl.innerHTML = "";
+                    const seg = document.createElement("span");
+                    seg.className = "lcars-breadcrumb-segment is-current";
+                    seg.textContent = "UNKNOWN";
+                    seg.setAttribute("aria-current", "location");
+                    pathEl.appendChild(seg);
                     return;
                 }
 
-                const parts = path
-                    .map((cat) => `<span>${escapeHtml(cat.name)}</span>`)
-                    .join('<span class="bookmark-location-separator">▸</span>');
+                path.forEach((cat, index) => {
+                    const isLast = index === path.length - 1;
+                    const isFirst = index === 0;
 
-                locEl.innerHTML = `
-                    <span class="bookmark-location-label">LOCATION:</span>
-                    <span class="bookmark-location-path">
-                        ${parts}
-                    </span>
-                `;
+                    if (index > 0) {
+                        const sep = document.createElement("span");
+                        sep.className = "lcars-breadcrumb-separator";
+                        sep.textContent = "▸";
+                        pathEl.appendChild(sep);
+                    }
+
+                    if (isLast) {
+                        const span = document.createElement("span");
+                        span.className = "lcars-breadcrumb-segment is-current";
+                        span.textContent = cat.name;
+                        span.setAttribute("aria-current", "location");
+                        pathEl.appendChild(span);
+                    } else {
+                        const btn = document.createElement("button");
+                        btn.type = "button";
+                        btn.className = "lcars-breadcrumb-segment";
+                        if (isFirst) btn.classList.add("is-root");
+                        btn.textContent = cat.name;
+                        btn.dataset.categoryId = cat.id;
+                        btn.addEventListener("click", () => {
+                            state.currentCategory = cat.id;
+                            saveData();
+                            renderGrid();
+                            renderCategories();
+                        });
+                        pathEl.appendChild(btn);
+                    }
+                });
             }
 
             function generateUUID() {
