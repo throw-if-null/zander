@@ -262,16 +262,46 @@ Example structure:
 
 ### 3.2 Sidebar Elbows
 
-The top and bottom caps use CSS gradients to carve internal curves out of the LCARS band, creating continuous elbow shapes without extra SVG assets:
+The top and bottom caps use a shared LCARS elbow primitive to carve internal curves out of the LCARS band, creating continuous elbow shapes without extra SVG assets.
 
-- `.sidebar-top-cap`: uses a radial gradient at bottom-left to curve into the header.
-- `.sidebar-bottom-cap`: uses a radial gradient at top-left to curve into the footer.
+#### 3.2.1 LCARS Elbow Primitive (`.lcars-elbow`)
 
-Visually, the flow is:
+- Implemented as a generic, reusable component:
+  - `height: 70px; width: 100%;`
+  - Background: `radial-gradient` using:
+    - Center position controlled via `--elbow-position` (e.g. `bottom left`, `top left`).
+    - Inner radius tied to the global frame radius: `var(--radius)`.
+    - Color transition:
+      - Inner circle: `var(--lcars-bg)` (frame cut-out).
+      - Outer band: `var(--shape-color)` (LCARS frame color).
+  - Corner radii controlled via:
+    - `--elbow-radius-top-left`
+    - `--elbow-radius-top-right`
+    - `--elbow-radius-bottom-right`
+    - `--elbow-radius-bottom-left`
+
+This allows any elbow to be configured purely via CSS custom properties without changing the HTML structure.
+
+#### 3.2.2 Sidebar-Specific Elbows
+
+Specializations for the sidebar:
+
+- `.sidebar-top-cap`:
+  - Extends `.lcars-elbow`.
+  - Uses `--elbow-position: bottom left;` to carve the curve toward the header.
+  - Sets `--elbow-radius-top-right: var(--radius);` to round the outer top-right corner.
+  - Connects the left-aligned header bar into the right-hand sidebar track.
+- `.sidebar-bottom-cap`:
+  - Extends `.lcars-elbow`.
+  - Uses `--elbow-position: top left;` to carve the curve toward the footer.
+  - Sets `--elbow-radius-bottom-right: var(--radius);` to round the outer bottom-right corner.
+  - Connects the sidebar track into the footer bar.
+
+Visually, the continuous LCARS frame flows:
 
 `HEADER` → `TOP CAP` → `SIDEBAR TRACK` → `BOTTOM CAP` → `FOOTER`.
 
-Category buttons and nested submenus are placed within the `.sidebar-track` but must not break the visual continuity of the frame.
+Category buttons and nested submenus are placed within the `.sidebar-track` and must not break the visual continuity of this frame.
 
 ### 3.3 Category Button States
 
@@ -665,20 +695,38 @@ This section covers visual and interaction accessibility. For comprehensive a11y
 
 ### 9.1 Focus States
 
-All interactive elements (links, buttons, tiles, inputs) use a consistent **neon glow** focus style:
+Focus is implemented using two LCARS focus helpers plus targeted overrides:
 
-- `outline: 2px solid #ffff66` (or equivalent).
-- Multiple box-shadow layers (e.g., 0 0 8px, 0 0 16px, 0 0 32px in yellow/orange).
+- **Global rule**:
+  - `:focus-visible` removes default box-shadow and applies a thin white outline for any focusable element that does not opt into a more specific helper.
+- **`.lcars-focus-outline`**:
+  - Used for pill buttons, dialog actions, and form inputs where a strong outline is desired.
+  - Applies `outline: 3px solid #ffffff` with a small `outline-offset` to create a clear “neon ring” effect.
+  - Commonly used on:
+    - `.lcars-button.lcars-pill` (e.g., settings actions, dialog actions).
+    - Text inputs, selects, and textareas.
+- **`.lcars-focus-bar`**:
+  - Used where a directional LCARS bar is more appropriate than a ring.
+  - Renders a solid bar via `:focus-visible::after`, with position and size controlled by custom properties:
+    - `--lcars-focus-bar-top`
+    - `--lcars-focus-bar-bottom`
+    - `--lcars-focus-bar-left`
+    - `--lcars-focus-bar-right`
+    - `--lcars-focus-bar-width`
+    - `--lcars-focus-bar-height`
+    - `--lcars-focus-bar-color`
+  - Examples:
+    - Sidebar category buttons (`.cat-btn.lcars-focus-bar`) use a vertical bar along the left edge.
+    - Footer bar buttons (`.lcars-footer-bar-button.lcars-focus-bar`) use a horizontal bar along the top edge.
 
 Additional notes:
 
-- Focus styles use `:focus-visible` so pointer users don't see outlines on click.
-- This applies to:
-  - `.cat-btn`
-  - `.bookmark-tile`
-  - `.action-btn`
-  - Dialog buttons and inputs
-  - Color options
+- All focus styles are applied with `:focus-visible` so pointer users don’t see outlines on mouse click.
+- Each interactive control chooses either the outline helper or the bar helper so the experience is consistent and visually LCARS-like:
+  - Category buttons: focus bar (edge indicator).
+  - Footer buttons: focus bar (top edge indicator).
+  - Dialog buttons and form fields: outline (ring).
+  - Color options, pins, and small controls: simple white outline tuned to their size.
 
 ### 9.2 Keyboard Navigation
 
