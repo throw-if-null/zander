@@ -840,7 +840,7 @@ This section lists the **reusable LCARS primitives** that ZANDER consumes. These
 ### 11.3 Pins & Small Controls
 
 - `lcars-pin`
-  - Base primitive for small circular LCARS controls (“pins”).
+  - Base primitive for small circular LCARS controls ("pins").
   - Extensible via:
     - `--lcars-pin-size`
     - `--lcars-pin-bg`
@@ -854,7 +854,32 @@ This section lists the **reusable LCARS primitives** that ZANDER consumes. These
     - Larger `--lcars-pin-size` and inset border to read clearly in Settings.
   - Still treated as a consumer of the `lcars-pin` visual language.
 
-### 11.4 Focus & Interaction Primitives
+### 11.4 Arrow Buttons & Scroll Containers
+
+- `lcars-arrow-btn`
+  - Flat directional control with triangle/arrow indicator.
+  - Used for scroll controls, pagination, carousels, list navigation.
+  - Configurable via:
+    - `--lcars-arrow-btn-height` (default: `24px`)
+    - `--lcars-arrow-btn-bg` (default: `var(--shape-color)`)
+    - `--lcars-arrow-btn-bg-hover` (default: `var(--lcars-beige)`)
+    - `--lcars-arrow-btn-bg-focus` (default: `var(--shape-color)`)
+    - `--lcars-arrow-btn-arrow-color` (default: `var(--lcars-black)`)
+  - Contains an SVG with triangle polygon for directional indication.
+  - States:
+    - `:hover` – background lightens to `--lcars-arrow-btn-bg-hover`.
+    - `:focus-visible` – inset focus outline.
+    - `:disabled` – arrow SVG reduced to 30% opacity.
+- `lcars-scroll-container`
+  - A scrollable container with hidden scrollbar.
+  - Mouse wheel and touch scrolling still functional.
+  - Cross-browser scrollbar hiding:
+    - `scrollbar-width: none` (Firefox)
+    - `-ms-overflow-style: none` (IE/Edge)
+    - `::-webkit-scrollbar { display: none }` (Chrome/Safari)
+  - Typically paired with `lcars-arrow-btn` controls for accessible navigation.
+
+### 11.5 Focus & Interaction Primitives
 
 - `lcars-focus-outline`
   - Helper class for elements that should use a strong outline:
@@ -877,7 +902,7 @@ This section lists the **reusable LCARS primitives** that ZANDER consumes. These
     - Sidebar category buttons: vertical bar along the left edge.
     - Footer buttons: horizontal bar along the top edge.
 
-### 11.5 Theme & Color System Primitives
+### 11.6 Theme & Color System Primitives
 
 - Global theme variables (applied on `body`):
   - `--theme-main` – primary frame/accent color.
@@ -889,7 +914,7 @@ This section lists the **reusable LCARS primitives** that ZANDER consumes. These
   - `body[data-theme="laan" | "data" | "doctor" | "chapel" | "spock" | "mbenga" | "seven" | "shran"]`
     - Each theme configures `--theme-main` and `--theme-secondary` for a distinct but consistent LCARS look.
 
-### 11.6 Layout Shell Conventions (Consumers, Not Primitives)
+### 11.7 Layout Shell Conventions (Consumers, Not Primitives)
 
 These classes are **not** primitives, but typical consumers that future apps can mirror:
 
@@ -899,11 +924,12 @@ These classes are **not** primitives, but typical consumers that future apps can
     - `lcars-frame-segment`
     - `lcars-frame-segment--horizontal`
     - `lcars-frame-segment--left-rounded`
-- `sidebar-container`, `sidebar-track`, `sidebar-top-cap`, `sidebar-bottom-cap`, `sidebar-filler`
+- `sidebar-container`, `sidebar-track`, `sidebar-top-cap`, `sidebar-bottom-cap`
   - Define the right-hand LCARS sidebar structure.
   - Use:
     - `lcars-elbow` for top and bottom caps.
-    - `lcars-frame-segment` for vertical filler.
+    - `lcars-scroll-container` for scrollable category list.
+    - `lcars-arrow-btn` for scroll navigation buttons.
 - `footer-bar`
   - App-specific shell for the bottom-left footer region.
   - Composes:

@@ -343,48 +343,108 @@
                 --elbow-radius-top-right: var(--radius);
             }
 
-            /* Middle Sidebar Track */
+            /* Middle Sidebar Track - now a flex container for scroll buttons + categories */
             .sidebar-track {
                 flex: 1;
                 min-height: 0; /* Allow flex item to shrink below content size */
                 background: none;
                 display: flex;
                 flex-direction: column;
-                gap: 5px;
-                padding: 5px 0 0 31px;
+                gap: 0;
+                padding: 0 0 0 31px;
+                position: relative; /* Establish positioning context for submenus */
+            }
+
+            /* ==============================================
+               LCARS SCROLL CONTAINER PRIMITIVE
+               A scrollable container with hidden scrollbar.
+               Mouse wheel and touch scrolling still work.
+               ============================================== */
+            .lcars-scroll-container {
                 overflow-y: auto;
-                overflow-x: hidden;
+                /* Note: overflow-x is NOT set to allow child elements (like submenus) to overflow */
+                /* Hide scrollbar but keep functionality */
+                scrollbar-width: none; /* Firefox */
+                -ms-overflow-style: none; /* IE/Edge */
             }
 
-            /* LCARS-styled scrollbar for sidebar */
-            .sidebar-track::-webkit-scrollbar {
-                width: 8px;
+            .lcars-scroll-container::-webkit-scrollbar {
+                display: none; /* Chrome/Safari/Opera */
             }
 
-            .sidebar-track::-webkit-scrollbar-track {
-                background: var(--lcars-black);
+            /* ==============================================
+               LCARS ARROW BUTTON PRIMITIVE
+               A flat directional control with triangle indicator.
+               Used for scroll controls, pagination, carousels, etc.
+               ============================================== */
+            .lcars-arrow-btn {
+                --lcars-arrow-btn-height: 24px;
+                --lcars-arrow-btn-bg: var(--shape-color);
+                --lcars-arrow-btn-bg-hover: var(--lcars-beige);
+                --lcars-arrow-btn-bg-focus: var(--shape-color);
+                --lcars-arrow-btn-arrow-size: 40px 12px;
+                --lcars-arrow-btn-arrow-color: var(--lcars-black);
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: var(--lcars-arrow-btn-height);
+                min-height: var(--lcars-arrow-btn-height);
+                background-color: var(--lcars-arrow-btn-bg);
+                border: none;
+                cursor: pointer;
+                transition: background-color 0.2s;
             }
 
-            .sidebar-track::-webkit-scrollbar-thumb {
-                background-color: var(--shape-color);
-                border-radius: 4px;
-                border: 2px solid var(--lcars-black);
+            .lcars-arrow-btn:hover {
+                background-color: var(--lcars-arrow-btn-bg-hover);
             }
 
-            .sidebar-track::-webkit-scrollbar-thumb:hover {
-                background-color: var(--lcars-beige);
+            .lcars-arrow-btn:focus-visible {
+                outline: var(--lcars-focus-outline-width) solid var(--lcars-focus-outline-color);
+                outline-offset: calc(-1 * var(--lcars-focus-outline-width));
+                background-color: var(--lcars-arrow-btn-bg-focus);
             }
 
-            /* Firefox scrollbar styling */
-            .sidebar-track {
-                scrollbar-width: thin;
-                scrollbar-color: var(--shape-color) var(--lcars-black);
+            .lcars-arrow-btn:disabled {
+                cursor: default;
             }
 
-            /* Bottom Elbow Connector */
-            .sidebar-filler {
+            .lcars-arrow-btn:disabled svg {
+                opacity: 0.3;
+            }
+
+            .lcars-arrow-btn svg {
+                width: 40px;
+                height: 12px;
+                fill: var(--lcars-arrow-btn-arrow-color);
+                transition: fill 0.2s, opacity 0.2s;
+            }
+
+            /* ==============================================
+               SIDEBAR-SPECIFIC STYLES
+               Compose primitives for sidebar scroll navigation
+               ============================================== */
+
+            /* Scrollable category container - composes lcars-scroll-container */
+            .sidebar-categories {
                 flex: 1;
+                min-height: 0;
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+                padding: 5px 0;
+            }
+
+            /* Sidebar scroll buttons - compose lcars-arrow-btn */
+            .sidebar-scroll-up {
                 width: 100%;
+                margin-bottom: 2px;
+            }
+
+            .sidebar-scroll-down {
+                width: 100%;
+                margin-top: 2px;
             }
 
             /* Bottom Elbow Connector (right side, opening upward) */
@@ -463,23 +523,23 @@
 
             /* Nested Categories */
             .cat-wrapper {
-                position: relative;
+                position: static; /* Allow submenu to escape scroll container */
                 width: 100%;
             }
 
             .cat-submenu {
                 display: none;
-                position: absolute;
-                right: 100%; /* Move to the left of the parent */
-                top: 0;
+                position: fixed; /* Fixed position escapes overflow clipping */
                 width: 160px; /* Match sidebar width */
                 flex-direction: column;
                 gap: 5px;
                 padding-right: 10px; /* Space between levels */
-                z-index: 100;
+                z-index: 1000;
+                /* Position will be set via JS */
             }
 
-            .cat-wrapper:hover > .cat-submenu {
+            .cat-wrapper:hover > .cat-submenu,
+            .cat-wrapper.submenu-open > .cat-submenu {
                 display: flex;
             }
 
@@ -1274,9 +1334,21 @@
                 <!-- Top Elbow -->
                 <div class="lcars-elbow sidebar-top-cap"></div>
 
-                <!-- Middle Track -->
-                <div class="sidebar-track" id="categorySidebar">
-                    <!-- Categories injected here -->
+                <!-- Middle Track with Scroll Buttons -->
+                <div class="sidebar-track">
+                    <button class="lcars-arrow-btn sidebar-scroll-up" id="sidebarScrollUp" aria-label="Scroll categories up">
+                        <svg viewBox="0 0 40 12" aria-hidden="true">
+                            <polygon points="20,0 40,12 0,12" />
+                        </svg>
+                    </button>
+                    <div class="lcars-scroll-container sidebar-categories" id="categorySidebar">
+                        <!-- Categories injected here -->
+                    </div>
+                    <button class="lcars-arrow-btn sidebar-scroll-down" id="sidebarScrollDown" aria-label="Scroll categories down">
+                        <svg viewBox="0 0 40 12" aria-hidden="true">
+                            <polygon points="0,0 40,0 20,12" />
+                        </svg>
+                    </button>
                 </div>
 
                 <!-- Bottom Elbow -->
@@ -1976,6 +2048,16 @@
                         });
 
                         wrapper.appendChild(submenu);
+
+                        // Position submenu on hover using fixed positioning
+                        const positionSubmenu = () => {
+                            const btnRect = btn.getBoundingClientRect();
+                            submenu.style.top = `${btnRect.top}px`;
+                            submenu.style.left = `${btnRect.left - 160 - 10}px`; // 160px width + 10px gap
+                        };
+
+                        wrapper.addEventListener("mouseenter", positionSubmenu);
+                        btn.addEventListener("focus", positionSubmenu);
                     }
 
                     return wrapper;
@@ -1984,10 +2066,6 @@
                 state.categories.forEach((cat) => {
                     sidebar.appendChild(createCategoryButton(cat, 1));
                 });
-
-                const filler = document.createElement("div");
-                filler.className = "sidebar-filler lcars-frame-segment";
-                sidebar.appendChild(filler);
 
                 // Update select in dialog
                 categoryInput.innerHTML = "";
@@ -2911,6 +2989,73 @@
             }
 
             // --- Event Listeners ---
+            // Sidebar scroll button functionality
+            const sidebarScrollUp = document.getElementById("sidebarScrollUp");
+            const sidebarScrollDown = document.getElementById("sidebarScrollDown");
+            const sidebarCategories = document.getElementById("categorySidebar");
+
+            function updateScrollButtons() {
+                if (!sidebarCategories) return;
+                const { scrollTop, scrollHeight, clientHeight } = sidebarCategories;
+                const canScrollUp = scrollTop > 0;
+                const canScrollDown = scrollTop + clientHeight < scrollHeight - 1;
+
+                if (sidebarScrollUp) sidebarScrollUp.disabled = !canScrollUp;
+                if (sidebarScrollDown) sidebarScrollDown.disabled = !canScrollDown;
+            }
+
+            function scrollSidebar(direction) {
+                if (!sidebarCategories) return;
+                const scrollAmount = 55; // Approximate height of one category button
+                sidebarCategories.scrollBy({
+                    top: direction * scrollAmount,
+                    behavior: "smooth"
+                });
+            }
+
+            if (sidebarScrollUp) {
+                sidebarScrollUp.addEventListener("click", () => scrollSidebar(-1));
+            }
+            if (sidebarScrollDown) {
+                sidebarScrollDown.addEventListener("click", () => scrollSidebar(1));
+            }
+            if (sidebarCategories) {
+                sidebarCategories.addEventListener("scroll", updateScrollButtons);
+                // Initial state
+                updateScrollButtons();
+                // Update after categories render
+                const observer = new MutationObserver(updateScrollButtons);
+                observer.observe(sidebarCategories, { childList: true, subtree: true });
+
+                // Keyboard arrow navigation for category buttons
+                sidebarCategories.addEventListener("keydown", (e) => {
+                    if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
+
+                    const focusedBtn = document.activeElement;
+                    if (!focusedBtn || !focusedBtn.classList.contains("cat-btn")) return;
+
+                    e.preventDefault();
+
+                    // Get all visible category buttons (flattened)
+                    const allButtons = Array.from(sidebarCategories.querySelectorAll(".cat-btn"));
+                    const currentIndex = allButtons.indexOf(focusedBtn);
+
+                    let nextIndex;
+                    if (e.key === "ArrowUp") {
+                        nextIndex = currentIndex <= 0 ? allButtons.length - 1 : currentIndex - 1;
+                    } else {
+                        nextIndex = currentIndex >= allButtons.length - 1 ? 0 : currentIndex + 1;
+                    }
+
+                    const nextBtn = allButtons[nextIndex];
+                    if (nextBtn) {
+                        nextBtn.focus();
+                        // Scroll the button into view
+                        nextBtn.scrollIntoView({ block: "nearest", behavior: "smooth" });
+                    }
+                });
+            }
+
             function setupEventListeners() {
                 // Category Sidebar Delegation
                 if (sidebar) {
