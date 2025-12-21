@@ -176,7 +176,9 @@
                 gap: 0; /* Seamless connections */
             }
 
-            /* Header (Left Part) */
+            /* Header (Left Part)
+               - Structural grid container and LCARS frame segment shell
+               - Receives LCARS chrome via lcars-frame-segment modifiers */
             .header-bar {
                 grid-column: 1;
                 grid-row: 1;
@@ -189,11 +191,24 @@
                 align-self: start;
             }
 
-            .header-fill {
-                flex: 1;
+            /* LCARS frame segment primitives */
+            .lcars-frame-segment {
                 background-color: var(--shape-color);
+            }
+
+            .lcars-frame-segment--horizontal {
+                display: flex;
+                align-items: center;
+            }
+
+            .lcars-frame-segment--left-rounded {
                 border-top-left-radius: var(--radius);
                 border-bottom-left-radius: var(--radius);
+            }
+
+            .header-fill {
+                flex: 1;
+                height: 40px;
             }
 
             .header-end-cap {
@@ -287,7 +302,6 @@
             /* Bottom Elbow Connector */
             .sidebar-filler {
                 flex: 1;
-                background-color: var(--shape-color);
                 width: 100%;
             }
 
@@ -300,11 +314,9 @@
             .footer-bar {
                 grid-column: 1;
                 grid-row: 3;
-                background-color: var(--shape-color);
-                border-top-left-radius: var(--radius);
-                border-bottom-left-radius: var(--radius);
                 display: flex;
                 align-items: center;
+                justify-content: flex-start;
                 padding-left: 0;
                 padding-right: 0;
                 gap: 0;
@@ -1168,7 +1180,7 @@
     <body>
         <div class="lcars-app">
             <!-- Header Bar (Left) -->
-            <div class="header-bar">
+            <div class="header-bar lcars-frame-segment lcars-frame-segment--horizontal lcars-frame-segment--left-rounded">
                 <div class="header-fill"></div>
                 <button class="app-title" id="homeBtn" aria-label="Home - Bookmarks View">ZANDER</button>
                 <div class="header-end-cap"></div>
@@ -1340,7 +1352,7 @@
                 </div>
             </main>
 
-            <div class="footer-bar">
+            <div class="footer-bar lcars-frame-segment lcars-frame-segment--horizontal lcars-frame-segment--left-rounded">
                 <div id="systemStatus" class="status-display"></div>
                 <button class="lcars-button lcars-focus-bar lcars-color-orange lcars-footer-bar-button" id="addBtn" aria-label="Add Entry (Alt+N)">ADD ENTRY</button>
                 <div class="settings-wrapper">
@@ -1891,7 +1903,7 @@
                 });
 
                 const filler = document.createElement("div");
-                filler.className = "sidebar-filler";
+                filler.className = "sidebar-filler lcars-frame-segment";
                 sidebar.appendChild(filler);
 
                 // Update select in dialog

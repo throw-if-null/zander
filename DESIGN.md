@@ -123,8 +123,71 @@ Key properties:
 - No gaps between grid cells: the header, sidebar caps, track, and footer visually join into a single continuous element.
 - The sidebar container spans all rows, with top and bottom caps forming the curved “elbow” connectors.
 - The sidebar track (`.sidebar-track`) hosts dynamically created category buttons and a `.sidebar-filler` that visually completes the LCARS band.
+- Header, sidebar filler, and footer segments are all visual consumers of a shared LCARS frame primitive, ensuring a consistent “C-shaped” navigation frame around the content.
 
 The main content sits *inside* the frame, with internal padding and margins to visually float away from the LCARS shell. The active view is controlled by applying or removing the `.active` class on `.main-view` sections via JavaScript.
+
+### 1.3 LCARS Frame Segment Primitives
+
+The continuous LCARS frame (header bar, sidebar track, footer bar) is built from a small set of reusable “frame segment” primitives. These primitives define the LCARS chrome, while structural shells like `.header-bar` and `.footer-bar` handle layout and semantics, and can themselves act as frame segments when combined with the `lcars-frame-segment` modifiers.
+
+- `.lcars-frame-segment`
+  - Base visual primitive for any LCARS frame piece.
+  - Applies the core frame color: `background-color: var(--shape-color);`.
+  - Used for:
+    - Header bar container (when combined with `.header-bar`).
+    - Sidebar filler segment between category buttons and bottom elbow.
+    - Footer bar container (when combined with `.footer-bar`).
+- `.lcars-frame-segment--horizontal`
+  - Marks a frame segment as a horizontal bar.
+  - Applies:
+    - `display: flex;`
+    - `align-items: center;`
+  - Used for:
+    - Header bar (`.header-bar` when combined with this modifier).
+    - Footer bar (`.footer-bar` when combined with this modifier).
+- `.lcars-frame-segment--left-rounded`
+  - Adds LCARS rounding on the left side of a horizontal segment:
+    - `border-top-left-radius: var(--radius);`
+    - `border-bottom-left-radius: var(--radius);`
+  - Used wherever the frame “wraps” around the content on the left:
+    - Header bar.
+    - Footer bar.
+
+Structural shells:
+
+- `.header-bar`
+  - Grid cell for the top-left header region.
+  - Provides layout: grid placement, flex alignment for the header fill, title button, and end cap.
+  - Receives LCARS chrome by also using `lcars-frame-segment` modifiers on the same element.
+- `.footer-bar`
+  - Grid cell for the bottom-left footer region.
+  - Provides layout: grid placement, flex alignment, and spacing for the system status and action buttons.
+  - Receives LCARS chrome by also using `lcars-frame-segment` modifiers on the same element.
+
+Examples:
+
+```/dev/null/frame-segments.html#L1-24
+<!-- Header: structural shell that is also a frame segment -->
+<div class="header-bar lcars-frame-segment lcars-frame-segment--horizontal lcars-frame-segment--left-rounded">
+  <div class="header-fill"></div>
+  <button class="app-title" id="homeBtn">ZANDER</button>
+  <div class="header-end-cap"></div>
+</div>
+
+<!-- Sidebar: structural track + vertical filler frame segment -->
+<div class="sidebar-track">
+  <!-- category buttons injected here -->
+  <div class="sidebar-filler lcars-frame-segment"></div>
+</div>
+
+<!-- Footer: structural shell that is also a frame segment -->
+<div class="footer-bar lcars-frame-segment lcars-frame-segment--horizontal lcars-frame-segment--left-rounded">
+  <!-- system status + action buttons -->
+</div>
+```
+
+These primitives allow future LCARS UIs to reuse the same frame language (horizontal bands, vertical fillers, rounded frame corners), while structural shells like `.header-bar` and `.footer-bar` remain app-specific layout containers that *opt into* LCARS visuals by composing the `lcars-frame-segment` modifiers.
 
 ---
 
@@ -262,42 +325,12 @@ Example structure:
 
 ### 3.2 Sidebar Elbows
 
-The top and bottom caps use a shared LCARS elbow primitive to carve internal curves out of the LCARS band, creating continuous elbow shapes without extra SVG assets.
+The top and bottom caps use CSS gradients to carve internal curves out of the LCARS band, creating continuous elbow shapes without extra SVG assets:
 
-#### 3.2.1 LCARS Elbow Primitive (`.lcars-elbow`)
+- `.sidebar-top-cap`: uses a radial gradient at bottom-left to curve into the header.
+- `.sidebar-bottom-cap`: uses a radial gradient at top-left to curve into the footer.
 
-- Implemented as a generic, reusable component:
-  - `height: 70px; width: 100%;`
-  - Background: `radial-gradient` using:
-    - Center position controlled via `--elbow-position` (e.g. `bottom left`, `top left`).
-    - Inner radius tied to the global frame radius: `var(--radius)`.
-    - Color transition:
-      - Inner circle: `var(--lcars-bg)` (frame cut-out).
-      - Outer band: `var(--shape-color)` (LCARS frame color).
-  - Corner radii controlled via:
-    - `--elbow-radius-top-left`
-    - `--elbow-radius-top-right`
-    - `--elbow-radius-bottom-right`
-    - `--elbow-radius-bottom-left`
-
-This allows any elbow to be configured purely via CSS custom properties without changing the HTML structure.
-
-#### 3.2.2 Sidebar-Specific Elbows
-
-Specializations for the sidebar:
-
-- `.sidebar-top-cap`:
-  - Extends `.lcars-elbow`.
-  - Uses `--elbow-position: bottom left;` to carve the curve toward the header.
-  - Sets `--elbow-radius-top-right: var(--radius);` to round the outer top-right corner.
-  - Connects the left-aligned header bar into the right-hand sidebar track.
-- `.sidebar-bottom-cap`:
-  - Extends `.lcars-elbow`.
-  - Uses `--elbow-position: top left;` to carve the curve toward the footer.
-  - Sets `--elbow-radius-bottom-right: var(--radius);` to round the outer bottom-right corner.
-  - Connects the sidebar track into the footer bar.
-
-Visually, the continuous LCARS frame flows:
+Visually, the flow is:
 
 `HEADER` → `TOP CAP` → `SIDEBAR TRACK` → `BOTTOM CAP` → `FOOTER`.
 
@@ -695,29 +728,10 @@ This section covers visual and interaction accessibility. For comprehensive a11y
 
 ### 9.1 Focus States
 
-Focus is implemented using two LCARS focus helpers plus targeted overrides:
+All interactive elements (links, buttons, tiles, inputs) use a consistent **neon glow** focus style:
 
-- **Global rule**:
-  - `:focus-visible` removes default box-shadow and applies a thin white outline for any focusable element that does not opt into a more specific helper.
-- **`.lcars-focus-outline`**:
-  - Used for pill buttons, dialog actions, and form inputs where a strong outline is desired.
-  - Applies `outline: 3px solid #ffffff` with a small `outline-offset` to create a clear “neon ring” effect.
-  - Commonly used on:
-    - `.lcars-button.lcars-pill` (e.g., settings actions, dialog actions).
-    - Text inputs, selects, and textareas.
-- **`.lcars-focus-bar`**:
-  - Used where a directional LCARS bar is more appropriate than a ring.
-  - Renders a solid bar via `:focus-visible::after`, with position and size controlled by custom properties:
-    - `--lcars-focus-bar-top`
-    - `--lcars-focus-bar-bottom`
-    - `--lcars-focus-bar-left`
-    - `--lcars-focus-bar-right`
-    - `--lcars-focus-bar-width`
-    - `--lcars-focus-bar-height`
-    - `--lcars-focus-bar-color`
-  - Examples:
-    - Sidebar category buttons (`.cat-btn.lcars-focus-bar`) use a vertical bar along the left edge.
-    - Footer bar buttons (`.lcars-footer-bar-button.lcars-focus-bar`) use a horizontal bar along the top edge.
+- `outline: 2px solid #ffff66` (or equivalent).
+- Multiple box-shadow layers (e.g., 0 0 8px, 0 0 16px, 0 0 32px in yellow/orange).
 
 Additional notes:
 
@@ -769,3 +783,132 @@ Additional notes:
    - The main content scrolls independently inside the fixed shell for smaller viewports.
 
 This document describes the intended appearance and interaction patterns. For implementation details (DOM structure, JavaScript behavior, and state model), see `ARCHITECTURE.md` and `index.html`.
+
+---
+
+## 11. LCARS Primitive Catalog
+
+This section lists the **reusable LCARS primitives** that ZANDER consumes. These are the building blocks for future LCARS-based applications; app-specific shells and layouts (like `header-bar` and `footer-bar`) are expected to compose these primitives rather than redefine LCARS visuals.
+
+### 11.1 Frame & Shell Primitives
+
+- `lcars-app`
+  - Grid container for the overall LCARS shell.
+  - Defines the 2×3 layout (header, main, footer × content, sidebar).
+- `lcars-frame-segment`
+  - Base LCARS frame surface.
+  - Applies `background-color: var(--shape-color);`.
+  - Used wherever the LCARS band should appear (header, sidebar filler, footer).
+- `lcars-frame-segment--horizontal`
+  - Marks a frame segment as a horizontal bar.
+  - Applies `display: flex; align-items: center;`.
+- `lcars-frame-segment--left-rounded`
+  - Adds LCARS rounding on the left side using the shared `--radius`.
+  - Used for header and footer left edges.
+- `lcars-elbow`
+  - Generic curved elbow constructed via `radial-gradient`.
+  - Configurable via:
+    - `--elbow-position` (e.g., `bottom left`, `top left`).
+    - `--elbow-radius-top-left`, `--elbow-radius-top-right`,
+      `--elbow-radius-bottom-right`, `--elbow-radius-bottom-left`.
+  - Specialized by:
+    - `sidebar-top-cap` (header → sidebar connection).
+    - `sidebar-bottom-cap` (sidebar → footer connection).
+
+### 11.2 Button & Control Primitives
+
+- `lcars-button`
+  - Base LCARS button:
+    - Uppercase label, bold type, inline-flex layout.
+    - Background and foreground colors driven by CSS variables:
+      - `--lcars-button-bg`
+      - `--lcars-button-fg`
+    - Supports context-specific variants via additional classes.
+- `lcars-pill`
+  - Modifier for rounded LCARS buttons.
+  - Sets a pill radius (e.g., `--lcars-button-radius: 20px`).
+- Color utility variants (for `lcars-button`):
+  - `lcars-color-orange` – primary LCARS command color.
+  - `lcars-color-dark` – dark panel with light text.
+  - `lcars-color-danger` – destructive actions (reset, delete).
+  - `lcars-color-beige` – neutral secondary controls.
+- Contextual button roles:
+  - `lcars-dialog-action` – buttons within dialogs.
+  - `lcars-settings-action` – buttons within the Settings panel.
+  - `lcars-footer-bar-button` – footer action buttons that integrate with the frame and focus bar.
+
+### 11.3 Pins & Small Controls
+
+- `lcars-pin`
+  - Base primitive for small circular LCARS controls (“pins”).
+  - Extensible via:
+    - `--lcars-pin-size`
+    - `--lcars-pin-bg`
+    - `--lcars-pin-fg`
+  - Used conceptually for:
+    - Bookmark footer actions (open/edit icons).
+    - Small configuration controls where a circular LCARS button is appropriate.
+- `category-config-btn`
+  - Specialized pin for category configuration controls:
+    - Uses SVG glyphs (up, down, plus, delete).
+    - Larger `--lcars-pin-size` and inset border to read clearly in Settings.
+  - Still treated as a consumer of the `lcars-pin` visual language.
+
+### 11.4 Focus & Interaction Primitives
+
+- `lcars-focus-outline`
+  - Helper class for elements that should use a strong outline:
+    - Outline: `3px solid #ffffff` with small offset.
+  - Applied to:
+    - Pill buttons (`lcars-button lcars-pill`).
+    - Dialog actions.
+    - Form inputs (text, select, textarea).
+- `lcars-focus-bar`
+  - Helper class that draws a directional focus bar using `:focus-visible::after`.
+  - Position and size are controlled by:
+    - `--lcars-focus-bar-top`
+    - `--lcars-focus-bar-bottom`
+    - `--lcars-focus-bar-left`
+    - `--lcars-focus-bar-right`
+    - `--lcars-focus-bar-width`
+    - `--lcars-focus-bar-height`
+    - `--lcars-focus-bar-color`
+  - Typical uses:
+    - Sidebar category buttons: vertical bar along the left edge.
+    - Footer buttons: horizontal bar along the top edge.
+
+### 11.5 Theme & Color System Primitives
+
+- Global theme variables (applied on `body`):
+  - `--theme-main` – primary frame/accent color.
+  - `--shape-color` – derived frame color used by LCARS shell components.
+  - `--theme-secondary` – secondary accent used for bookmark tiles and some buttons.
+- Palette:
+  - `LCARS_PALETTE` – canonical list of LCARS colors used for categories and the color picker.
+- Theme data attributes:
+  - `body[data-theme="laan" | "data" | "doctor" | "chapel" | "spock" | "mbenga" | "seven" | "shran"]`
+    - Each theme configures `--theme-main` and `--theme-secondary` for a distinct but consistent LCARS look.
+
+### 11.6 Layout Shell Conventions (Consumers, Not Primitives)
+
+These classes are **not** primitives, but typical consumers that future apps can mirror:
+
+- `header-bar`
+  - App-specific shell for the top-left header region.
+  - Composes:
+    - `lcars-frame-segment`
+    - `lcars-frame-segment--horizontal`
+    - `lcars-frame-segment--left-rounded`
+- `sidebar-container`, `sidebar-track`, `sidebar-top-cap`, `sidebar-bottom-cap`, `sidebar-filler`
+  - Define the right-hand LCARS sidebar structure.
+  - Use:
+    - `lcars-elbow` for top and bottom caps.
+    - `lcars-frame-segment` for vertical filler.
+- `footer-bar`
+  - App-specific shell for the bottom-left footer region.
+  - Composes:
+    - `lcars-frame-segment`
+    - `lcars-frame-segment--horizontal`
+    - `lcars-frame-segment--left-rounded`
+
+When extracting a standalone LCARS design system, the `lcars-*` primitives listed above should form the **public API**. Application shells (like those in ZANDER) are responsible for arranging these primitives into a complete console layout.
