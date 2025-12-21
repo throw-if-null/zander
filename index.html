@@ -2055,6 +2055,7 @@
                 bookmarks: JSON.parse(JSON.stringify(DEFAULT_BOOKMARKS)),
                 categories: JSON.parse(JSON.stringify(DEFAULT_CATEGORIES)),
                 currentCategory: "cat-root-startrek",
+                landingCategoryId: null,
             };
 
             // Theme state is intentionally separate from bookmark/category state
@@ -2186,6 +2187,9 @@
                         ) {
                             state.categories = data.categories;
                         }
+                        if (typeof data.landingCategoryId === "string") {
+                            state.landingCategoryId = data.landingCategoryId;
+                        }
 
                         backfillBookmarkCreatedAt(state.bookmarks);
                         backfillCategoryCreatedAt(state.categories);
@@ -2215,7 +2219,15 @@
                     )
                 ) {
                     state.currentCategory =
-                        state.categories[0]?.id || "cat-databanks";
+                        state.categories[0]?.id || null;
+                }
+
+                // Initialize landingCategoryId: default to first root if not set/invalid
+                const hasValidLanding =
+                    state.landingCategoryId &&
+                    !!getCategoryPath(state.landingCategoryId, state.categories);
+                if (!hasValidLanding) {
+                    state.landingCategoryId = state.categories[0]?.id || null;
                 }
             }
 
@@ -2225,6 +2237,7 @@
                     JSON.stringify({
                         bookmarks: state.bookmarks,
                         categories: state.categories,
+                        landingCategoryId: state.landingCategoryId || null,
                     }),
                 );
             }
@@ -2519,6 +2532,50 @@
                 updateSystemStatus();
                 updateBookmarkLocation();
             }
+
+           function goHome() {
+               // Ensure views are switched to Bookmarks
+               bookmarksView.classList.add("active");
+               settingsView.classList.remove("active");
+               aboutView.classList.remove("active");
+
+               let targetCategoryId = null;
+
+               // 1. Prefer configured landing category if it still exists
+               if (state.landingCategoryId) {
+                   const landingPath = getCategoryPath(
+                       state.landingCategoryId,
+                       state.categories,
+                   );
+                   if (landingPath && landingPath.length > 0) {
+                       targetCategoryId = state.landingCategoryId;
+                   }
+               }
+
+               // 2. If no valid landing category, use root of current category path
+               if (!targetCategoryId && state.currentCategory) {
+                   const path = getCategoryPath(
+                       state.currentCategory,
+                       state.categories,
+                   );
+                   if (path && path.length > 0) {
+                       targetCategoryId = path[0].id;
+                   }
+               }
+
+               // 3. Fallback to first root category
+               if (!targetCategoryId && state.categories.length > 0) {
+                   targetCategoryId = state.categories[0].id;
+               }
+
+               if (targetCategoryId) {
+                   state.currentCategory = targetCategoryId;
+                   saveData();
+               }
+
+               renderCategories();
+               renderGrid();
+           }
 
             function formatCurrentStardateDisplay() {
                 const sd = calculateStardate();
@@ -3524,9 +3581,7 @@
 
                 if (homeBtn) {
                     homeBtn.addEventListener("click", () => {
-                        bookmarksView.classList.add("active");
-                        settingsView.classList.remove("active");
-                        aboutView.classList.remove("active");
+                        goHome();
                     });
                 }
 
@@ -3587,10 +3642,7 @@
                                 break;
                             case "h":
                                 e.preventDefault();
-                                // Alt+H: go Home (Bookmarks view)
-                                bookmarksView.classList.add("active");
-                                settingsView.classList.remove("active");
-                                aboutView.classList.remove("active");
+                                goHome();
                                 break;
                         }
                     }
