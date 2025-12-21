@@ -406,11 +406,14 @@
                 background-color: var(--lcars-arrow-btn-bg-focus);
             }
 
-            .lcars-arrow-btn:disabled {
+            .lcars-arrow-btn:disabled,
+            .lcars-arrow-btn.disabled {
                 cursor: default;
+                pointer-events: none;
             }
 
-            .lcars-arrow-btn:disabled svg {
+            .lcars-arrow-btn:disabled svg,
+            .lcars-arrow-btn.disabled svg {
                 opacity: 0.3;
             }
 
@@ -506,9 +509,9 @@
                 /* Configure LCARS focus bar for left-edge vertical indicator */
                 --lcars-focus-bar-top: 0;
                 --lcars-focus-bar-bottom: 0;
-                --lcars-focus-bar-left: -10px;
+                --lcars-focus-bar-left: 0px;
                 --lcars-focus-bar-right: auto;
-                --lcars-focus-bar-width: 4px;
+                --lcars-focus-bar-width: 6px;
                 --lcars-focus-bar-height: 100%;
             }
 
@@ -1581,19 +1584,19 @@
 
                 <!-- Middle Track with Scroll Buttons -->
                 <div class="sidebar-track">
-                    <button class="lcars-arrow-btn sidebar-scroll-up" id="sidebarScrollUp" aria-label="Scroll categories up">
-                        <svg viewBox="0 0 40 12" aria-hidden="true">
+                    <div class="lcars-arrow-btn sidebar-scroll-up" id="sidebarScrollUp" aria-hidden="true">
+                        <svg viewBox="0 0 40 12">
                             <polygon points="20,0 40,12 0,12" />
                         </svg>
-                    </button>
-                    <div class="lcars-scroll-container sidebar-categories" id="categorySidebar">
+                    </div>
+                    <div class="lcars-scroll-container sidebar-categories" id="categorySidebar" tabindex="-1">
                         <!-- Categories injected here -->
                     </div>
-                    <button class="lcars-arrow-btn sidebar-scroll-down" id="sidebarScrollDown" aria-label="Scroll categories down">
-                        <svg viewBox="0 0 40 12" aria-hidden="true">
+                    <div class="lcars-arrow-btn sidebar-scroll-down" id="sidebarScrollDown" aria-hidden="true">
+                        <svg viewBox="0 0 40 12">
                             <polygon points="0,0 40,0 20,12" />
                         </svg>
-                    </button>
+                    </div>
                 </div>
 
                 <!-- Bottom Elbow -->
@@ -2305,6 +2308,12 @@
                     : null;
                 const currentRootId = path && path.length ? path[0].id : null;
 
+                // Determine effective tab target (roving tabindex)
+                // If currentRootId is valid and exists in root categories, use it.
+                // Otherwise default to the first category.
+                const rootExists = state.categories.some(c => c.id === currentRootId);
+                const tabTargetId = rootExists ? currentRootId : (state.categories.length > 0 ? state.categories[0].id : null);
+
                 // Render only root categories in the sidebar
                 state.categories.forEach((cat) => {
                     const btn = document.createElement("button");
@@ -2315,6 +2324,10 @@
                     btn.style.setProperty("--cat-color", cat.color);
                     btn.dataset.id = cat.id;
                     btn.setAttribute("aria-label", `Category: ${cat.name}`);
+
+                    // Roving tabindex
+                    btn.tabIndex = (cat.id === tabTargetId) ? 0 : -1;
+
                     if (currentRootId === cat.id) {
                         btn.setAttribute("aria-current", "page");
                     }
@@ -3517,8 +3530,8 @@
                 const canScrollUp = scrollTop > 0;
                 const canScrollDown = scrollTop + clientHeight < scrollHeight - 1;
 
-                if (sidebarScrollUp) sidebarScrollUp.disabled = !canScrollUp;
-                if (sidebarScrollDown) sidebarScrollDown.disabled = !canScrollDown;
+                if (sidebarScrollUp) sidebarScrollUp.classList.toggle("disabled", !canScrollUp);
+                if (sidebarScrollDown) sidebarScrollDown.classList.toggle("disabled", !canScrollDown);
             }
 
             function scrollSidebar(direction) {
@@ -3566,6 +3579,10 @@
 
                     const nextBtn = allButtons[nextIndex];
                     if (nextBtn) {
+                        // Roving tabindex update
+                        focusedBtn.tabIndex = -1;
+                        nextBtn.tabIndex = 0;
+
                         nextBtn.focus();
                         // Scroll the button into view
                         nextBtn.scrollIntoView({ block: "nearest", behavior: "smooth" });
