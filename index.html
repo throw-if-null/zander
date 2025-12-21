@@ -1664,6 +1664,17 @@
                             </section>
 
                             <section class="settings-section">
+                                <h2>HOME CATEGORY</h2>
+                                <div class="form-group">
+                                    <label for="landingCategorySelect">LANDING CATEGORY</label>
+                                    <select id="landingCategorySelect" aria-label="Landing Category"></select>
+                                    <p style="font-size: 0.8rem; opacity: 0.8; margin-top: 6px;">
+                                        SELECT WHICH CATEGORY THE SYSTEM SHOULD LAND ON WHEN YOU PRESS HOME OR ACTIVATE THE ZANDER HEADER.
+                                    </p>
+                                </div>
+                            </section>
+
+                            <section class="settings-section">
                                 <h2>THEME</h2>
                                 <div class="form-group">
                                     <div
@@ -2069,6 +2080,7 @@
             const bookmarksView = document.getElementById("bookmarksView");
             const settingsView = document.getElementById("settingsView");
             const aboutView = document.getElementById("aboutView");
+            const landingCategorySelect = document.getElementById("landingCategorySelect");
             const aboutStardateEl = document.getElementById("aboutStardate");
             const settingsStardateEl =
                 document.getElementById("settingsStardate");
@@ -2335,6 +2347,39 @@
                 updateBookmarkLocation();
             }
 
+            function renderLandingCategoryOptions() {
+                if (!landingCategorySelect) return;
+
+                landingCategorySelect.innerHTML = "";
+
+                walkCategories(
+                    state.categories,
+                    (cat, parent, depth) => {
+                        const level = depth + 1;
+                        // Only allow root categories as landing options for now
+                        if (level !== 1) return;
+
+                        const opt = document.createElement("option");
+                        opt.value = cat.id;
+                        opt.textContent = cat.name;
+                        landingCategorySelect.appendChild(opt);
+                    },
+                );
+
+                // Ensure a valid landingCategoryId exists
+                const hasValidLanding =
+                    state.landingCategoryId &&
+                    !!getCategoryPath(state.landingCategoryId, state.categories);
+                if (!hasValidLanding && state.categories.length > 0) {
+                    state.landingCategoryId = state.categories[0].id;
+                    saveData();
+                }
+
+                if (state.landingCategoryId) {
+                    landingCategorySelect.value = state.landingCategoryId;
+                }
+            }
+
             function createCategoryTile(category) {
                 const tile = document.createElement("button");
                 tile.type = "button";
@@ -2533,49 +2578,49 @@
                 updateBookmarkLocation();
             }
 
-           function goHome() {
-               // Ensure views are switched to Bookmarks
-               bookmarksView.classList.add("active");
-               settingsView.classList.remove("active");
-               aboutView.classList.remove("active");
+            function goHome() {
+                // Ensure views are switched to Bookmarks
+                bookmarksView.classList.add("active");
+                settingsView.classList.remove("active");
+                aboutView.classList.remove("active");
 
-               let targetCategoryId = null;
+                let targetCategoryId = null;
 
-               // 1. Prefer configured landing category if it still exists
-               if (state.landingCategoryId) {
-                   const landingPath = getCategoryPath(
-                       state.landingCategoryId,
-                       state.categories,
-                   );
-                   if (landingPath && landingPath.length > 0) {
-                       targetCategoryId = state.landingCategoryId;
-                   }
-               }
+                // 1. Prefer configured landing category if it still exists
+                if (state.landingCategoryId) {
+                    const landingPath = getCategoryPath(
+                        state.landingCategoryId,
+                        state.categories,
+                    );
+                    if (landingPath && landingPath.length > 0) {
+                        targetCategoryId = state.landingCategoryId;
+                    }
+                }
 
-               // 2. If no valid landing category, use root of current category path
-               if (!targetCategoryId && state.currentCategory) {
-                   const path = getCategoryPath(
-                       state.currentCategory,
-                       state.categories,
-                   );
-                   if (path && path.length > 0) {
-                       targetCategoryId = path[0].id;
-                   }
-               }
+                // 2. If no valid landing category, use root of current category path
+                if (!targetCategoryId && state.currentCategory) {
+                    const path = getCategoryPath(
+                        state.currentCategory,
+                        state.categories,
+                    );
+                    if (path && path.length > 0) {
+                        targetCategoryId = path[0].id;
+                    }
+                }
 
-               // 3. Fallback to first root category
-               if (!targetCategoryId && state.categories.length > 0) {
-                   targetCategoryId = state.categories[0].id;
-               }
+                // 3. Fallback to first root category
+                if (!targetCategoryId && state.categories.length > 0) {
+                    targetCategoryId = state.categories[0].id;
+                }
 
-               if (targetCategoryId) {
-                   state.currentCategory = targetCategoryId;
-                   saveData();
-               }
+                if (targetCategoryId) {
+                    state.currentCategory = targetCategoryId;
+                    saveData();
+                }
 
-               renderCategories();
-               renderGrid();
-           }
+                renderCategories();
+                renderGrid();
+            }
 
             function formatCurrentStardateDisplay() {
                 const sd = calculateStardate();
@@ -3655,11 +3700,24 @@
                 onClick("addCategoryBtnMain", () => {
                     addCategory(null);
                     renderCategoryConfig();
+                    renderLandingCategoryOptions();
                 });
                 onChange("importInput", handleImport);
 
                 // Theme controls
                 renderThemeControls();
+
+                // Landing category select
+                if (landingCategorySelect) {
+                    landingCategorySelect.addEventListener("change", (e) => {
+                        const value = e.target.value || null;
+                        if (value) {
+                            state.landingCategoryId = value;
+                            saveData();
+                        }
+                    });
+                }
+                renderLandingCategoryOptions();
 
                 // Dialog close on ESC
                 bookmarkDialog.addEventListener("cancel", (e) => {
