@@ -648,7 +648,7 @@
                 padding: 0;
                 border-radius: 0;
                 border-bottom-right-radius: 30px;
-                cursor: pointer;
+                cursor: default;
                 text-decoration: none;
                 display: grid;
                 grid-template-columns: 15px 1fr;
@@ -738,6 +738,11 @@
                 color: #000;
                 cursor: pointer;
                 transition: transform 0.2s, filter 0.2s;
+            }
+
+            .bookmark-footer-btn:focus-visible {
+                outline: 2px solid #ffffff;
+                outline-offset: 2px;
             }
 
             .bookmark-footer-btn:hover {
@@ -1910,7 +1915,7 @@
             }
 
             function createBookmarkTile(bookmark) {
-                const tile = document.createElement("a");
+                const tile = document.createElement("div");
                 tile.className = "bookmark-tile";
                 tile.dataset.id = bookmark.id;
                 tile.setAttribute("role", "listitem");
@@ -1931,16 +1936,17 @@
                     <div class="bookmark-title">${escapeHtml(bookmark.title)}</div>
                     ${descriptionHtml}
                     <div class="bookmark-url-footer">
-                        <div class="bookmark-footer-btn bookmark-edit-icon" title="Edit Bookmark" aria-label="Edit Bookmark"></div>
-                        <span class="bookmark-footer-btn bookmark-url-icon" title="${escapeHtml(bookmark.url)}"></span>
+                        <button class="bookmark-footer-btn bookmark-edit-icon" type="button" title="Edit Bookmark" aria-label="Edit Bookmark"></button>
+                        <button class="bookmark-footer-btn bookmark-url-icon" type="button" title="${escapeHtml(bookmark.url)}" aria-label="Open Bookmark URL"></button>
                     </div>
                 `;
 
-                // Left click opens
-                tile.href = bookmark.url;
-                tile.target = "_blank";
-                tile.rel = "noopener noreferrer";
-                tile.setAttribute("aria-label", `Open ${escapeHtml(bookmark.title)} - ${escapeHtml(bookmark.url)}`);
+                // Bookmark tiles are visual containers; open/edit via footer pins only
+                tile.setAttribute("role", "group");
+                tile.setAttribute(
+                    "aria-label",
+                    `Bookmark: ${escapeHtml(bookmark.title)} - ${escapeHtml(bookmark.url)}`
+                );
 
                 return tile;
             }
@@ -2834,25 +2840,31 @@
                         const tile = e.target.closest(".bookmark-tile");
                         if (!tile) return;
 
-                        // Check if edit icon was clicked
+                        // Check if edit pin was clicked
                         if (e.target.closest(".bookmark-edit-icon")) {
                             e.preventDefault();
                             e.stopPropagation();
                             const id = tile.dataset.id;
                             const bookmark = state.bookmarks.find((b) => b.id === id);
                             if (bookmark) openEditDialog(bookmark);
+                            return;
                         }
-                    });
 
-                    grid.addEventListener("contextmenu", (e) => {
-                        const tile = e.target.closest(".bookmark-tile");
-                        if (tile) {
+                        // Check if URL pin was clicked
+                        if (e.target.closest(".bookmark-url-icon")) {
                             e.preventDefault();
+                            e.stopPropagation();
                             const id = tile.dataset.id;
                             const bookmark = state.bookmarks.find((b) => b.id === id);
-                            if (bookmark) openEditDialog(bookmark);
+                            if (bookmark?.url) {
+                                window.open(bookmark.url, "_blank", "noopener,noreferrer");
+                            }
+                            return;
                         }
+
+                        // Clicks on the tile body do not trigger open/edit; pins are the only controls
                     });
+
                 }
 
                 if (homeBtn) {
