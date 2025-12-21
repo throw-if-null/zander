@@ -2274,69 +2274,49 @@
             function renderCategories() {
                 sidebar.innerHTML = "";
 
-                function createCategoryButton(cat, level) {
-                    const wrapper = document.createElement("div");
-                    wrapper.className = "cat-wrapper";
+                // Determine which root category should be marked active based on the current path
+                const path = state.currentCategory
+                    ? getCategoryPath(state.currentCategory, state.categories)
+                    : null;
+                const currentRootId = path && path.length ? path[0].id : null;
 
+                // Render only root categories in the sidebar
+                state.categories.forEach((cat) => {
                     const btn = document.createElement("button");
-                    btn.className = `lcars-button lcars-focus-bar cat-btn ${state.currentCategory === cat.id ? "active" : ""}`;
+                    btn.className =
+                        "lcars-button lcars-focus-bar cat-btn" +
+                        (currentRootId === cat.id ? " active" : "");
                     btn.textContent = cat.name;
                     btn.style.setProperty("--cat-color", cat.color);
                     btn.dataset.id = cat.id;
                     btn.setAttribute("aria-label", `Category: ${cat.name}`);
-                    if (state.currentCategory === cat.id) {
+                    if (currentRootId === cat.id) {
                         btn.setAttribute("aria-current", "page");
                     }
-
-                    wrapper.appendChild(btn);
-
-                    if (cat.children && cat.children.length > 0 && level < 3) {
-                        const submenu = document.createElement("div");
-                        submenu.className = "cat-submenu";
-                        submenu.setAttribute("role", "group");
-                        submenu.setAttribute("aria-label", `Subcategories of ${cat.name}`);
-
-                        cat.children.forEach((child) => {
-                            submenu.appendChild(
-                                createCategoryButton(child, level + 1),
-                            );
-                        });
-
-                        wrapper.appendChild(submenu);
-
-                        // Position submenu on hover using fixed positioning
-                        const positionSubmenu = () => {
-                            const btnRect = btn.getBoundingClientRect();
-                            submenu.style.top = `${btnRect.top}px`;
-                            submenu.style.left = `${btnRect.left - 160 - 10}px`; // 160px width + 10px gap
-                        };
-
-                        wrapper.addEventListener("mouseenter", positionSubmenu);
-                        btn.addEventListener("focus", positionSubmenu);
-                    }
-
-                    return wrapper;
-                }
-
-                state.categories.forEach((cat) => {
-                    sidebar.appendChild(createCategoryButton(cat, 1));
+                    sidebar.appendChild(btn);
                 });
 
-                // Update select in dialog
+                // Update category select in the dialog using the full tree, with indentation
                 categoryInput.innerHTML = "";
-
-                walkCategories(state.categories, (cat, parent, depth, index, siblings) => {
+                walkCategories(
+                    state.categories,
+                    (cat, parent, depth) => {
                         const level = depth + 1;
                         const opt = document.createElement("option");
                         opt.value = cat.id;
                         let prefix = "";
-                        for (let i = 1; i < level; i++)
+                        for (let i = 1; i < level; i++) {
                             prefix += "\u00A0\u00A0"; // Non-breaking spaces
+                        }
                         if (level > 1) prefix += "└ ";
                         opt.textContent = prefix + cat.name;
-                        opt.setAttribute("aria-label", `${cat.name}${level > 1 ? " (subcategory)" : ""}`);
+                        opt.setAttribute(
+                            "aria-label",
+                            `${cat.name}${level > 1 ? " (subcategory)" : ""}`,
+                        );
                         categoryInput.appendChild(opt);
-                    });
+                    },
+                );
 
                 updateSystemStatus();
                 updateBookmarkLocation();
@@ -2491,13 +2471,42 @@
                 return tile;
             }
 
+            function getCurrentCategory() {
+                const id = state.currentCategory;
+                if (!id) return null;
+
+                return (
+                    walkCategories(state.categories, (cat) => {
+                        if (cat.id === id) return cat;
+                        return undefined;
+                    }) || null
+                );
+            }
+
             function renderGrid() {
                 grid.innerHTML = "";
-                const filtered = state.bookmarks.filter(
-                    (b) => b.categoryId === state.currentCategory,
+
+                const currentCategory = getCurrentCategory();
+
+                // 1. Render child categories as LCARS category tiles
+                const childCategories = currentCategory?.children || [];
+                childCategories.forEach((cat) => {
+                    const tile = createCategoryTile(cat);
+                    tile.addEventListener("click", () => {
+                        state.currentCategory = cat.id;
+                        saveData();
+                        renderGrid();
+                        renderCategories();
+                    });
+                    grid.appendChild(tile);
+                });
+
+                // 2. Render bookmarks directly in the current category
+                const filtered = state.bookmarks.filter((b) =>
+                    currentCategory ? b.categoryId === currentCategory.id : true,
                 );
 
-                if (filtered.length === 0) {
+                if (filtered.length === 0 && childCategories.length === 0) {
                     emptyState.style.display = "block";
                 } else {
                     emptyState.style.display = "none";
@@ -2506,6 +2515,7 @@
                         grid.appendChild(tile);
                     });
                 }
+
                 updateSystemStatus();
                 updateBookmarkLocation();
             }
