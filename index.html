@@ -346,11 +346,39 @@
             /* Middle Sidebar Track */
             .sidebar-track {
                 flex: 1;
+                min-height: 0; /* Allow flex item to shrink below content size */
                 background: none;
                 display: flex;
                 flex-direction: column;
                 gap: 5px;
                 padding: 5px 0 0 31px;
+                overflow-y: auto;
+                overflow-x: hidden;
+            }
+
+            /* LCARS-styled scrollbar for sidebar */
+            .sidebar-track::-webkit-scrollbar {
+                width: 8px;
+            }
+
+            .sidebar-track::-webkit-scrollbar-track {
+                background: var(--lcars-black);
+            }
+
+            .sidebar-track::-webkit-scrollbar-thumb {
+                background-color: var(--shape-color);
+                border-radius: 4px;
+                border: 2px solid var(--lcars-black);
+            }
+
+            .sidebar-track::-webkit-scrollbar-thumb:hover {
+                background-color: var(--lcars-beige);
+            }
+
+            /* Firefox scrollbar styling */
+            .sidebar-track {
+                scrollbar-width: thin;
+                scrollbar-color: var(--shape-color) var(--lcars-black);
             }
 
             /* Bottom Elbow Connector */
