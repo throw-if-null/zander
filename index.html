@@ -1430,12 +1430,19 @@
 
             .category-config-row {
                 display: grid;
-                grid-template-columns: 70px 1fr 40px 40px 40px 40px;
+                grid-template-columns: 70px 1fr auto;
                 gap: 8px;
                 align-items: center;
                 padding: 6px 8px;
                 border-radius: var(--lcars-radius-md);
                 background-color: var(--lcars-dark-1);
+            }
+
+            .category-config-row-controls {
+                display: inline-grid;
+                grid-auto-flow: column;
+                grid-auto-columns: 40px;
+                gap: 8px;
             }
 
             .category-color-swatch {
@@ -1545,7 +1552,9 @@
 
             .category-config-btn.delete {
                 --lcars-pin-bg: var(--lcars-red);
+                --lcars-pin-fg: var(--lcars-black);
                 background-color: var(--lcars-pin-bg);
+                color: var(--lcars-pin-fg);
             }
 
             /* Category pin icons (SVG) */
@@ -1577,6 +1586,10 @@
             .category-config-btn[data-glyph="delete"] svg {
                 width: 80%;
                 height: 80%;
+                stroke: currentColor;
+                stroke-width: 2.5;
+                stroke-linecap: round;
+                fill: none;
             }
 
             /* System Status Display */
@@ -1700,9 +1713,9 @@
                                     <button
                                         class="lcars-button lcars-pill lcars-focus-outline lcars-color-orange lcars-settings-action action-btn action-btn--small"
                                         id="addCategoryBtnMain"
-                                        style="width: 100%; margin-bottom: 20px"
+                                        style="width: calc(100% - 20px); margin: 0 10px 20px 10px"
                                     >
-                                        ADD CATEGORY
+                                        ADD ROOT CATEGORY
                                     </button>
                                 </div>
                             </section>
@@ -3211,11 +3224,15 @@
                     delBtn.setAttribute("aria-label", `Delete ${cat.name} category`);
                     delBtn.onclick = () => deleteCategory(cat.id);
 
+                    const controls = document.createElement("div");
+                    controls.className = "category-config-row-controls";
+                    controls.appendChild(upBtn);
+                    controls.appendChild(downBtn);
+                    controls.appendChild(delBtn);
+
                     row.appendChild(colorBtn);
                     row.appendChild(nameInput);
-                    row.appendChild(upBtn);
-                    row.appendChild(downBtn);
-                    row.appendChild(delBtn);
+                    row.appendChild(controls);
 
                     categoryConfigList.appendChild(row);
                 });
@@ -3313,7 +3330,34 @@
             }
 
             function addCategory(parentId = null) {
-                openAddCategoryDialog(parentId);
+                const name = "NEW CATEGORY";
+                const color = getDefaultCategoryColor();
+                const createdAt = calculateStardate();
+
+                const newCategory = {
+                    id: "cat-" + Date.now().toString(36),
+                    name,
+                    color,
+                    createdAt,
+                    children: [],
+                };
+
+                if (parentId) {
+                    const result = findCategoryAndParent(
+                        parentId,
+                        state.categories,
+                        null,
+                    );
+                    if (!result) return;
+                    result.category.children = result.category.children || [];
+                    result.category.children.push(newCategory);
+                } else {
+                    state.categories.push(newCategory);
+                }
+
+                saveData();
+                renderCategories();
+                renderCategoryConfig();
             }
 
             function moveCategory(id, direction) {
