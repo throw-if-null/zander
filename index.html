@@ -1172,9 +1172,10 @@
                 gap: 10px;
             }
 
-            .bookmark-footer-btn {
-                /* LCARS pin variant for bookmark footer actions */
+            /* LCARS tile pin: small circular action button for use in tiles */
+            .lcars-tile-pin {
                 --lcars-pin-size: 18px;
+                --lcars-pin-bg: var(--theme-main);
 
                 width: var(--lcars-pin-size);
                 height: var(--lcars-pin-size);
@@ -1186,28 +1187,38 @@
                 align-items: center;
                 justify-content: center;
 
-                background-color: var(--lcars-pin-bg, var(--theme-main));
+                background-color: var(--lcars-pin-bg);
                 color: var(--lcars-black);
                 cursor: pointer;
                 transition: transform 0.2s, filter 0.2s;
+                z-index: 2;
             }
 
-            .bookmark-footer-btn:focus-visible {
+            .lcars-tile-pin:focus-visible {
                 outline: var(--lcars-focus-outline-width) solid var(--lcars-focus-outline-color);
                 outline-offset: var(--lcars-focus-outline-offset);
             }
 
-            .bookmark-footer-btn:hover {
+            .lcars-tile-pin:hover {
                 transform: scale(1.2);
                 filter: brightness(1.2);
             }
 
-            .bookmark-url-icon {
+            /* Tile pin color variants */
+            .lcars-tile-pin--url {
                 --lcars-pin-bg: var(--theme-main);
             }
 
-            .bookmark-edit-icon {
+            .lcars-tile-pin--edit {
                 --lcars-pin-bg: var(--lcars-orange);
+            }
+
+            /* Category tile edit pin positioning */
+            .lcars-category-tile .lcars-tile-pin {
+                position: absolute;
+                bottom: 8px;
+                right: 12px;
+                z-index: 10;
             }
 
             /* Footer Actions: LCARS buttons with footer-specific layout */
@@ -1969,6 +1980,15 @@
                     <div class="lcars-dialog-footer">
                         <button
                             type="button"
+                            class="lcars-button lcars-pill lcars-focus-outline lcars-color-danger lcars-dialog-action delete"
+                            id="categoryDeleteBtn"
+                            style="display: none"
+                            aria-label="Delete Category"
+                        >
+                            DELETE
+                        </button>
+                        <button
+                            type="button"
                             class="lcars-button lcars-pill lcars-focus-outline lcars-color-dark lcars-dialog-action"
                             onclick="document.getElementById('categoryDialog').close()"
                             aria-label="Cancel"
@@ -2238,6 +2258,7 @@
             const categoryParentInput = document.getElementById("categoryParentInput");
             const categoryColorGrid = document.getElementById("categoryColorGrid");
             const categoryColorInput = document.getElementById("categoryColorInput");
+            const categoryDeleteBtn = document.getElementById("categoryDeleteBtn");
 
             function showConfirm(title, message, onOk) {
                 confirmTitle.textContent = title;
@@ -2600,8 +2621,8 @@
                     <div class="bookmark-title">${escapeHtml(bookmark.title)}</div>
                     ${descriptionHtml}
                     <div class="bookmark-url-footer">
-                        <button class="bookmark-footer-btn bookmark-edit-icon" type="button" title="Edit Bookmark" aria-label="Edit Bookmark"></button>
-                        <button class="bookmark-footer-btn bookmark-url-icon" type="button" title="${escapeHtml(bookmark.url)}" aria-label="Open Bookmark URL"></button>
+                        <button class="lcars-tile-pin lcars-tile-pin--edit" type="button" title="Edit Bookmark" aria-label="Edit Bookmark"></button>
+                        <button class="lcars-tile-pin lcars-tile-pin--url" type="button" title="${escapeHtml(bookmark.url)}" aria-label="Open Bookmark URL"></button>
                     </div>
                 `;
 
@@ -2616,10 +2637,11 @@
             }
 
             function createCategoryTile(category) {
-                const tile = document.createElement("button");
-                tile.type = "button";
+                const tile = document.createElement("div");
                 tile.className = "lcars-category-tile";
                 tile.dataset.id = category.id;
+                tile.setAttribute("role", "button");
+                tile.setAttribute("tabindex", "0");
 
                 const color = category.color || "var(--theme-main)";
                 tile.style.setProperty("--cat-color", color);
@@ -2659,6 +2681,7 @@
             <div class="lcars-category-tile-meta-primary">${primaryMeta}</div>
             <div class="lcars-category-tile-meta-secondary">${escapeHtml(createdAtLabel)}</div>
         </div>
+        <button class="lcars-tile-pin lcars-tile-pin--edit" type="button" title="Edit Category" aria-label="Edit Category ${escapeHtml(category.name)}"></button>
     `;
 
                 tile.setAttribute(
@@ -2692,12 +2715,6 @@
                 const childCategories = currentCategory?.children || [];
                 childCategories.forEach((cat) => {
                     const tile = createCategoryTile(cat);
-                    tile.addEventListener("click", () => {
-                        state.currentCategory = cat.id;
-                        saveData();
-                        renderGrid();
-                        renderCategories();
-                    });
                     grid.appendChild(tile);
                 });
 
@@ -3252,6 +3269,7 @@
                 categoryForm.reset();
                 categoryIdInput.value = "";
                 categoryDialogTitle.textContent = "NEW CATEGORY";
+                categoryDeleteBtn.style.display = "none";
                 updateStardateDisplay(categoryStardateEl);
 
                 // Populate Parent Options
@@ -3304,37 +3322,165 @@
                 categoryDialog.showModal();
             }
 
+            function openEditCategoryDialog(category) {
+                categoryForm.reset();
+                categoryIdInput.value = category.id;
+                categoryDialogTitle.textContent = "EDIT CATEGORY";
+                categoryDeleteBtn.style.display = "inline-block";
+                categoryDeleteBtn.onclick = () => {
+                    categoryDialog.close();
+                    deleteCategory(category.id);
+                };
+
+                // Show stardate from category creation
+                if (category.createdAt) {
+                    const date = parseStardate(category.createdAt);
+                    const dateLabel = date
+                        ? date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })
+                        : "";
+                    categoryStardateEl.textContent = `CREATED ST: ${category.createdAt}${dateLabel ? " (" + dateLabel + ")" : ""}`;
+                    categoryStardateEl.title = dateLabel;
+                } else {
+                    updateStardateDisplay(categoryStardateEl);
+                }
+
+                // Populate name
+                categoryNameInput.value = category.name;
+
+                // Find current parent
+                const result = findCategoryAndParent(category.id, state.categories, null);
+                const currentParentId = result && result.parent ? result.parent.id : "";
+
+                // Populate Parent Options (excluding self and descendants)
+                categoryParentInput.innerHTML = '<option value="">(ROOT)</option>';
+
+                function getDescendantIds(cat) {
+                    let ids = [cat.id];
+                    if (cat.children) {
+                        cat.children.forEach(child => {
+                            ids = ids.concat(getDescendantIds(child));
+                        });
+                    }
+                    return ids;
+                }
+                const excludeIds = getDescendantIds(category);
+
+                function renderOptions(cats, level = 0) {
+                    cats.forEach(cat => {
+                        if (excludeIds.includes(cat.id)) return; // Can't be parent of self or descendant
+
+                        const opt = document.createElement("option");
+                        opt.value = cat.id;
+                        opt.textContent = "- ".repeat(level) + cat.name;
+
+                        if (cat.id === currentParentId) {
+                            opt.selected = true;
+                        }
+
+                        categoryParentInput.appendChild(opt);
+                        if (cat.children) {
+                            renderOptions(cat.children, level + 1);
+                        }
+                    });
+                }
+                renderOptions(state.categories);
+
+                // Populate Colors
+                categoryColorGrid.innerHTML = "";
+                const selectedColor = category.color || getDefaultCategoryColor(currentTheme);
+                categoryColorInput.value = selectedColor;
+
+                LCARS_PALETTE.forEach(color => {
+                    const div = document.createElement("div");
+                    div.className = "color-option";
+                    div.style.backgroundColor = color;
+                    div.style.height = "30px";
+                    div.style.cursor = "pointer";
+                    if (color === selectedColor) {
+                        div.style.border = "2px solid white";
+                    }
+                    div.onclick = () => {
+                        categoryColorInput.value = color;
+                        Array.from(categoryColorGrid.children).forEach(c => c.style.border = "none");
+                        div.style.border = "2px solid white";
+                    };
+                    categoryColorGrid.appendChild(div);
+                });
+
+                categoryDialog.showModal();
+            }
+
             function saveCategory(e) {
                 e.preventDefault();
 
                 const id = categoryIdInput.value;
                 const name = categoryNameInput.value.trim().toUpperCase();
-                const parentId = categoryParentInput.value || null;
+                const newParentId = categoryParentInput.value || null;
                 const color = categoryColorInput.value;
 
                 if (!name) return;
 
-                const newCat = {
-                    id: generateUUID(),
-                    name: name,
-                    color: color,
-                    createdAt: calculateStardate(),
-                    children: []
-                };
+                if (id) {
+                    // Edit existing category
+                    const result = findCategoryAndParent(id, state.categories, null);
+                    if (!result || !result.category) {
+                        categoryDialog.close();
+                        return;
+                    }
 
-                if (parentId) {
-                    const result = findCategoryAndParent(parentId, state.categories, null);
-                    if (result) {
-                        if (!result.category.children) result.category.children = [];
-                        result.category.children.push(newCat);
+                    const category = result.category;
+                    const oldParent = result.parent;
+                    const oldParentId = oldParent ? oldParent.id : null;
+
+                    // Update category properties
+                    category.name = name;
+                    category.color = color;
+
+                    // Handle parent change (move category)
+                    if (newParentId !== oldParentId) {
+                        // Remove from old parent
+                        if (oldParent) {
+                            oldParent.children = oldParent.children.filter(c => c.id !== id);
+                        } else {
+                            state.categories = state.categories.filter(c => c.id !== id);
+                        }
+
+                        // Add to new parent
+                        if (newParentId) {
+                            const newParentResult = findCategoryAndParent(newParentId, state.categories, null);
+                            if (newParentResult && newParentResult.category) {
+                                if (!newParentResult.category.children) newParentResult.category.children = [];
+                                newParentResult.category.children.push(category);
+                            }
+                        } else {
+                            state.categories.push(category);
+                        }
                     }
                 } else {
-                    state.categories.push(newCat);
+                    // Add new category
+                    const newCat = {
+                        id: generateUUID(),
+                        name: name,
+                        color: color,
+                        createdAt: calculateStardate(),
+                        children: []
+                    };
+
+                    if (newParentId) {
+                        const result = findCategoryAndParent(newParentId, state.categories, null);
+                        if (result) {
+                            if (!result.category.children) result.category.children = [];
+                            result.category.children.push(newCat);
+                        }
+                    } else {
+                        state.categories.push(newCat);
+                    }
                 }
 
                 saveData();
                 renderCategories();
                 renderCategoryConfig();
+                renderGrid();
                 categoryDialog.close();
             }
 
@@ -3809,11 +3955,38 @@
                 // Bookmark Grid Delegation
                 if (grid) {
                     grid.addEventListener("click", (e) => {
+                        // Handle category tile clicks
+                        const categoryTile = e.target.closest(".lcars-category-tile");
+                        if (categoryTile) {
+                            // Check if edit pin was clicked
+                            if (e.target.closest(".lcars-tile-pin--edit")) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                const id = categoryTile.dataset.id;
+                                const category = walkCategories(state.categories, (cat) => {
+                                    if (cat.id === id) return cat;
+                                    return undefined;
+                                });
+                                if (category) openEditCategoryDialog(category);
+                                return;
+                            }
+
+                            // Click on tile body navigates into category
+                            e.preventDefault();
+                            e.stopPropagation();
+                            state.currentCategory = categoryTile.dataset.id;
+                            saveData();
+                            renderGrid();
+                            renderCategories();
+                            return;
+                        }
+
+                        // Handle bookmark tile clicks
                         const tile = e.target.closest(".bookmark-tile");
                         if (!tile) return;
 
                         // Check if edit pin was clicked
-                        if (e.target.closest(".bookmark-edit-icon")) {
+                        if (e.target.closest(".lcars-tile-pin--edit")) {
                             e.preventDefault();
                             e.stopPropagation();
                             const id = tile.dataset.id;
@@ -3823,7 +3996,7 @@
                         }
 
                         // Check if URL pin was clicked
-                        if (e.target.closest(".bookmark-url-icon")) {
+                        if (e.target.closest(".lcars-tile-pin--url")) {
                             e.preventDefault();
                             e.stopPropagation();
                             const id = tile.dataset.id;

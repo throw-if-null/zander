@@ -483,14 +483,14 @@ Bookmarks are represented as `.bookmark-tile` elements rendered inside `.bookmar
 ### 5.1 Structure
 
 ```/dev/null/bookmark-tile.html#L1-40
-<a class="bookmark-tile" href="https://example.com" target="_blank" rel="noopener noreferrer">
+<div class="bookmark-tile">
   <div class="bookmark-title">EXAMPLE SITE</div>
   <div class="bookmark-description">Optional description text here...</div>
   <div class="bookmark-url-footer">
-    <div class="bookmark-footer-btn bookmark-edit-icon" title="Edit"></div>
-    <span class="bookmark-footer-btn bookmark-url-icon" title="https://example.com"></span>
+    <button class="lcars-tile-pin lcars-tile-pin--edit" type="button" title="Edit"></button>
+    <button class="lcars-tile-pin lcars-tile-pin--url" type="button" title="https://example.com"></button>
   </div>
-</a>
+</div>
 ```
 
 The tile uses a 3-row CSS grid layout:
@@ -505,8 +505,8 @@ Content breakdown:
 - **`.bookmark-title`**: The bookmark's title (max 64 characters). Spans full width (`grid-column: 1 / -1`). Displayed in uppercase with black text on the main theme color background.
 - **`.bookmark-description`**: Description text (max 512 characters). Displayed in secondary theme color on a black background. Uses `border-top-left-radius: 15px` to create an "elbow" shape against the left strip. Truncated via CSS line-clamping (4 lines).
 - **`.bookmark-url-footer`**: Compact footer strip with black background. Flex container for actions, aligned to the right.
-  - **`.bookmark-edit-icon`**: Circular button in LCARS orange (`--lcars-orange`).
-  - **`.bookmark-url-icon`**: Circular button in main theme color. Full URL shown on hover via `title` attribute.
+  - **`.lcars-tile-pin.lcars-tile-pin--edit`**: Circular button in LCARS orange (`--lcars-orange`). Opens edit dialog.
+  - **`.lcars-tile-pin.lcars-tile-pin--url`**: Circular button in main theme color. Opens bookmark URL. Full URL shown on hover via `title` attribute.
 
 ### 5.2 Visual Design
 

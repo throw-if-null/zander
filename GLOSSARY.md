@@ -206,8 +206,8 @@ When there is disagreement between documentation, this glossary, and the impleme
     - `.bookmark-title` — the bookmark's title (max 64 characters), spans full width, displayed on the theme color background (`--theme-main`) with category-colored text (row 1) for bold LCARS-style separation
     - `.bookmark-description` — description text (max 512 characters stored, truncated to first 100 characters on tile with ellipsis; full text viewable in edit mode), displayed on the category-colored background with black text (row 2)
     - `.bookmark-url-footer` — compact theme-colored footer strip with LCARS rounded cutout (row 3)
-      - `.bookmark-url-text` — the URL in category color, truncated with ellipsis; full URL shown on hover via `title` attribute
-    - `.bookmark-edit-icon` (edit action)
+      - `.lcars-tile-pin.lcars-tile-pin--url` — circular button in main theme color; opens bookmark URL; full URL shown on hover via `title` attribute
+      - `.lcars-tile-pin.lcars-tile-pin--edit` — circular button in LCARS orange; opens edit dialog
 - **Behavior**:
   - Clicking the tile opens the URL in a new tab/window.
   - Clicking the edit icon opens the **Bookmark Dialog** in edit mode.
