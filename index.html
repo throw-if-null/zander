@@ -1969,7 +1969,7 @@
                                 <!-- Options injected -->
                             </select>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group" id="categoryColorFormGroup">
                             <label>COLOR</label>
                             <div class="color-grid" id="categoryColorGrid" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px;">
                                 <!-- Colors injected via JS -->
@@ -2258,6 +2258,7 @@
             const categoryParentInput = document.getElementById("categoryParentInput");
             const categoryColorGrid = document.getElementById("categoryColorGrid");
             const categoryColorInput = document.getElementById("categoryColorInput");
+            const categoryColorFormGroup = document.getElementById("categoryColorFormGroup");
             const categoryDeleteBtn = document.getElementById("categoryDeleteBtn");
 
             function showConfirm(title, message, onOk) {
@@ -3297,6 +3298,24 @@
                 }
                 renderOptions(state.categories);
 
+                // Helper to update color picker visibility based on parent selection
+                function updateColorPickerVisibility() {
+                    const isSubCategory = categoryParentInput.value !== "";
+                    if (isSubCategory) {
+                        categoryColorFormGroup.style.display = "none";
+                        categoryColorInput.value = "var(--theme-secondary)";
+                    } else {
+                        categoryColorFormGroup.style.display = "block";
+                        // Reset to default color for root categories
+                        const defaultColor = getDefaultCategoryColor(currentTheme);
+                        categoryColorInput.value = defaultColor;
+                        // Update visual selection
+                        Array.from(categoryColorGrid.children).forEach(c => {
+                            c.style.border = c.style.backgroundColor === defaultColor ? "2px solid white" : "none";
+                        });
+                    }
+                }
+
                 // Populate Colors
                 categoryColorGrid.innerHTML = "";
                 const defaultColor = getDefaultCategoryColor(currentTheme);
@@ -3318,6 +3337,12 @@
                     };
                     categoryColorGrid.appendChild(div);
                 });
+
+                // Add change listener for parent selection
+                categoryParentInput.onchange = updateColorPickerVisibility;
+
+                // Initial visibility check
+                updateColorPickerVisibility();
 
                 categoryDialog.showModal();
             }
@@ -3385,10 +3410,29 @@
                 }
                 renderOptions(state.categories);
 
+                // Helper to update color picker visibility based on parent selection
+                const isSubCategory = currentParentId !== "";
+                function updateColorPickerVisibility() {
+                    const isSubCat = categoryParentInput.value !== "";
+                    if (isSubCat) {
+                        categoryColorFormGroup.style.display = "none";
+                        categoryColorInput.value = "var(--theme-secondary)";
+                    } else {
+                        categoryColorFormGroup.style.display = "block";
+                        // Reset to default color for root categories
+                        const defaultColor = getDefaultCategoryColor(currentTheme);
+                        categoryColorInput.value = defaultColor;
+                        // Update visual selection
+                        Array.from(categoryColorGrid.children).forEach(c => {
+                            c.style.border = c.style.backgroundColor === defaultColor ? "2px solid white" : "none";
+                        });
+                    }
+                }
+
                 // Populate Colors
                 categoryColorGrid.innerHTML = "";
                 const selectedColor = category.color || getDefaultCategoryColor(currentTheme);
-                categoryColorInput.value = selectedColor;
+                categoryColorInput.value = isSubCategory ? "var(--theme-secondary)" : selectedColor;
 
                 LCARS_PALETTE.forEach(color => {
                     const div = document.createElement("div");
@@ -3406,6 +3450,12 @@
                     };
                     categoryColorGrid.appendChild(div);
                 });
+
+                // Add change listener for parent selection
+                categoryParentInput.onchange = updateColorPickerVisibility;
+
+                // Set initial visibility
+                categoryColorFormGroup.style.display = isSubCategory ? "none" : "block";
 
                 categoryDialog.showModal();
             }
