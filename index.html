@@ -492,11 +492,11 @@
                 position: absolute;
                 bottom: 100%;
                 left: 0;
-                min-width: 160px;
+                min-width: 150px;
                 display: none;
                 flex-direction: column;
                 gap: 5px;
-                padding-bottom: 10px;
+                padding-bottom: 5px;
                 z-index: 1000;
             }
 
@@ -506,22 +506,29 @@
             }
 
             .add-menu-item {
-                width: 100%;
-                text-align: right;
-                padding-right: 15px;
-                height: 30px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: flex-end;
+                width: 150px;
+                min-height: 40px;
+                padding: 0 15px;
                 font-size: 16px;
-                border-radius: 15px;
-                background-color: var(--lcars-orange);
-                color: black;
+                border-radius: 0;
+                background-color: var(--theme-secondary, color-mix(
+                    in srgb,
+                    var(--shape-color) 30%,
+                    var(--lcars-white) 70%
+                ));
+                color: var(--lcars-black);
                 border: none;
                 font-family: 'Antonio', sans-serif;
                 font-weight: bold;
                 cursor: pointer;
+                white-space: nowrap;
             }
 
             .add-menu-item:hover, .add-menu-item:focus-visible {
-                background-color: var(--lcars-light-blue);
+                background-color: var(--lcars-white);
             }
 
             /* Sidebar Buttons (LCARS category actions) */
