@@ -3845,13 +3845,7 @@
                     updateStardateDisplay(settingsStardateEl);
                 });
 
-                onClick("addBtn", () => {
-                    // Ensure main view is bookmarks when adding an entry
-                    bookmarksView.classList.add("active");
-                    settingsView.classList.remove("active");
-                    aboutView.classList.remove("active");
-                    openAddDialog();
-                });
+
 
                 onClick("addBookmarkBtn", () => {
                     bookmarksView.classList.add("active");
@@ -3879,15 +3873,10 @@
 
                 // Keyboard Shortcuts
                 document.addEventListener("keydown", (e) => {
-                    if (e.altKey) {
+                    if (e.altKey && false) {
                         switch (e.key.toLowerCase()) {
                             case "n":
-                                e.preventDefault();
-                                // Switch back to bookmarks view on New Entry
-                                bookmarksView.classList.add("active");
-                                settingsView.classList.remove("active");
-                                aboutView.classList.remove("active");
-                                openAddDialog();
+                                // Alt+N shortcut currently disabled; do nothing
                                 break;
                             case "s":
                                 e.preventDefault();
