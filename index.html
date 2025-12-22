@@ -478,9 +478,50 @@
                 border-left: 5px solid var(--lcars-black);
             }
 
-            .footer-bar .settings-wrapper {
+            .footer-bar .settings-wrapper,
+            .footer-bar .add-wrapper {
                 height: 100%;
                 display: flex;
+            }
+
+            .add-wrapper {
+                position: relative;
+            }
+
+            .add-menu {
+                position: absolute;
+                bottom: 100%;
+                left: 0;
+                min-width: 160px;
+                display: none;
+                flex-direction: column;
+                gap: 5px;
+                padding-bottom: 10px;
+                z-index: 1000;
+            }
+
+            .add-wrapper:hover .add-menu,
+            .add-wrapper:focus-within .add-menu {
+                display: flex;
+            }
+
+            .add-menu-item {
+                width: 100%;
+                text-align: right;
+                padding-right: 15px;
+                height: 30px;
+                font-size: 16px;
+                border-radius: 15px;
+                background-color: var(--lcars-orange);
+                color: black;
+                border: none;
+                font-family: 'Antonio', sans-serif;
+                font-weight: bold;
+                cursor: pointer;
+            }
+
+            .add-menu-item:hover, .add-menu-item:focus-visible {
+                background-color: var(--lcars-light-blue);
             }
 
             /* Sidebar Buttons (LCARS category actions) */
@@ -1778,7 +1819,13 @@
 
             <div class="footer-bar lcars-frame-segment lcars-frame-segment--horizontal lcars-frame-segment--left-rounded">
                 <div id="systemStatus" class="status-display"></div>
-                <button class="lcars-button lcars-focus-bar lcars-color-orange lcars-footer-bar-button" id="addBtn" aria-label="Add Entry (Alt+N)">ADD ENTRY</button>
+                <div class="add-wrapper">
+                    <div class="add-menu">
+                        <button class="add-menu-item" id="addBookmarkBtn">BOOKMARK</button>
+                        <button class="add-menu-item" id="addCategoryBtn">CATEGORY</button>
+                    </div>
+                    <button class="lcars-button lcars-focus-bar lcars-color-orange lcars-footer-bar-button" id="addBtn" aria-label="Add Entry (Alt+N)">ADD ENTRY</button>
+                </div>
                 <div class="settings-wrapper">
                     <button class="lcars-button lcars-focus-bar lcars-color-orange lcars-footer-bar-button" id="settingsBtn" aria-label="Settings (Alt+S)">
                         SETTINGS
@@ -1858,6 +1905,55 @@
                             CANCEL
                         </button>
                         <button type="submit" class="lcars-button lcars-pill lcars-focus-outline lcars-color-orange lcars-dialog-action" aria-label="Save Bookmark">
+                            MAKE IT SO
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </dialog>
+
+        <dialog id="categoryDialog" aria-label="Category Dialog">
+            <div class="lcars-dialog">
+                <div class="lcars-dialog-header">
+                    <h2 class="lcars-dialog-title" id="categoryDialogTitle">
+                        NEW CATEGORY
+                    </h2>
+                    <span class="lcars-dialog-meta" id="categoryStardate">
+                        STARDATE 0000000.0000
+                    </span>
+                </div>
+                <form id="categoryForm" method="dialog">
+                    <div class="lcars-dialog-body">
+                        <input type="hidden" id="categoryId" />
+                        <div class="form-group">
+                            <label for="categoryNameInput">NAME</label>
+                            <input type="text" id="categoryNameInput" required aria-required="true" maxlength="32" style="text-transform: uppercase;" />
+                        </div>
+                        <div class="form-group">
+                            <label for="categoryParentInput">PARENT CATEGORY</label>
+                            <select id="categoryParentInput" aria-label="Parent Category">
+                                <option value="">(ROOT)</option>
+                                <!-- Options injected -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>COLOR</label>
+                            <div class="color-grid" id="categoryColorGrid" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px;">
+                                <!-- Colors injected via JS -->
+                            </div>
+                            <input type="hidden" id="categoryColorInput" />
+                        </div>
+                    </div>
+                    <div class="lcars-dialog-footer">
+                        <button
+                            type="button"
+                            class="lcars-button lcars-pill lcars-focus-outline lcars-color-dark lcars-dialog-action"
+                            onclick="document.getElementById('categoryDialog').close()"
+                            aria-label="Cancel"
+                        >
+                            CANCEL
+                        </button>
+                        <button type="submit" class="lcars-button lcars-pill lcars-focus-outline lcars-color-orange lcars-dialog-action" aria-label="Save Category">
                             MAKE IT SO
                         </button>
                     </div>
@@ -2109,6 +2205,17 @@
             const colorPickerDialog =
                 document.getElementById("colorPickerDialog");
             const colorGrid = document.getElementById("colorGrid");
+
+            // Category Dialog Elements
+            const categoryDialog = document.getElementById("categoryDialog");
+            const categoryForm = document.getElementById("categoryForm");
+            const categoryDialogTitle = document.getElementById("categoryDialogTitle");
+            const categoryStardateEl = document.getElementById("categoryStardate");
+            const categoryIdInput = document.getElementById("categoryId");
+            const categoryNameInput = document.getElementById("categoryNameInput");
+            const categoryParentInput = document.getElementById("categoryParentInput");
+            const categoryColorGrid = document.getElementById("categoryColorGrid");
+            const categoryColorInput = document.getElementById("categoryColorInput");
 
             function showConfirm(title, message, onOk) {
                 confirmTitle.textContent = title;
@@ -3140,26 +3247,84 @@
                 });
             }
 
-            function addCategory(parentId = null) {
+            function openAddCategoryDialog(preselectedParentId = null) {
+                categoryForm.reset();
+                categoryIdInput.value = "";
+                categoryDialogTitle.textContent = "NEW CATEGORY";
+                updateStardateDisplay(categoryStardateEl);
+
+                // Populate Parent Options
+                categoryParentInput.innerHTML = '<option value="">(ROOT)</option>';
+
+                function renderOptions(cats, level = 0) {
+                    cats.forEach(cat => {
+                        const opt = document.createElement("option");
+                        opt.value = cat.id;
+                        opt.textContent = "- ".repeat(level) + cat.name;
+
+                        if (preselectedParentId) {
+                            if (cat.id === preselectedParentId) {
+                                opt.selected = true;
+                            }
+                        } else if (state.currentCategory === cat.id) {
+                            opt.selected = true;
+                        }
+
+                        categoryParentInput.appendChild(opt);
+                        if (cat.children) {
+                            renderOptions(cat.children, level + 1);
+                        }
+                    });
+                }
+                renderOptions(state.categories);
+
+                // Populate Colors
+                categoryColorGrid.innerHTML = "";
+                const defaultColor = getDefaultCategoryColor(currentTheme);
+                categoryColorInput.value = defaultColor;
+
+                LCARS_PALETTE.forEach(color => {
+                    const div = document.createElement("div");
+                    div.className = "color-option";
+                    div.style.backgroundColor = color;
+                    div.style.height = "30px";
+                    div.style.cursor = "pointer";
+                    if (color === defaultColor) {
+                        div.style.border = "2px solid white";
+                    }
+                    div.onclick = () => {
+                        categoryColorInput.value = color;
+                        Array.from(categoryColorGrid.children).forEach(c => c.style.border = "none");
+                        div.style.border = "2px solid white";
+                    };
+                    categoryColorGrid.appendChild(div);
+                });
+
+                categoryDialog.showModal();
+            }
+
+            function saveCategory(e) {
+                e.preventDefault();
+
+                const id = categoryIdInput.value;
+                const name = categoryNameInput.value.trim().toUpperCase();
+                const parentId = categoryParentInput.value || null;
+                const color = categoryColorInput.value;
+
+                if (!name) return;
+
                 const newCat = {
                     id: generateUUID(),
-                    name: "NEW CATEGORY",
-                    color: LCARS_PALETTE[
-                        Math.floor(Math.random() * LCARS_PALETTE.length)
-                    ],
+                    name: name,
+                    color: color,
                     createdAt: calculateStardate(),
-                    children: [],
+                    children: []
                 };
 
                 if (parentId) {
-                    const result = findCategoryAndParent(
-                        parentId,
-                        state.categories,
-                        null,
-                    );
+                    const result = findCategoryAndParent(parentId, state.categories, null);
                     if (result) {
-                        if (!result.category.children)
-                            result.category.children = [];
+                        if (!result.category.children) result.category.children = [];
                         result.category.children.push(newCat);
                     }
                 } else {
@@ -3169,6 +3334,11 @@
                 saveData();
                 renderCategories();
                 renderCategoryConfig();
+                categoryDialog.close();
+            }
+
+            function addCategory(parentId = null) {
+                openAddCategoryDialog(parentId);
             }
 
             function moveCategory(id, direction) {
@@ -3664,6 +3834,20 @@
                     openAddDialog();
                 });
 
+                onClick("addBookmarkBtn", () => {
+                    bookmarksView.classList.add("active");
+                    settingsView.classList.remove("active");
+                    aboutView.classList.remove("active");
+                    openAddDialog();
+                });
+
+                onClick("addCategoryBtn", () => {
+                    bookmarksView.classList.add("active");
+                    settingsView.classList.remove("active");
+                    aboutView.classList.remove("active");
+                    openAddCategoryDialog();
+                });
+
                 onClick("aboutBtn", () => {
                     bookmarksView.classList.remove("active");
                     settingsView.classList.remove("active");
@@ -3672,6 +3856,7 @@
                 });
 
                 bookmarkForm.addEventListener("submit", saveBookmark);
+                categoryForm.addEventListener("submit", saveCategory);
 
                 // Keyboard Shortcuts
                 document.addEventListener("keydown", (e) => {
@@ -3740,6 +3925,11 @@
                 bookmarkDialog.addEventListener("cancel", (e) => {
                     e.preventDefault();
                     bookmarkDialog.close();
+                });
+
+                categoryDialog.addEventListener("cancel", (e) => {
+                    e.preventDefault();
+                    categoryDialog.close();
                 });
             }
 
