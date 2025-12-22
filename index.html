@@ -3132,11 +3132,10 @@
             function renderCategoryConfig() {
                 categoryConfigList.innerHTML = "";
 
-                function renderConfigRow(cat, parent, index, siblings, level) {
+                // Only render root categories
+                state.categories.forEach((cat, index) => {
                     const row = document.createElement("div");
                     row.className = "category-config-row";
-                    // Indent
-                    row.style.paddingLeft = `${(level - 1) * 40}px`;
 
                     // Color Picker
                     const colorBtn = document.createElement("button");
@@ -3194,27 +3193,10 @@
                         </svg>
                     `;
                     downBtn.setAttribute("aria-label", `Move ${cat.name} category down`);
-                    downBtn.disabled = index === siblings.length - 1;
-                    if (index === siblings.length - 1)
+                    downBtn.disabled = index === state.categories.length - 1;
+                    if (index === state.categories.length - 1)
                         downBtn.style.opacity = "0.5";
                     downBtn.onclick = () => moveCategory(cat.id, 1);
-
-                    // Add Subcategory (New)
-                    const addBtn = document.createElement("button");
-                    addBtn.className = "category-config-btn";
-                    addBtn.dataset.glyph = "plus";
-                    addBtn.innerHTML = `
-                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                            <rect x="11" y="5" width="2" height="14" />
-                            <rect x="5" y="11" width="14" height="2" />
-                        </svg>
-                    `;
-                    addBtn.setAttribute("aria-label", `Add subcategory to ${cat.name}`);
-                    if (level >= 3) {
-                        addBtn.disabled = true;
-                        addBtn.style.opacity = "0.5";
-                    }
-                    addBtn.onclick = () => addCategory(cat.id);
 
                     // Delete
                     const delBtn = document.createElement("button");
@@ -3222,8 +3204,8 @@
                     delBtn.dataset.glyph = "delete";
                     delBtn.innerHTML = `
                         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                            <rect x="6" y="11" width="12" height="2" transform="rotate(45 12 12)" />
-                            <rect x="6" y="11" width="12" height="2" transform="rotate(-45 12 12)" />
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
                         </svg>
                     `;
                     delBtn.setAttribute("aria-label", `Delete ${cat.name} category`);
@@ -3233,19 +3215,12 @@
                     row.appendChild(nameInput);
                     row.appendChild(upBtn);
                     row.appendChild(downBtn);
-                    row.appendChild(addBtn);
                     row.appendChild(delBtn);
 
                     categoryConfigList.appendChild(row);
-                }
-
-                walkCategories(state.categories, (cat, parent, depth, index, siblings) => {
-                    // depth is 0-based from root; config UI levels start at 1
-                    const level = depth + 1;
-                    renderConfigRow(cat, parent, index, siblings, level);
-                    return undefined;
                 });
             }
+
 
             function openAddCategoryDialog(preselectedParentId = null) {
                 categoryForm.reset();
@@ -3901,8 +3876,6 @@
                 onClick("resetBtnMain", resetSystem);
                 onClick("addCategoryBtnMain", () => {
                     addCategory(null);
-                    renderCategoryConfig();
-                    renderLandingCategoryOptions();
                 });
                 onChange("importInput", handleImport);
 
