@@ -64,35 +64,20 @@ This is the biggest issue. There are TODO comments marking legacy aliases, but t
 
 ---
 
-### 2. Missing Design Tokens
+### 2. ~~Missing Design Tokens~~ ✅ RESOLVED
 
-Tokens are good but incomplete for a full design system:
+~~Tokens are good but incomplete for a full design system.~~
 
-**Missing tokens to add:**
+**Resolution:** All missing tokens have been added to `:root` and hardcoded values replaced:
 
-```css
-:root {
-    /* Z-index scale */
-    --lcars-z-index-dropdown: 1000;
-    --lcars-z-index-dialog: 2000;
-    --lcars-z-index-tooltip: 3000;
-    
-    /* Transition timing */
-    --lcars-transition-fast: 0.1s ease-out;
-    --lcars-transition-normal: 0.2s ease-out;
-    
-    /* Consistent spacing scale */
-    --lcars-spacing-xs: 5px;
-    --lcars-spacing-sm: 8px;
-    --lcars-spacing-md: 15px;
-    --lcars-spacing-lg: 20px;
-    --lcars-spacing-xl: 30px;
-}
-```
+- ✅ Added `--lcars-z-index-dropdown`, `--lcars-z-index-dialog`, `--lcars-z-index-tooltip`
+- ✅ Added `--lcars-transition-fast`, `--lcars-transition-normal`
+- ✅ Added `--lcars-spacing-xs` through `--lcars-spacing-xl`
+- ✅ Replaced `z-index: 1000` with `var(--lcars-z-index-dropdown)` in `.lcars-expandable-menu`, `.add-menu`, `.cat-submenu`
+- ✅ Replaced all hardcoded `0.1s ease-out` transitions with `var(--lcars-transition-fast)` in `.lcars-tile`, `.settings-tile`, `.lcars-category-tile`, `.bookmark-tile`
+- ✅ Replaced all hardcoded `0.2s` transitions with `var(--lcars-transition-normal)` in `.lcars-arrow-btn`, `.cat-btn`, `.lcars-tile-pin`, `.lcars-pin`
 
-Currently there are hardcoded values like `z-index: 1000` scattered in multiple places (L759, L852, L961).
-
-**Action:** Add missing token categories to `:root`.
+**Note:** Spacing tokens (`--lcars-spacing-*`) are defined but not yet applied throughout the CSS. This is deferred for future refactoring as it requires broader changes.
 
 ---
 
@@ -225,7 +210,7 @@ vs
 
 | Category | Status | Action Needed |
 |----------|--------|---------------|
-| Design tokens | 🟢 Good | ✅ Added z-index, transition, spacing scales |
+| Design tokens | 🟢 Complete | ✅ All tokens added and hardcoded values replaced |
 | Theme system | 🟡 Partial | Clarify `--shape-color` purpose or remove |
 | Primitives | 🟢 Good | Well-defined core set |
 | Legacy cleanup | 🔴 Blocking | Remove ~500 lines of duplicates |
@@ -247,6 +232,7 @@ vs
 2. ✅ Replace hardcoded values with tokens throughout CSS:
    - ✅ Replaced `z-index: 1000` with `var(--lcars-z-index-dropdown)` in `.lcars-expandable-menu`, `.add-menu`, `.cat-submenu`
    - ✅ Replaced `transition: ... 0.2s` with `var(--lcars-transition-normal)` in `.lcars-arrow-btn`, `.lcars-arrow-btn svg`, `.cat-btn`, `.lcars-tile-pin`, `.lcars-pin`
+   - ✅ Replaced `transition: ... 0.1s ease-out` with `var(--lcars-transition-fast)` in `.lcars-tile`, `.settings-tile`, `.lcars-category-tile`, `.bookmark-tile`
 3. Decide on `--shape-color` fate (remove or document purpose)
 
 ### Phase 2: Legacy Migration
