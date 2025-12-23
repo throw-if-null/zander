@@ -1100,7 +1100,7 @@
             }
 
             /* Pin positioning within tiles (only for pins outside footer) */
-            .lcars-tile > .lcars-tile-pin {
+            .lcars-tile > .lcars-pin {
                 position: absolute;
                 bottom: 8px;
                 right: 12px;
@@ -1531,10 +1531,16 @@
                 gap: 10px;
             }
 
-            /* LCARS tile pin: small circular action button for use in tiles */
+            /* ==============================================
+               LCARS TILE PIN (Legacy Alias)
+               TODO: Migrate to .lcars-pin.lcars-pin--sm
+               ============================================== */
+
             .lcars-tile-pin {
+                /* Alias: use lcars-pin lcars-pin--sm instead */
                 --lcars-pin-size: 18px;
                 --lcars-pin-bg: var(--theme-main);
+                --lcars-pin-fg: var(--lcars-black);
 
                 width: var(--lcars-pin-size);
                 height: var(--lcars-pin-size);
@@ -1547,7 +1553,7 @@
                 justify-content: center;
 
                 background-color: var(--lcars-pin-bg);
-                color: var(--lcars-black);
+                color: var(--lcars-pin-fg);
                 cursor: pointer;
                 transition: transform 0.2s, filter 0.2s;
                 z-index: 2;
@@ -1559,11 +1565,11 @@
             }
 
             .lcars-tile-pin:hover {
-                transform: scale(1.2);
-                filter: brightness(1.2);
+                transform: scale(1.1);
+                filter: brightness(1.1);
             }
 
-            /* Tile pin color variants */
+            /* Tile pin color variants (legacy, use .lcars-pin--edit / .lcars-pin--url) */
             .lcars-tile-pin--url {
                 --lcars-pin-bg: var(--theme-main);
             }
@@ -1572,7 +1578,7 @@
                 --lcars-pin-bg: var(--lcars-orange);
             }
 
-            /* Category tile edit pin positioning */
+            /* Category tile edit pin positioning (legacy) */
             .lcars-category-tile .lcars-tile-pin {
                 position: absolute;
                 bottom: 8px;
@@ -1855,7 +1861,12 @@
                 outline-offset: 2px;
             }
 
-            /* LCARS pin primitive: small circular action control */
+            /* ==============================================
+               LCARS PIN PRIMITIVE
+               Unified circular action control with size/color variants.
+               Replaces: .lcars-tile-pin, .category-config-btn
+               ============================================== */
+
             .lcars-pin {
                 --lcars-pin-size: 20px;
                 --lcars-pin-bg: var(--theme-secondary, var(--lcars-blue));
@@ -1880,11 +1891,12 @@
 
                 cursor: pointer;
                 position: relative;
+                transition: transform 0.2s, filter 0.2s;
             }
 
             .lcars-pin:hover {
                 filter: brightness(1.1);
-                transform: scale(1.05);
+                transform: scale(1.1);
             }
 
             .lcars-pin:focus-visible {
@@ -1892,8 +1904,77 @@
                 outline-offset: var(--lcars-focus-outline-offset);
             }
 
+            /* --- Pin Size Modifiers --- */
+
+            /* Small: 18px (for tile actions) */
+            .lcars-pin--sm {
+                --lcars-pin-size: 18px;
+                font-size: 0.85rem;
+            }
+
+            /* Large: 40px (for config controls) */
+            .lcars-pin--lg {
+                --lcars-pin-size: 40px;
+                font-size: 1.25rem;
+                line-height: 1.1;
+                letter-spacing: 0.03em;
+            }
+
+            /* --- Pin Color Variants --- */
+
+            .lcars-pin--edit {
+                --lcars-pin-bg: var(--lcars-orange);
+            }
+
+            .lcars-pin--url {
+                --lcars-pin-bg: var(--theme-main);
+            }
+
+            .lcars-pin--delete {
+                --lcars-pin-bg: var(--lcars-red);
+            }
+
+            /* --- Pin Style Modifiers --- */
+
+            /* Bordered: adds inset border (for config buttons) */
+            .lcars-pin--bordered {
+                box-shadow: inset 0 0 0 2px var(--lcars-black);
+            }
+
+            /* --- Pin SVG Icon Support --- */
+
+            .lcars-pin svg {
+                width: 70%;
+                height: 70%;
+                display: block;
+                margin: auto;
+                fill: currentColor;
+            }
+
+            .lcars-pin[data-glyph="up"] svg {
+                width: 87%;
+                height: 87%;
+                transform: translateY(-2px);
+            }
+
+            .lcars-pin[data-glyph="down"] svg {
+                width: 87%;
+                height: 87%;
+                transform: translateY(2px);
+            }
+
+            .lcars-pin[data-glyph="plus"] svg {
+                width: 90%;
+                height: 90%;
+            }
+
+            /* ==============================================
+               CATEGORY CONFIG BUTTON (Legacy Alias)
+               TODO: Migrate to .lcars-pin.lcars-pin--lg.lcars-pin--bordered
+               ============================================== */
+
             .category-config-btn {
-                /* Category config buttons as LCARS pins */
+                /* Alias: use lcars-pin lcars-pin--lg lcars-pin--bordered instead */
                 --lcars-pin-size: 40px;
                 --lcars-pin-bg: var(--theme-secondary, var(--lcars-blue));
                 --lcars-pin-fg: var(--lcars-black);
@@ -3066,8 +3147,8 @@
                     <div class="lcars-tile-label lcars-tile-label--bookmark">${escapeHtml(bookmark.title)}</div>
                     ${descriptionHtml}
                     <div class="lcars-tile-footer">
-                        <button class="lcars-tile-pin lcars-tile-pin--edit" type="button" title="Edit Bookmark" aria-label="Edit Bookmark"></button>
-                        <button class="lcars-tile-pin lcars-tile-pin--url" type="button" title="${escapeHtml(bookmark.url)}" aria-label="Open Bookmark URL"></button>
+                        <button class="lcars-pin lcars-pin--sm lcars-pin--edit" type="button" title="Edit Bookmark" aria-label="Edit Bookmark"></button>
+                        <button class="lcars-pin lcars-pin--sm lcars-pin--url" type="button" title="${escapeHtml(bookmark.url)}" aria-label="Open Bookmark URL"></button>
                     </div>
                 `;
 
@@ -3126,7 +3207,7 @@
             <div class="lcars-tile-meta-primary">${primaryMeta}</div>
             <div class="lcars-tile-meta-secondary">${escapeHtml(createdAtLabel)}</div>
         </div>
-        <button class="lcars-tile-pin lcars-tile-pin--edit" type="button" title="Edit Category" aria-label="Edit Category ${escapeHtml(category.name)}"></button>
+        <button class="lcars-pin lcars-pin--sm lcars-pin--edit" type="button" title="Edit Category" aria-label="Edit Category ${escapeHtml(category.name)}"></button>
     `;
 
                 tile.setAttribute(
@@ -3792,7 +3873,7 @@
 
                     // Move Up
                     const upBtn = document.createElement("button");
-                    upBtn.className = "category-config-btn";
+                    upBtn.className = "lcars-pin lcars-pin--lg lcars-pin--bordered";
                     upBtn.dataset.glyph = "up";
                     upBtn.innerHTML = `
                         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -3806,7 +3887,7 @@
 
                     // Move Down
                     const downBtn = document.createElement("button");
-                    downBtn.className = "category-config-btn";
+                    downBtn.className = "lcars-pin lcars-pin--lg lcars-pin--bordered";
                     downBtn.dataset.glyph = "down";
                     downBtn.innerHTML = `
                         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -3821,7 +3902,7 @@
 
                     // Delete
                     const delBtn = document.createElement("button");
-                    delBtn.className = "category-config-btn delete";
+                    delBtn.className = "lcars-pin lcars-pin--lg lcars-pin--bordered lcars-pin--delete";
                     delBtn.dataset.glyph = "delete";
                     delBtn.innerHTML = `
                         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -4624,7 +4705,7 @@
                         const categoryTile = e.target.closest(".lcars-tile--category");
                         if (categoryTile) {
                             // Check if edit pin was clicked
-                            if (e.target.closest(".lcars-tile-pin--edit")) {
+                            if (e.target.closest(".lcars-pin--edit")) {
                                 e.preventDefault();
                                 e.stopPropagation();
                                 const id = categoryTile.dataset.id;
@@ -4651,7 +4732,7 @@
                         if (!tile) return;
 
                         // Check if edit pin was clicked
-                        if (e.target.closest(".lcars-tile-pin--edit")) {
+                        if (e.target.closest(".lcars-pin--edit")) {
                             e.preventDefault();
                             e.stopPropagation();
                             const id = tile.dataset.id;
@@ -4661,7 +4742,7 @@
                         }
 
                         // Check if URL pin was clicked
-                        if (e.target.closest(".lcars-tile-pin--url")) {
+                        if (e.target.closest(".lcars-pin--url")) {
                             e.preventDefault();
                             e.stopPropagation();
                             const id = tile.dataset.id;

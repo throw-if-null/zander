@@ -32,17 +32,16 @@ This audit identifies issues and proposes a phased remediation plan.
 - Shared sub-components: `.lcars-tile-label`, `.lcars-tile-meta`, `.lcars-tile-footer`
 - Legacy class aliases maintained for backward compatibility
 
-### 3. Three Pin Components That Should Be One
+### 3. ~~Three Pin Components That Should Be One~~ ✅ RESOLVED
 
-| Component | Size | Used For |
-|-----------|------|----------|
-| `.lcars-pin` | 20px | Generic primitive (defined but underutilized) |
-| `.lcars-tile-pin` | 18px | Bookmark/category tile action buttons |
-| `.category-config-btn` | 40px | Settings category configuration controls |
+~~Three pin components with duplicate structure existed.~~
 
-All are circular buttons with the same core structure but different sizes.
-
-**Recommendation:** Consolidate into single `.lcars-pin` with size modifiers (e.g., `--sm`, `--md`, `--lg`).
+**Resolution:** Unified into single `.lcars-pin` primitive in Phase 3 with:
+- Size modifiers: `--sm` (18px), default (20px), `--lg` (40px)
+- Color variants: `--edit`, `--url`, `--delete`
+- Style modifiers: `--bordered` (inset border for config buttons)
+- SVG icon support with glyph-specific sizing
+- Legacy aliases maintained for backward compatibility
 
 ---
 
@@ -269,18 +268,35 @@ Level 4: Layout Shells (app-specific compositions)
 - All tiles now use `--tile-color` CSS variable consistently
 - Fixed pin positioning: changed `.lcars-tile .lcars-tile-pin` to `.lcars-tile > .lcars-tile-pin` so pins in footer use flexbox flow
 
-### Phase 3: Unify Pins ⏳
+### Phase 3: Unify Pins ✅
 **Priority:** Medium  
-**Effort:** Low
+**Effort:** Low  
+**Completed:** 2025-01-20
 
-1. Keep `.lcars-pin` as the single base primitive
-2. Add size modifiers:
+1. ✅ Keep `.lcars-pin` as the single base primitive
+2. ✅ Add size modifiers:
    - `.lcars-pin--sm` — 18px (for tile actions)
-   - `.lcars-pin--md` — 20px (default)
+   - `.lcars-pin--md` — 20px (default, no class needed)
    - `.lcars-pin--lg` — 40px (for config controls)
 
-3. Remove `.lcars-tile-pin` (use `.lcars-pin--sm`)
-4. Refactor `.category-config-btn` to use `.lcars-pin--lg` with glyph styling
+3. ✅ Add color variants:
+   - `.lcars-pin--edit` — orange
+   - `.lcars-pin--url` — theme-main
+   - `.lcars-pin--delete` — red
+
+4. ✅ Add style modifiers:
+   - `.lcars-pin--bordered` — inset border for config buttons
+
+5. ✅ Add SVG icon support with glyph-specific sizing
+
+**Changes made:**
+- Enhanced `.lcars-pin` primitive with size/color/style modifiers (~70 lines added)
+- Updated `createBookmarkTile()` to use `.lcars-pin.lcars-pin--sm.lcars-pin--edit/--url`
+- Updated `createCategoryTile()` to use `.lcars-pin.lcars-pin--sm.lcars-pin--edit`
+- Updated `renderCategoryConfig()` to use `.lcars-pin.lcars-pin--lg.lcars-pin--bordered`
+- Updated event handlers to use `.lcars-pin--edit` and `.lcars-pin--url` selectors
+- Updated tile pin positioning rule to use `.lcars-tile > .lcars-pin`
+- Kept legacy aliases (`.lcars-tile-pin`, `.category-config-btn`) for backward compatibility
 
 ### Phase 4: Create Expandable Component ⏳
 **Priority:** Medium  
@@ -353,5 +369,6 @@ Consider packaging the LCARS primitives as:
 - **Total CSS in `<style>` block (original):** ~1,885 lines
 - **After Phase 1 cleanup:** ~1,785 lines (~100 lines removed)
 - **After Phase 2 tile unification:** ~1,750 lines (added unified primitive, legacy aliases kept for now)
-- **Estimated after legacy alias removal:** ~1,550 lines
-- **Estimated after full refactor:** ~1,400 lines (unified primitives reduce redundancy)
+- **After Phase 3 pin unification:** ~1,820 lines (added unified pin primitive with modifiers)
+- **Estimated after legacy alias removal:** ~1,500 lines
+- **Estimated after full refactor:** ~1,350 lines (unified primitives reduce redundancy)
