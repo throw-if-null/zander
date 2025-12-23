@@ -64,6 +64,12 @@ The following primitives are properly componentized with CSS variable configurat
 
 **Note:** The `.status-display` HTML element and JS-generated inner HTML were updated to use `lcars-status-display`, `lcars-status-text`, and `lcars-status-info` primitive classes.
 
+**Additional cleanup:** Removed legacy CSS variable aliases from `:root` and replaced all usages:
+- `--lcars-bg` → `--lcars-black` (removed alias, replaced 3 usages)
+- `--radius` → `--lcars-radius-lg` (removed alias, replaced 14 usages)
+- `--gutter` → `--lcars-gutter` (removed unused alias)
+- `--gap` → `--lcars-gap` (removed unused alias)
+
 ---
 
 ### 2. ~~Missing Design Tokens~~ ✅ RESOLVED
