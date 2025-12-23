@@ -1841,7 +1841,7 @@
                             KEYBOARD SHORTCUTS:
                             <ul>
                                 <li>ALT+H — HOME (BOOKMARKS VIEW)</li>
-                                <li>ALT+N — NEW ENTRY</li>
+                                <li>ALT+B — NEW BOOKMARK</li>
                                 <li>ALT+S — SETTINGS VIEW</li>
                                 <li>ALT+C — NEW CATEGORY (IN SETTINGS)</li>
                             </ul>
@@ -4141,10 +4141,12 @@
 
                 // Keyboard Shortcuts
                 document.addEventListener("keydown", (e) => {
-                    if (e.altKey && false) {
+                    if (e.altKey) {
                         switch (e.key.toLowerCase()) {
-                            case "n":
-                                // Alt+N shortcut currently disabled; do nothing
+                            case "b":
+                                e.preventDefault();
+                                // Alt+B: add bookmark directly
+                                document.getElementById("addBookmarkBtn")?.click();
                                 break;
                             case "s":
                                 e.preventDefault();
@@ -4157,11 +4159,8 @@
                                 break;
                             case "c":
                                 e.preventDefault();
-                                // Alt+C: new category while in settings
-                                if (settingsView.classList.contains("active")) {
-                                    addCategory(null);
-                                    renderCategoryConfig();
-                                }
+                                // Alt+C: open add category dialog
+                                openAddCategoryDialog();
                                 break;
                             case "h":
                                 e.preventDefault();
