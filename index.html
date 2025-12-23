@@ -2063,26 +2063,26 @@
                 {
                     id: "cat-root-startrek",
                     name: "STAR TREK",
-                    color: "#ff9900",
+                    color: "var(--theme-main)",
                     createdAt: "2025352.1200",
                     children: [
                         {
                             id: "cat-tng",
                             name: "The Next Generation",
-                            color: "#ffcc00",
+                            color: "var(--theme-secondary)",
                             createdAt: "2025352.1201",
                             children: [
                                 {
                                     id: "cat-tng-s1",
                                     name: "Season 1",
-                                    color: "#ffcc99",
+                                    color: "var(--theme-secondary)",
                                     createdAt: "2025352.1202",
                                     children: [],
                                 },
                                 {
                                     id: "cat-tng-s2",
                                     name: "Season 2",
-                                    color: "#cc99cc",
+                                    color: "var(--theme-secondary)",
                                     createdAt: "2025352.1203",
                                     children: [],
                                 },
@@ -2091,20 +2091,20 @@
                         {
                             id: "cat-ds9",
                             name: "Deep Space Nine",
-                            color: "#cc9966",
+                            color: "var(--theme-secondary)",
                             createdAt: "2025352.1204",
                             children: [
                                 {
                                     id: "cat-ds9-s1",
                                     name: "Season 1",
-                                    color: "#9999cc",
+                                    color: "var(--theme-secondary)",
                                     createdAt: "2025352.1205",
                                     children: [],
                                 },
                                 {
                                     id: "cat-ds9-s2",
                                     name: "Season 2",
-                                    color: "#99ccff",
+                                    color: "var(--theme-secondary)",
                                     createdAt: "2025352.1206",
                                     children: [],
                                 },
@@ -3691,6 +3691,14 @@
                 return "#ff9900";
             }
 
+            function isValidCategoryColor(color) {
+                if (typeof color !== 'string' || !color.trim()) return false;
+                // Allow CSS variable references (e.g., var(--theme-secondary))
+                if (color.startsWith('var(--') && color.endsWith(')')) return true;
+                // Allow palette hex colors
+                return LCARS_PALETTE.includes(color);
+            }
+
             function applyDataBundle(bundle) {
                 const originalBookmarkCount = Array.isArray(bundle.bookmarks)
                     ? bundle.bookmarks.length
@@ -3730,11 +3738,7 @@
                         .map(c => {
                             const clone = { ...c };
 
-                            if (
-                                typeof clone.color !== 'string' ||
-                                !clone.color.trim() ||
-                                !LCARS_PALETTE.includes(clone.color)
-                            ) {
+                            if (!isValidCategoryColor(clone.color)) {
                                 clone.color = defaultColor;
                                 overriddenColorCount++;
                             }
@@ -3753,12 +3757,39 @@
                 state.bookmarks = validBookmarks;
                 state.categories = normalizedCategories;
 
+                // Reset currentCategory to first root category if it no longer exists
+                if (state.currentCategory) {
+                    const currentExists = walkCategories(state.categories, (cat) => {
+                        if (cat.id === state.currentCategory) return cat;
+                        return undefined;
+                    });
+                    if (!currentExists) {
+                        state.currentCategory = state.categories.length > 0
+                            ? state.categories[0].id
+                            : null;
+                    }
+                } else if (state.categories.length > 0) {
+                    state.currentCategory = state.categories[0].id;
+                }
+
+                // Reset landingCategoryId if it no longer exists
+                if (state.landingCategoryId) {
+                    const landingExists = walkCategories(state.categories, (cat) => {
+                        if (cat.id === state.landingCategoryId) return cat;
+                        return undefined;
+                    });
+                    if (!landingExists) {
+                        state.landingCategoryId = null;
+                    }
+                }
+
                 // Backfill createdAt fields on imported data
                 backfillBookmarkCreatedAt(state.bookmarks);
                 backfillCategoryCreatedAt(state.categories);
 
                 saveData();
                 renderCategories();
+                renderLandingCategoryOptions();
                 renderGrid();
                 updateStardateDisplay(aboutStardateEl);
                 updateStardateDisplay(settingsStardateEl);
