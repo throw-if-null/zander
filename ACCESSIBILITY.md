@@ -37,10 +37,22 @@ Accessibility is not optional—it's part of the design from the start. The Zand
   - Text inputs: Tab to focus, type to edit, Tab to move to next field.
 
 - **Keyboard shortcuts must respect input focus:**
-  - Alt+N, Alt+S, Alt+C should not fire when user is typing in a text field.
+  - Alt+H, Alt+B, Alt+S, Alt+C should not fire when user is typing in a text field.
   - Check `event.target.tagName` and `event.target.contentEditable` before triggering shortcuts.
 
 - **Escape key closes dialogs** (standard modal behavior).
+
+- **Enter key submits dialog forms:**
+  - Dialog forms do not use `method="dialog"` to ensure Enter properly triggers the `submit` event.
+  - Pressing Enter in any form field saves the bookmark or category.
+
+- **Add Entry menu keyboard navigation:**
+  - Tab to `ADD ENTRY` button: Focus lands on the button with visible focus bar; menu expands automatically (via CSS `:focus-within`) so keyboard users see the options.
+  - Tab again: Focus moves to `BOOKMARK` menu item (focus bar on top).
+  - Tab again: Focus moves to `CATEGORY` menu item (focus bar on top).
+  - Tab again: Focus moves to `SETTINGS`; menu closes as focus leaves the wrapper.
+  - Enter/Space on menu item: Opens the corresponding dialog.
+  - Click on `ADD ENTRY`: Moves focus to the first menu item (`BOOKMARK`).
 
 ### Focus States & Visibility
 
@@ -170,9 +182,10 @@ Choose one or more of:
 
 LCARS neon aesthetic + accessibility:
 
-- **LCARS Focus Bar Pattern:** Primary LCARS controls (e.g., category buttons, footer action buttons, and the header title button) use a **white focus bar** rendered via `:focus-visible::after` instead of the default browser outline.
+- **LCARS Focus Bar Pattern:** Primary LCARS controls (e.g., category buttons, footer action buttons, menu items, and the header title button) use a **white focus bar** rendered via `:focus-visible::after` instead of the default browser outline.
   - Sidebar category buttons show a vertical white bar along the **leading edge** of the button.
   - Footer action buttons show a horizontal white bar along the **top edge**.
+  - Add Entry menu items (BOOKMARK, CATEGORY) show a horizontal white bar along the **top edge**.
   - The `ZANDER` title button shows a horizontal white bar along the **bottom edge** when focused via keyboard.
 - **Neon Glow Focus (optional):** A bright cyan or amber glow (box-shadow) may still be used for other focusable elements that do not participate in the LCARS button system, as long as it meets 4.5:1 contrast.
 - **Generic Focus Styles:** Elements without custom LCARS button styling retain a more generic but clearly visible focus outline so they remain discoverable via keyboard.

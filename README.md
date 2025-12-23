@@ -131,7 +131,7 @@ All dialogs are implemented using native `<dialog>` elements with custom LCARS s
 
 **Add Bookmark**
 
-- Click `ADD ENTRY` in the footer, or press `Alt + N`.
+- Click `ADD ENTRY` in the footer, then select `BOOKMARK` from the menu, or press `Alt + B`.
 - In the **Bookmark** dialog:
   - Enter a **Title**.
   - Enter a **URL**:
@@ -287,16 +287,29 @@ This clears the app’s `localStorage` and restores the default demo categories 
 | Shortcut   | Action                               |
 |-----------|---------------------------------------|
 | `Alt + H` | Go **Home** (Bookmarks view)          |
-| `Alt + N` | Open **Add Bookmark** dialog          |
+| `Alt + B` | Open **Add Bookmark** dialog          |
 | `Alt + S` | Open **Settings** view                |
-| `Alt + C` | Add **New Category** (in Settings)    |
+| `Alt + C` | Open **Add Category** dialog          |
 | `Esc`     | Close the active dialog (if any)      |
+| `Enter`   | Submit the active dialog form         |
 
 Keyboard focus styles follow a consistent LCARS pattern:
 
 - Sidebar category buttons and footer action buttons use a white focus bar rendered via `:focus-visible::after` on one edge of the control.
 - The header title button (`ZANDER`) also uses a white focus line along its bottom edge when focused via keyboard.
+- Add Entry menu items (BOOKMARK, CATEGORY) use a white focus bar along the top edge.
 - A more generic focus outline is used for other focusable elements that do not have custom LCARS button styling.
+
+#### Add Entry Menu Navigation
+
+The `ADD ENTRY` button in the footer has a popup menu with `BOOKMARK` and `CATEGORY` options. Full keyboard navigation is supported:
+
+- **Tab to Add Entry**: Focus lands on the button with a visible focus bar; the menu expands automatically so keyboard users can see the available options.
+- **Tab again**: Focus moves to `BOOKMARK` (focus bar on top).
+- **Tab again**: Focus moves to `CATEGORY` (focus bar on top).
+- **Tab again**: Focus moves to `SETTINGS`; the menu closes.
+- **Enter/Space on menu item**: Opens the corresponding dialog.
+- **Click on Add Entry**: Moves focus to the first menu item (`BOOKMARK`).
 
 Browser or OS‑level shortcuts may conflict; when they do, those take precedence.
 

@@ -817,20 +817,35 @@ Visibility of each view is controlled by logic that adds/removes `.active` on `.
 
 Global hotkeys (active when no text input has focus):
 
-- `Alt + N`  
+- `Alt + H`  
+  - Go **Home** (Bookmarks view).
+- `Alt + B`  
   - Open **Add Bookmark** dialog.
 - `Alt + S`  
   - Switch to **Settings** view.
 - `Alt + C`  
-  - Add **New Category** in the Settings view (typically at root or selected context).
+  - Add **New Category** (opens Add Category dialog).
 - `Esc`  
   - Close any open dialog (`<dialog>`) or revert to primary view when feasible.
+- `Enter`  
+  - Submit the active dialog form (Add Bookmark, Add Category, etc.).
 
 Implementation details:
 
-- A single `keydown` listener on `window`.
+- A single `keydown` listener on `document`.
 - Checks `event.altKey` and `event.code` / `event.key`.
 - Ensures that shortcuts do not trigger when focus is inside an `<input>`, `<select>`, or `<textarea>` unless explicitly desired.
+- Dialog forms do **not** use `method="dialog"` to ensure Enter key properly triggers form submission via the `submit` event listener.
+
+### Add Entry Menu Navigation
+
+The footer `ADD ENTRY` button has a popup menu (BOOKMARK, CATEGORY) with full keyboard support:
+
+- **Tab to Add Entry**: Focus lands on the button; menu expands automatically (via CSS `:focus-within`).
+- **Tab through menu**: Focus moves Add Entry → BOOKMARK → CATEGORY → SETTINGS.
+- **Enter/Space on menu item**: Triggers the corresponding action (opens dialog).
+- **Click on Add Entry**: Moves focus to the first menu item (BOOKMARK).
+- Menu items use the same white focus bar style as footer buttons (bar on top edge).
 
 ---
 

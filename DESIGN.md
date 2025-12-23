@@ -675,21 +675,20 @@ Design notes:
 
 ### 8.1 Footer Bar
 
-
 The footer bar (`.footer-bar`) anchors global controls:
 
 - Left: Indicator stub aligning with the LCARS frame.
 - Center/right: Action buttons:
-  - `ADD ENTRY`
+  - `ADD ENTRY` (with popup menu)
   - `SETTINGS`
   - `ABOUT`
 - At the far right: compact status summary or filler block that visually joins with the sidebar bottom cap.
 
-Buttons use `.action-btn` with variants:
+Buttons use `.lcars-footer-bar-button` with color variants:
 
-- `.btn-primary`: Orange background, black text.
-- `.btn-secondary`: Beige background, black text.
-- `.btn-secondary.reset` or `.delete`: Red background, black text.
+- `.lcars-color-orange`: Orange background, black text (primary actions).
+- `.lcars-color-beige`: Beige background, black text (secondary actions).
+- `.lcars-color-danger`: Red background, black text (destructive actions).
 
 Design details:
 
@@ -697,6 +696,38 @@ Design details:
   - `border-radius: 999px`.
 - Right-aligned text inside the button to evoke LCARS control tabs.
 - Even padding and gap between buttons.
+
+#### Add Entry Menu
+
+The `ADD ENTRY` button (`.add-wrapper`) contains a popup menu with two options:
+
+- **BOOKMARK** – Opens the Add Bookmark dialog.
+- **CATEGORY** – Opens the Add Category dialog.
+
+Menu structure (DOM order matters for Tab navigation):
+
+```/dev/null/add-menu-structure.html#L1-7
+<div class="add-wrapper">
+    <button id="addBtn">ADD ENTRY</button>
+    <div class="add-menu" role="menu">
+        <button class="add-menu-item" role="menuitem">BOOKMARK</button>
+        <button class="add-menu-item" role="menuitem">CATEGORY</button>
+    </div>
+</div>
+```
+
+Menu visibility:
+
+- **Hover**: Menu appears when hovering over `.add-wrapper`.
+- **Focus-within**: Menu appears when any element inside `.add-wrapper` has focus (CSS `:focus-within`).
+- Menu is positioned absolutely above the `ADD ENTRY` button (`bottom: 100%`).
+
+Menu item styling:
+
+- Background: Theme secondary color (light pink/beige mix).
+- Left border: 5px solid black (LCARS accent).
+- Hover state: White background.
+- Focus state: White focus bar on **top edge** (matching footer button focus style).
 
 ### 8.2 Status Display
 
@@ -746,13 +777,28 @@ Additional notes:
 
 - All key actions must be reachable using only the keyboard.
 - Keyboard shortcuts (documented elsewhere) tie into LCARS actions:
-  - `Alt+N` → Open Add Entry (Bookmark dialog).
+  - `Alt+B` → Open Add Bookmark dialog.
   - `Alt+S` → Open Settings.
-  - `Alt+C` → Add new category (when Settings is active).
+  - `Alt+C` → Add new category.
+  - `Alt+H` → Go Home (Bookmarks view).
 - `Esc` closes the currently open dialog.
+- `Enter` or `Space` submits the active dialog form.
 - Tab order:
   - Follows visual order within each view.
   - Dialogs trap focus while open.
+
+#### Add Entry Menu
+
+The footer `ADD ENTRY` button has a popup menu with `BOOKMARK` and `CATEGORY` options:
+
+- **Tab to Add Entry**: Focus lands on the `ADD ENTRY` button with a visible focus bar; the menu expands automatically (via `:focus-within`) so keyboard users can see the available options.
+- **Tab again**: Focus moves to `BOOKMARK` menu item (focus bar on top).
+- **Tab again**: Focus moves to `CATEGORY` menu item (focus bar on top).
+- **Tab again**: Focus moves to `SETTINGS`; the menu closes as focus leaves the wrapper.
+- **Enter/Space on menu item**: Opens the corresponding dialog (Add Bookmark or Add Category).
+- **Click on Add Entry**: Moves focus to the first menu item (`BOOKMARK`).
+
+Menu items use the same white focus bar style as footer buttons, rendered on the **top edge** of each item.
 
 ---
 
