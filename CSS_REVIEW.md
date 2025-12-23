@@ -45,22 +45,24 @@ The following primitives are properly componentized with CSS variable configurat
 
 ## ❌ Issues to Address
 
-### 1. ~500+ Lines of Legacy Duplicate Code (Critical)
+### 1. ~~\~500+ Lines of Legacy Duplicate Code (Critical)~~ ✅ RESOLVED
 
-This is the biggest issue. There are TODO comments marking legacy aliases, but they contain full duplicated style blocks:
+~~This is the biggest issue. There are TODO comments marking legacy aliases, but they contain full duplicated style blocks.~~
 
-| Legacy Class | Primitive Equivalent | Lines |
-|--------------|---------------------|-------|
-| `.settings-tile` | `.lcars-tile.lcars-tile--settings` | L1470-1569 |
-| `.lcars-category-tile` | `.lcars-tile.lcars-tile--category` | L1703-1796 |
-| `.bookmark-tile` | `.lcars-tile.lcars-tile--bookmark` | L1803-1891 |
-| `.lcars-tile-pin` | `.lcars-pin.lcars-pin--sm` | L1898-1946 |
-| `.category-config-btn` | `.lcars-pin.lcars-pin--lg.lcars-pin--bordered` | L2335-2412 |
-| `.add-wrapper/.add-menu/.add-menu-item` | `.lcars-expandable` | L836-900 |
-| `.settings-breadcrumb` | `.lcars-breadcrumb--settings` | L1593-1660 |
-| `.status-display` | `.lcars-status-display` | L2415-2441 |
+**Resolution:** All legacy CSS blocks have been deleted (~470 lines removed). HTML and JavaScript were already using the primitive classes:
 
-**Action:** Migrate HTML to use primitive classes, then delete legacy blocks.
+| Legacy Class | Primitive Equivalent | Status |
+|--------------|---------------------|--------|
+| `.settings-tile` | `.lcars-tile.lcars-tile--settings` | ✅ Deleted |
+| `.lcars-category-tile` | `.lcars-tile.lcars-tile--category` | ✅ Deleted |
+| `.bookmark-tile` | `.lcars-tile.lcars-tile--bookmark` | ✅ Deleted |
+| `.lcars-tile-pin` | `.lcars-pin.lcars-pin--sm` | ✅ Deleted |
+| `.category-config-btn` | `.lcars-pin.lcars-pin--lg.lcars-pin--bordered` | ✅ Deleted |
+| `.add-wrapper/.add-menu/.add-menu-item` | `.lcars-expandable` | ✅ Deleted |
+| `.settings-breadcrumb` | `.lcars-breadcrumb--settings` | ✅ Deleted |
+| `.status-display` | `.lcars-status-display` | ✅ Migrated HTML + Deleted |
+
+**Note:** The `.status-display` HTML element and JS-generated inner HTML were updated to use `lcars-status-display`, `lcars-status-text`, and `lcars-status-info` primitive classes.
 
 ---
 
@@ -203,7 +205,7 @@ vs
 | Design tokens | 🟢 Complete | ✅ All tokens added and hardcoded values replaced |
 | Theme system | 🟢 Complete | ✅ Documented `--shape-color` purpose |
 | Primitives | 🟢 Good | Well-defined core set |
-| Legacy cleanup | 🔴 Blocking | Remove ~500 lines of duplicates |
+| Legacy cleanup | 🟢 Complete | ✅ Removed ~470 lines of duplicates |
 | Naming convention | 🟡 Partial | Document and enforce BEM-like pattern |
 | Form primitives | 🔴 Blocking | Namespace as `lcars-input`, etc. |
 | Focus system | 🟡 Partial | Consolidate to use helper class consistently |
@@ -225,18 +227,18 @@ vs
    - ✅ Replaced `transition: ... 0.1s ease-out` with `var(--lcars-transition-fast)` in `.lcars-tile`, `.settings-tile`, `.lcars-category-tile`, `.bookmark-tile`
 3. ✅ Documented `--shape-color` purpose in CSS comment (intentional indirection for frame customization)
 
-### Phase 2: Legacy Migration
+### Phase 2: Legacy Migration ✅ COMPLETE
 
-1. Update HTML to use primitive classes:
-   - `lcars-category-tile` → `lcars-tile lcars-tile--category`
-   - `bookmark-tile` → `lcars-tile lcars-tile--bookmark`
-   - `settings-tile` → `lcars-tile lcars-tile--settings`
-   - `lcars-tile-pin` → `lcars-pin lcars-pin--sm`
-   - `category-config-btn` → `lcars-pin lcars-pin--lg lcars-pin--bordered`
-   - `add-wrapper/add-menu/add-menu-item` → `lcars-expandable` equivalents
-   - `settings-breadcrumb` → `lcars-breadcrumb lcars-breadcrumb--settings`
-   - `status-display` → `lcars-status-display`
-2. Delete legacy alias CSS blocks after HTML migration
+1. ✅ HTML/JS already used primitive classes (verified):
+   - ✅ `lcars-category-tile` → `lcars-tile lcars-tile--category`
+   - ✅ `bookmark-tile` → `lcars-tile lcars-tile--bookmark`
+   - ✅ `settings-tile` → `lcars-tile lcars-tile--settings`
+   - ✅ `lcars-tile-pin` → `lcars-pin lcars-pin--sm`
+   - ✅ `category-config-btn` → `lcars-pin lcars-pin--lg lcars-pin--bordered`
+   - ✅ `add-wrapper/add-menu/add-menu-item` → `lcars-expandable` equivalents
+   - ✅ `settings-breadcrumb` → `lcars-breadcrumb lcars-breadcrumb--settings`
+   - ✅ `status-display` → `lcars-status-display` (migrated HTML + JS)
+2. ✅ Deleted all legacy alias CSS blocks (~470 lines removed)
 
 ### Phase 3: Form Primitives
 
