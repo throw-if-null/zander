@@ -47,31 +47,16 @@ This audit identifies issues and proposes a phased remediation plan.
 
 ## 🟡 Missing Abstractions
 
-### 4. Expandable Button Pattern Not Componentized
+### 4. ~~Expandable Button Pattern Not Componentized~~ ✅ RESOLVED
 
-The "Add Entry" menu uses this HTML pattern:
+~~The "Add Entry" menu uses tightly coupled CSS that was not reusable.~~
 
-```html
-<div class="add-wrapper">
-    <button class="lcars-button ...">ADD ENTRY</button>
-    <div class="add-menu" role="menu">
-        <button class="add-menu-item" role="menuitem">BOOKMARK</button>
-        <button class="add-menu-item" role="menuitem">CATEGORY</button>
-    </div>
-</div>
-```
-
-The CSS (`.add-wrapper`, `.add-menu`, `.add-menu-item`) is tightly coupled to this single use case with hardcoded positioning and styling.
-
-**Recommendation:** Abstract into a reusable component:
-- `lcars-expandable` — wrapper that handles show/hide logic
-- `lcars-expandable-trigger` — the button that opens the menu
-- `lcars-expandable-menu` — the popup container
-- `lcars-expandable-item` — individual menu items
-
-Configuration options:
-- `--lcars-expandable-direction: up | down | left | right`
-- `--lcars-expandable-gap: <spacing>`
+**Resolution:** Created unified `.lcars-expandable` primitive in Phase 4 with:
+- `.lcars-expandable` — wrapper with configurable CSS variables
+- `.lcars-expandable-menu` — popup container with direction support
+- `.lcars-expandable-item` — individual menu items with focus states
+- Direction modifiers: `--up` (default), `--down`
+- CSS variables: `--lcars-expandable-gap`, `--lcars-expandable-offset`, `--lcars-expandable-item-width`, `--lcars-expandable-item-height`
 
 ### 5. Two Breadcrumb Implementations
 
@@ -298,18 +283,33 @@ Level 4: Layout Shells (app-specific compositions)
 - Updated tile pin positioning rule to use `.lcars-tile > .lcars-pin`
 - Kept legacy aliases (`.lcars-tile-pin`, `.category-config-btn`) for backward compatibility
 
-### Phase 4: Create Expandable Component ⏳
+### Phase 4: Create Expandable Component ✅
 **Priority:** Medium  
-**Effort:** Medium
+**Effort:** Medium  
+**Completed:** 2025-01-20
 
-1. Abstract add-menu pattern into `lcars-expandable`
-2. CSS variables for configuration:
-   - `--lcars-expandable-direction` (up/down)
-   - `--lcars-expandable-gap`
+1. ✅ Abstract add-menu pattern into `lcars-expandable`
+2. ✅ CSS variables for configuration:
+   - `--lcars-expandable-gap` (gap between items)
+   - `--lcars-expandable-offset` (gap between trigger and menu)
    - `--lcars-expandable-item-width`
+   - `--lcars-expandable-item-height`
 
-3. Update add-menu HTML to use new classes
-4. Document usage pattern
+3. ✅ Direction modifiers:
+   - `.lcars-expandable--up` (default, menu appears above)
+   - `.lcars-expandable--down` (menu appears below)
+
+4. ✅ Update add-menu HTML to use new classes
+5. ✅ Focus states with directional focus bar indicator
+
+**Changes made:**
+- Created `.lcars-expandable` primitive (~90 lines)
+- Created `.lcars-expandable-menu` with direction support
+- Created `.lcars-expandable-item` with hover/focus states
+- Updated footer "ADD ENTRY" menu HTML to use new classes
+- Fixed hardcoded `font-family: 'Antonio'` to use `var(--lcars-font)` token
+- Added `.footer-bar > .lcars-expandable > .lcars-footer-bar-button` to border-left rule
+- Kept legacy aliases (`.add-wrapper`, `.add-menu`, `.add-menu-item`) for backward compatibility
 
 ### Phase 5: Unify Breadcrumbs ⏳
 **Priority:** Low  
@@ -370,5 +370,6 @@ Consider packaging the LCARS primitives as:
 - **After Phase 1 cleanup:** ~1,785 lines (~100 lines removed)
 - **After Phase 2 tile unification:** ~1,750 lines (added unified primitive, legacy aliases kept for now)
 - **After Phase 3 pin unification:** ~1,820 lines (added unified pin primitive with modifiers)
-- **Estimated after legacy alias removal:** ~1,500 lines
-- **Estimated after full refactor:** ~1,350 lines (unified primitives reduce redundancy)
+- **After Phase 4 expandable component:** ~1,910 lines (added expandable primitive)
+- **Estimated after legacy alias removal:** ~1,450 lines
+- **Estimated after full refactor:** ~1,300 lines (unified primitives reduce redundancy)

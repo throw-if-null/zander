@@ -485,7 +485,8 @@
 
             .footer-bar > .lcars-footer-bar-button,
             .footer-bar > .settings-wrapper > .lcars-footer-bar-button,
-            .footer-bar > .add-wrapper > .lcars-footer-bar-button {
+            .footer-bar > .add-wrapper > .lcars-footer-bar-button,
+            .footer-bar > .lcars-expandable > .lcars-footer-bar-button {
                 height: 100%;
                 border-radius: 0;
                 margin: 0;
@@ -493,16 +494,121 @@
             }
 
             .footer-bar .settings-wrapper,
-            .footer-bar .add-wrapper {
+            .footer-bar .add-wrapper,
+            .footer-bar .lcars-expandable {
                 height: 100%;
                 display: flex;
             }
 
+            /* ==============================================
+               LCARS EXPANDABLE PRIMITIVE
+               Unified dropdown/popup menu component.
+               Replaces: .add-wrapper, .add-menu, .add-menu-item
+               ============================================== */
+
+            .lcars-expandable {
+                /* Configurable properties */
+                --lcars-expandable-gap: 5px;
+                --lcars-expandable-offset: 5px;
+                --lcars-expandable-item-width: 150px;
+                --lcars-expandable-item-height: 40px;
+
+                position: relative;
+                display: inline-flex;
+            }
+
+            .lcars-expandable-menu {
+                position: absolute;
+                left: 0;
+                min-width: var(--lcars-expandable-item-width);
+                display: none;
+                flex-direction: column;
+                gap: var(--lcars-expandable-gap);
+                z-index: 1000;
+            }
+
+            /* Direction: up (default) - menu appears above trigger */
+            .lcars-expandable-menu,
+            .lcars-expandable--up .lcars-expandable-menu {
+                bottom: 100%;
+                padding-bottom: var(--lcars-expandable-offset);
+            }
+
+            /* Direction: down - menu appears below trigger */
+            .lcars-expandable--down .lcars-expandable-menu {
+                bottom: auto;
+                top: 100%;
+                padding-bottom: 0;
+                padding-top: var(--lcars-expandable-offset);
+            }
+
+            /* Show menu on hover or focus-within */
+            .lcars-expandable:hover .lcars-expandable-menu,
+            .lcars-expandable:focus-within .lcars-expandable-menu {
+                display: flex;
+            }
+
+            .lcars-expandable-item {
+                position: relative;
+                display: inline-flex;
+                align-items: center;
+                justify-content: flex-end;
+                width: var(--lcars-expandable-item-width);
+                min-height: var(--lcars-expandable-item-height);
+                padding: 0 15px;
+                font-size: 1rem;
+                border-radius: 0;
+                background-color: var(--theme-secondary, color-mix(
+                    in srgb,
+                    var(--shape-color) 30%,
+                    var(--lcars-white) 70%
+                ));
+                color: var(--lcars-black);
+                border: none;
+                border-left: 5px solid var(--lcars-black);
+                font-family: var(--lcars-font);
+                font-weight: bold;
+                cursor: pointer;
+                white-space: nowrap;
+            }
+
+            .lcars-expandable-item:hover {
+                background-color: var(--lcars-white);
+            }
+
+            .lcars-expandable-item:focus-visible {
+                outline: none;
+            }
+
+            /* Focus bar indicator for expandable items */
+            .lcars-expandable-item:focus-visible::after {
+                content: "";
+                position: absolute;
+                left: 0;
+                right: 0;
+                top: calc(-1 * var(--lcars-expandable-gap));
+                height: 4px;
+                background-color: var(--lcars-white);
+            }
+
+            /* Down direction: focus bar at bottom */
+            .lcars-expandable--down .lcars-expandable-item:focus-visible::after {
+                top: auto;
+                bottom: calc(-1 * var(--lcars-expandable-gap));
+            }
+
+            /* ==============================================
+               LEGACY EXPANDABLE ALIASES
+               TODO: Remove after full migration to .lcars-expandable
+               ============================================== */
+
             .add-wrapper {
+                /* Alias: use lcars-expandable instead */
                 position: relative;
             }
 
             .add-menu {
+                /* Alias: use lcars-expandable-menu instead */
                 position: absolute;
                 bottom: 100%;
                 left: 0;
@@ -520,6 +626,7 @@
             }
 
             .add-menu-item {
+                /* Alias: use lcars-expandable-item instead */
                 position: relative;
                 display: inline-flex;
                 align-items: center;
@@ -537,7 +644,7 @@
                 color: var(--lcars-black);
                 border: none;
                 border-left: 5px solid var(--lcars-black);
-                font-family: 'Antonio', sans-serif;
+                font-family: var(--lcars-font);
                 font-weight: bold;
                 cursor: pointer;
                 white-space: nowrap;
@@ -2358,11 +2465,11 @@
 
             <div class="footer-bar lcars-frame-segment lcars-frame-segment--horizontal lcars-frame-segment--left-rounded">
                 <div id="systemStatus" class="status-display"></div>
-                <div class="add-wrapper">
+                <div class="lcars-expandable">
                     <button class="lcars-button lcars-focus-bar lcars-color-orange lcars-footer-bar-button" id="addBtn" aria-label="Add Entry (Alt+N)" aria-haspopup="menu" aria-expanded="false">ADD ENTRY</button>
-                    <div class="add-menu" role="menu" id="addMenu">
-                        <button class="add-menu-item" id="addBookmarkBtn" role="menuitem">BOOKMARK</button>
-                        <button class="add-menu-item" id="addCategoryBtn" role="menuitem">CATEGORY</button>
+                    <div class="lcars-expandable-menu" role="menu" id="addMenu">
+                        <button class="lcars-expandable-item" id="addBookmarkBtn" role="menuitem">BOOKMARK</button>
+                        <button class="lcars-expandable-item" id="addCategoryBtn" role="menuitem">CATEGORY</button>
                     </div>
                 </div>
                 <div class="settings-wrapper">
