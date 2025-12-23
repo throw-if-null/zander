@@ -267,6 +267,236 @@
                 border-bottom-left-radius: var(--radius);
             }
 
+            /* ==============================================
+               LCARS SHELL BAR PRIMITIVES
+               Reusable header, footer, and sidebar bars
+               ============================================== */
+
+            /* --- LCARS Header Bar --- */
+            .lcars-header-bar {
+                --lcars-header-bar-height: 40px;
+                --lcars-header-bar-gap: 0;
+
+                /* Grid positioning when used in lcars-app */
+                grid-column: 1;
+                grid-row: 1;
+                align-self: start;
+                margin-right: -1px;
+
+                display: flex;
+                align-items: stretch;
+                justify-content: flex-start;
+                padding-left: var(--lcars-header-bar-gap);
+                padding-right: 0;
+                height: var(--lcars-header-bar-height);
+                background-color: var(--shape-color);
+                border-top-left-radius: var(--radius);
+                border-bottom-left-radius: var(--radius);
+            }
+
+            .lcars-header-bar-home {
+                color: var(--lcars-orange);
+                background-color: var(--lcars-black);
+                font-size: 44px;
+                line-height: 1;
+                font-weight: bold;
+                text-transform: uppercase;
+                padding: 0 10px;
+                margin: 0;
+                margin-left: 50px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                letter-spacing: -1px;
+                border: none;
+                cursor: pointer;
+            }
+
+            .lcars-header-bar-home:focus-visible {
+                outline: none;
+                box-shadow: none;
+                position: relative;
+            }
+
+            .lcars-header-bar-home:focus-visible::after {
+                content: "";
+                position: absolute;
+                left: 0;
+                right: 0;
+                bottom: -10px;
+                height: 4px;
+                background-color: var(--lcars-white);
+            }
+
+            .lcars-header-bar-fill {
+                flex: 1;
+                height: var(--lcars-header-bar-height, 40px);
+            }
+
+            .lcars-header-bar-end-cap {
+                width: 20px;
+                background-color: var(--shape-color);
+            }
+
+            /* --- LCARS Footer Bar --- */
+            .lcars-footer-bar {
+                --lcars-footer-bar-height: 40px;
+
+                display: flex;
+                align-items: center;
+                justify-content: flex-start;
+                padding-left: 0;
+                padding-right: 0;
+                gap: 0;
+                height: var(--lcars-footer-bar-height);
+                background-color: var(--shape-color);
+                border-top-left-radius: var(--radius);
+                border-bottom-left-radius: var(--radius);
+            }
+
+            .lcars-footer-bar-status {
+                display: flex;
+                align-items: center;
+                flex: 1;
+                padding-left: 15px;
+                height: 100%;
+            }
+
+            .lcars-footer-bar-actions {
+                display: flex;
+                align-items: center;
+                height: 100%;
+                gap: 0;
+            }
+
+            /* --- LCARS Sidebar Bar --- */
+            .lcars-sidebar-bar {
+                --lcars-sidebar-bar-width: var(--sidebar-width, 110px);
+                --lcars-sidebar-bar-elbow-height: 70px;
+
+                display: flex;
+                flex-direction: column;
+                width: var(--lcars-sidebar-bar-width);
+                height: 100%;
+            }
+
+            .lcars-sidebar-bar-top-cap {
+                height: var(--lcars-sidebar-bar-elbow-height);
+                width: 100%;
+                --elbow-position: bottom left;
+                --elbow-radius-top-right: var(--radius);
+                background: radial-gradient(
+                    circle at var(--elbow-position),
+                    var(--lcars-bg) var(--radius),
+                    var(--shape-color) calc(var(--radius) + 0.5px)
+                );
+                border-top-right-radius: var(--radius);
+            }
+
+            .lcars-sidebar-bar-track {
+                flex: 1;
+                min-height: 0;
+                background: none;
+                display: flex;
+                flex-direction: column;
+                gap: 0;
+                padding: 0 0 0 calc(var(--radius) + 0.5px);
+                position: relative;
+            }
+
+            .lcars-sidebar-bar-filler {
+                flex: 1;
+                background-color: var(--shape-color);
+            }
+
+            .lcars-sidebar-bar-toggle {
+                width: 100%;
+                height: 50px;
+                background-color: var(--shape-color);
+                border: none;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: var(--lcars-black);
+            }
+
+            .lcars-sidebar-bar-toggle:hover {
+                filter: brightness(1.1);
+            }
+
+            .lcars-sidebar-bar-toggle:focus-visible {
+                outline: 3px solid var(--lcars-white);
+                outline-offset: -3px;
+            }
+
+            .lcars-sidebar-bar-bottom-cap {
+                height: var(--lcars-sidebar-bar-elbow-height);
+                width: 100%;
+                --elbow-position: top left;
+                --elbow-radius-bottom-right: var(--radius);
+                background: radial-gradient(
+                    circle at var(--elbow-position),
+                    var(--lcars-bg) var(--radius),
+                    var(--shape-color) calc(var(--radius) + 0.5px)
+                );
+                border-bottom-right-radius: var(--radius);
+            }
+
+            /* Decorative variant - just a visual bar */
+            .lcars-sidebar-bar--decorative .lcars-sidebar-bar-track {
+                background-color: var(--shape-color);
+            }
+
+            /* --- LCARS Status Display --- */
+            .lcars-status-display {
+                --lcars-status-label-bg: var(--theme-secondary);
+                --lcars-status-label-color: var(--lcars-black);
+                --lcars-status-value-bg: var(--lcars-black);
+                --lcars-status-value-color: var(--lcars-orange);
+
+                display: flex;
+                align-items: center;
+                height: 100%;
+            }
+
+            .lcars-status-text {
+                color: var(--lcars-black);
+                font-weight: bold;
+                margin-right: 10px;
+                font-size: 1.2rem;
+            }
+
+            .lcars-status-info {
+                background-color: var(--lcars-status-value-bg);
+                color: var(--lcars-status-value-color);
+                padding: 0 15px;
+                height: 100%;
+                border-radius: 0;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                font-weight: bold;
+                font-size: 1.1rem;
+            }
+
+            .lcars-status-label {
+                background-color: var(--lcars-status-label-bg);
+                color: var(--lcars-status-label-color);
+                padding: 2px 6px;
+                font-size: 0.9rem;
+                font-weight: bold;
+            }
+
+            .lcars-status-value {
+                color: var(--lcars-status-value-color);
+                font-weight: bold;
+            }
+
+            /* ==============================================
+               END LCARS SHELL BAR PRIMITIVES
+               ============================================== */
+
             .header-fill {
                 flex: 1;
                 height: 40px;
@@ -2214,10 +2444,10 @@
     <body>
         <div class="lcars-app">
             <!-- Header Bar (Left) -->
-            <div class="header-bar lcars-frame-segment lcars-frame-segment--horizontal lcars-frame-segment--left-rounded">
-                <button class="app-title" id="homeBtn" aria-label="Home - Bookmarks View">ZANDER</button>
-                <div class="header-fill"></div>
-                <div class="header-end-cap"></div>
+            <div class="lcars-header-bar">
+                <button class="lcars-header-bar-home" id="homeBtn" aria-label="Home - Bookmarks View">ZANDER</button>
+                <div class="lcars-header-bar-fill"></div>
+                <div class="lcars-header-bar-end-cap"></div>
             </div>
 
             <!-- Sidebar (Right - Full Height) -->

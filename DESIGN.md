@@ -925,7 +925,152 @@ This section lists the **reusable LCARS primitives** that ZANDER consumes. These
     - Hover: `filter: brightness(1.1); transform: scale(1.02)`.
     - Focus: uses `lcars-focus-outline` system.
 
-### 11.4 Pins & Small Controls
+### 11.4 Shell Bar Primitives
+
+These primitives form the outer frame of an LCARS application shell. They can be used independently or composed together to create a classic "C-shaped" LCARS console layout.
+
+#### `lcars-header-bar`
+
+A horizontal header bar primitive for the top edge of an LCARS shell.
+
+- Composes: `lcars-frame-segment`, `lcars-frame-segment--horizontal`, `lcars-frame-segment--left-rounded`.
+- Configurable via CSS variables:
+  - `--lcars-header-bar-height` (default: `40px`)
+  - `--lcars-header-bar-gap` (default: `var(--lcars-gap)`)
+- Sub-components:
+  - `lcars-header-bar-home` – Home/brand button slot (required).
+    - Styled as a clickable button with black background and orange text.
+    - Typically links to the application home view.
+    - Focus state: white bar indicator below the button.
+  - `lcars-header-bar-fill` – Flexible filler segment (optional).
+    - Expands to fill available space between home button and end cap.
+  - `lcars-header-bar-end-cap` – Right edge cap connecting to sidebar (optional).
+    - Fixed-width terminator that visually joins with the sidebar top elbow.
+
+Minimal structure:
+
+```/dev/null/lcars-header-bar.html#L1-5
+<div class="lcars-header-bar">
+    <button class="lcars-header-bar-home" aria-label="Home">APP TITLE</button>
+    <div class="lcars-header-bar-fill"></div>
+    <div class="lcars-header-bar-end-cap"></div>
+</div>
+```
+
+When used without a sidebar, omit `lcars-header-bar-end-cap` and the fill will extend to the edge.
+
+#### `lcars-footer-bar`
+
+A horizontal footer bar primitive for the bottom edge of an LCARS shell.
+
+- Composes: `lcars-frame-segment`, `lcars-frame-segment--horizontal`, `lcars-frame-segment--left-rounded`.
+- Configurable via CSS variables:
+  - `--lcars-footer-bar-height` (default: `40px`)
+- Sub-components:
+  - `lcars-footer-bar-status` – Optional status display slot (left side).
+    - Can be omitted entirely if no status is needed.
+    - When present, displays application status in LCARS style.
+    - See `lcars-status-display` primitive for internal structure.
+  - `lcars-footer-bar-actions` – Action button container (center/right).
+    - Houses `lcars-footer-bar-button` elements for global actions.
+    - Supports `lcars-expandable` menus for grouped actions.
+
+Minimal structure (with status):
+
+```/dev/null/lcars-footer-bar-full.html#L1-8
+<div class="lcars-footer-bar">
+    <div class="lcars-footer-bar-status">
+        <!-- lcars-status-display content -->
+    </div>
+    <button class="lcars-footer-bar-button">ACTION 1</button>
+    <button class="lcars-footer-bar-button">ACTION 2</button>
+</div>
+```
+
+Minimal structure (without status):
+
+```/dev/null/lcars-footer-bar-minimal.html#L1-4
+<div class="lcars-footer-bar">
+    <button class="lcars-footer-bar-button">ACTION 1</button>
+    <button class="lcars-footer-bar-button">ACTION 2</button>
+</div>
+```
+
+#### `lcars-sidebar-bar`
+
+A vertical sidebar bar primitive for the right (or left) edge of an LCARS shell. Can be purely decorative or contain navigation controls.
+
+- Configurable via CSS variables:
+  - `--lcars-sidebar-bar-width` (default: `var(--sidebar-width)`)
+  - `--lcars-sidebar-bar-elbow-height` (default: `70px`)
+- Sub-components:
+  - `lcars-sidebar-bar-top-cap` – Top elbow connector (composes `lcars-elbow`).
+  - `lcars-sidebar-bar-track` – Middle track region.
+    - Can contain:
+      - Nothing (purely decorative vertical bar).
+      - A hamburger/menu toggle button (`lcars-sidebar-bar-toggle`).
+      - Scrollable navigation buttons (e.g., category buttons in ZANDER).
+  - `lcars-sidebar-bar-filler` – Visual filler to complete the LCARS band.
+  - `lcars-sidebar-bar-bottom-cap` – Bottom elbow connector (composes `lcars-elbow`).
+- Variant modifiers:
+  - `lcars-sidebar-bar--decorative` – No interactive content, just a visual bar.
+  - `lcars-sidebar-bar--with-toggle` – Includes a hamburger/menu toggle button.
+
+Decorative sidebar (no content):
+
+```/dev/null/lcars-sidebar-decorative.html#L1-6
+<aside class="lcars-sidebar-bar lcars-sidebar-bar--decorative">
+    <div class="lcars-sidebar-bar-top-cap lcars-elbow"></div>
+    <div class="lcars-sidebar-bar-track"></div>
+    <div class="lcars-sidebar-bar-bottom-cap lcars-elbow"></div>
+</aside>
+```
+
+Sidebar with hamburger toggle:
+
+```/dev/null/lcars-sidebar-toggle.html#L1-10
+<aside class="lcars-sidebar-bar lcars-sidebar-bar--with-toggle">
+    <div class="lcars-sidebar-bar-top-cap lcars-elbow"></div>
+    <div class="lcars-sidebar-bar-track">
+        <button class="lcars-sidebar-bar-toggle" aria-label="Toggle menu" aria-expanded="false">
+            <!-- hamburger icon or LCARS glyph -->
+        </button>
+        <div class="lcars-sidebar-bar-filler"></div>
+    </div>
+    <div class="lcars-sidebar-bar-bottom-cap lcars-elbow"></div>
+</aside>
+```
+
+#### `lcars-status-display`
+
+A reusable status readout primitive for displaying key-value metrics in LCARS style.
+
+- Configurable via CSS variables:
+  - `--lcars-status-label-bg` (default: `var(--theme-secondary)`)
+  - `--lcars-status-label-color` (default: `var(--lcars-black)`)
+  - `--lcars-status-value-bg` (default: `var(--lcars-black)`)
+  - `--lcars-status-value-color` (default: `var(--lcars-orange)`)
+- Sub-components:
+  - `lcars-status-text` – Optional prefix label (e.g., "STATUS:").
+  - `lcars-status-info` – Container for label/value pairs.
+  - `lcars-status-label` – Metric label (e.g., "CT", "BM").
+  - `lcars-status-value` – Metric value.
+
+Structure:
+
+```/dev/null/lcars-status-display.html#L1-8
+<div class="lcars-status-display">
+    <span class="lcars-status-text">STATUS:</span>
+    <div class="lcars-status-info">
+        <span class="lcars-status-label">CT</span><span class="lcars-status-value">3</span>
+        <span class="lcars-status-label">BM</span><span class="lcars-status-value">12</span>
+    </div>
+</div>
+```
+
+Can be embedded in `lcars-footer-bar-status` or used standalone in any view.
+
+### 11.5 Pins & Small Controls
 
 - `lcars-pin`
   - Base primitive for small circular LCARS controls ("pins").
@@ -949,7 +1094,7 @@ This section lists the **reusable LCARS primitives** that ZANDER consumes. These
     - Hover: `filter: brightness(1.1); transform: scale(1.1)`.
     - Focus: uses `lcars-focus-outline` system.
 
-### 11.5 Expandable Menus
+### 11.6 Expandable Menus
 
 - `lcars-expandable`
   - Base primitive for dropdown/popup menu patterns.
@@ -970,7 +1115,7 @@ This section lists the **reusable LCARS primitives** that ZANDER consumes. These
     - Hover: background lightens to white.
     - Focus: directional focus bar indicator.
 
-### 11.6 Breadcrumbs
+### 11.7 Breadcrumbs
 
 - `lcars-breadcrumb`
   - Base primitive for location/path readout components.
@@ -994,7 +1139,7 @@ This section lists the **reusable LCARS primitives** that ZANDER consumes. These
     - Non-current segments are clickable for navigation.
     - Focus: uses `lcars-focus-outline` system.
 
-### 11.7 Arrow Buttons & Scroll Containers
+### 11.8 Arrow Buttons & Scroll Containers
 
 - `lcars-arrow-btn`
   - Flat directional control with triangle/arrow indicator.
@@ -1019,7 +1164,7 @@ This section lists the **reusable LCARS primitives** that ZANDER consumes. These
     - `::-webkit-scrollbar { display: none }` (Chrome/Safari)
   - Typically paired with `lcars-arrow-btn` controls for accessible navigation.
 
-### 11.8 Focus & Interaction Primitives
+### 11.9 Focus & Interaction Primitives
 
 - `lcars-focus-outline`
   - Helper class for elements that should use a strong outline:
@@ -1042,7 +1187,7 @@ This section lists the **reusable LCARS primitives** that ZANDER consumes. These
     - Sidebar category buttons: vertical bar along the left edge.
     - Footer buttons: horizontal bar along the top edge.
 
-### 11.9 Theme & Color System Primitives
+### 11.10 Theme & Color System Primitives
 
 - Global theme variables (applied on `body`):
   - `--theme-main` – primary frame/accent color.
@@ -1054,27 +1199,22 @@ This section lists the **reusable LCARS primitives** that ZANDER consumes. These
   - `body[data-theme="laan" | "data" | "doctor" | "chapel" | "spock" | "mbenga" | "seven" | "shran"]`
     - Each theme configures `--theme-main` and `--theme-secondary` for a distinct but consistent LCARS look.
 
-### 11.10 Layout Shell Conventions (Consumers, Not Primitives)
+### 11.11 Layout Shell Conventions (ZANDER-Specific Consumers)
 
-These classes are **not** primitives, but typical consumers that future apps can mirror:
+These classes are **ZANDER-specific** implementations that consume the shell bar primitives. Future apps should use the `lcars-*` primitives directly.
 
-- `header-bar`
-  - App-specific shell for the top-left header region.
-  - Composes:
-    - `lcars-frame-segment`
-    - `lcars-frame-segment--horizontal`
-    - `lcars-frame-segment--left-rounded`
-- `sidebar-container`, `sidebar-track`, `sidebar-top-cap`, `sidebar-bottom-cap`
-  - Define the right-hand LCARS sidebar structure.
-  - Use:
-    - `lcars-elbow` for top and bottom caps.
+- `header-bar` → Migrating to `lcars-header-bar`
+  - ZANDER's top-left header region.
+  - Contains the "ZANDER" home button and end cap.
+- `sidebar-container`, `sidebar-track`, `sidebar-top-cap`, `sidebar-bottom-cap` → Migrating to `lcars-sidebar-bar`
+  - ZANDER's right-hand sidebar with scrollable category buttons.
+  - Uses:
+    - `lcars-elbow` for curved elbows.
     - `lcars-scroll-container` for scrollable category list.
-    - `lcars-arrow-btn` for scroll navigation buttons.
-- `footer-bar`
-  - App-specific shell for the bottom-left footer region.
-  - Composes:
-    - `lcars-frame-segment`
-    - `lcars-frame-segment--horizontal`
-    - `lcars-frame-segment--left-rounded`
+    - `lcars-arrow-btn` for scroll navigation.
+- `footer-bar` → Migrating to `lcars-footer-bar`
+  - ZANDER's bottom-left footer with status display and action buttons.
+
+**Migration path:** When refactoring, replace ZANDER-specific classes with the equivalent `lcars-*` primitives documented in Section 11.4 (Shell Bar Primitives). The primitives provide the same visual appearance with standardized naming and configuration options.
 
 When extracting a standalone LCARS design system, the `lcars-*` primitives listed above should form the **public API**. Application shells (like those in ZANDER) are responsible for arranging these primitives into a complete console layout.

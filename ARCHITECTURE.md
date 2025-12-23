@@ -28,19 +28,23 @@ For accessibility standards, implementation requirements, and testing guidelines
 
 ### 1.2 UI Shell & Views
 
-The app is visually presented as a **LCARS-style console** built from a continuous frame:
+The app is visually presented as a **LCARS-style console** built from a continuous frame. The shell uses standardized **LCARS shell bar primitives** (see `DESIGN.md` Section 11.4) that can be reused in other applications:
 
-- **Header Bar**  
+- **Header Bar** (primitive: `lcars-header-bar`)  
   - Top structural element with the LCARS-style title and decorative top band.
-  - The `ZANDER` title in the header acts as a **Home control**, returning to the main Bookmarks view when clicked or when the `Alt+H` keyboard shortcut is used.
-- **Sidebar (Right Frame Column)**  
+  - The `ZANDER` title in the header acts as a **Home control** (`lcars-header-bar-home`), returning to the main Bookmarks view when clicked or when the `Alt+H` keyboard shortcut is used.
+  - Includes fill segment and end cap for connecting to the sidebar.
+- **Sidebar (Right Frame Column)** (primitive: `lcars-sidebar-bar`)  
   - Vertical track containing:
-    - Decorative caps (`.sidebar-top-cap`, `.sidebar-bottom-cap`) forming LCARS “elbows”.
-    - A continuous `.sidebar-track` with category buttons rendered as `.cat-btn` elements.
+    - Decorative caps (`lcars-sidebar-bar-top-cap`, `lcars-sidebar-bar-bottom-cap`) forming LCARS "elbows".
+    - A continuous track (`lcars-sidebar-bar-track`) with category buttons rendered as `.cat-btn` elements.
+  - The sidebar bar primitive supports variants:
+    - `lcars-sidebar-bar--decorative` – purely visual, no interactive content.
+    - `lcars-sidebar-bar--with-toggle` – includes a hamburger/menu toggle button.
 - **Main Content (Left Pane)**  
   - **Bookmarks View** (default):
-    - Bookmark “grid” rendered as tiles.
-    - Bookmark “location” breadcrumb/path at the top showing the selected category hierarchy.
+    - Bookmark "grid" rendered as tiles.
+    - Bookmark "location" breadcrumb/path at the top showing the selected category hierarchy.
     - Status display with system metrics (categories, bookmarks, stardate).
   - **Settings View**:
     - Category configuration (nested tree, colors, ordering).
@@ -51,12 +55,13 @@ The app is visually presented as a **LCARS-style console** built from a continuo
   - **About View**:
     - System name, code name, and credits.
     - Current stardate and Earth date (displayed and/or on hover).
-- **Footer Bar**  
+- **Footer Bar** (primitive: `lcars-footer-bar`)  
   - Bottom structural element with global action buttons:
     - `ADD ENTRY`
     - `SETTINGS`
     - `ABOUT`
-  - System status block integrated into the footer region.
+  - System status block (`lcars-footer-bar-status` with `lcars-status-display`) integrated into the footer region.
+  - Status display can be omitted if not needed; the footer bar works without it.
 
 ### 1.3 Dialogs
 
