@@ -58,23 +58,15 @@ This audit identifies issues and proposes a phased remediation plan.
 - Direction modifiers: `--up` (default), `--down`
 - CSS variables: `--lcars-expandable-gap`, `--lcars-expandable-offset`, `--lcars-expandable-item-width`, `--lcars-expandable-item-height`
 
-### 5. Two Breadcrumb Implementations
+### 5. ~~Two Breadcrumb Implementations~~ ✅ RESOLVED
 
-Two nearly identical breadcrumb patterns exist:
+~~Two nearly identical breadcrumb patterns existed.~~
 
-1. **Bookmark location breadcrumb** (`.lcars-breadcrumb-*`)
-   - Used in the main bookmark view to show current category path
-
-2. **Settings breadcrumb** (`.settings-breadcrumb-*`)
-   - Used in settings panel for navigation
-
-Both share:
-- Horizontal layout with segments and separators
-- Interactive segments (clickable for navigation)
-- Current segment styling (bold, different color)
-- Same focus behavior
-
-**Recommendation:** Unify into single `lcars-breadcrumb` component.
+**Resolution:** Unified into single `.lcars-breadcrumb` primitive in Phase 5 with:
+- CSS variables for configurable styling (`--lcars-breadcrumb-margin`, `--lcars-breadcrumb-segment-bg`, etc.)
+- Settings variant: `.lcars-breadcrumb--settings`
+- Shared sub-components: `.lcars-breadcrumb-label`, `.lcars-breadcrumb-path`, `.lcars-breadcrumb-segment`, `.lcars-breadcrumb-separator`
+- Legacy aliases maintained for backward compatibility
 
 ---
 
@@ -311,14 +303,24 @@ Level 4: Layout Shells (app-specific compositions)
 - Added `.footer-bar > .lcars-expandable > .lcars-footer-bar-button` to border-left rule
 - Kept legacy aliases (`.add-wrapper`, `.add-menu`, `.add-menu-item`) for backward compatibility
 
-### Phase 5: Unify Breadcrumbs ⏳
+### Phase 5: Unify Breadcrumbs ✅
 **Priority:** Low  
-**Effort:** Low
+**Effort:** Low  
+**Completed:** 2025-01-20
 
-1. Create single `lcars-breadcrumb` component
-2. Migrate bookmark location breadcrumb
-3. Migrate settings breadcrumb
-4. Remove old `.settings-breadcrumb-*` and `.lcars-breadcrumb-*` (keep one naming pattern)
+1. ✅ Create single `lcars-breadcrumb` component with CSS variables
+2. ✅ Add `.lcars-breadcrumb--settings` variant for settings-specific styling
+3. ✅ Migrate settings breadcrumb HTML to use unified classes
+4. ✅ Update `renderSettingsBreadcrumb()` JS to use unified classes
+5. ✅ Consolidated duplicate `.lcars-breadcrumb-segment` CSS rules
+
+**Changes made:**
+- Added CSS variables: `--lcars-breadcrumb-margin`, `--lcars-breadcrumb-segment-bg`, `--lcars-breadcrumb-segment-bg-hover`, `--lcars-breadcrumb-segment-color`
+- Created `.lcars-breadcrumb--settings` variant with different colors and margins
+- Updated settings breadcrumb HTML from `.settings-breadcrumb` to `.lcars-breadcrumb.lcars-breadcrumb--settings`
+- Updated `renderSettingsBreadcrumb()` to use `.lcars-breadcrumb-segment` and `.lcars-breadcrumb-separator`
+- Consolidated duplicate `.lcars-breadcrumb-segment` rules into single definition
+- Kept legacy aliases (`.settings-breadcrumb-*`) for backward compatibility
 
 ### Phase 6: Update Documentation ⏳
 **Priority:** Medium  
@@ -371,5 +373,6 @@ Consider packaging the LCARS primitives as:
 - **After Phase 2 tile unification:** ~1,750 lines (added unified primitive, legacy aliases kept for now)
 - **After Phase 3 pin unification:** ~1,820 lines (added unified pin primitive with modifiers)
 - **After Phase 4 expandable component:** ~1,910 lines (added expandable primitive)
-- **Estimated after legacy alias removal:** ~1,450 lines
-- **Estimated after full refactor:** ~1,300 lines (unified primitives reduce redundancy)
+- **After Phase 5 breadcrumb unification:** ~1,920 lines (added variant, consolidated duplicates)
+- **Estimated after legacy alias removal:** ~1,400 lines
+- **Estimated after full refactor:** ~1,250 lines (unified primitives reduce redundancy)

@@ -764,19 +764,24 @@
             }
 
             /* ==============================================
-               LCARS BREADCRUMB
-               Reusable location/path readout component.
+               LCARS BREADCRUMB PRIMITIVE
+               Unified location/path readout component.
+               Replaces: .lcars-breadcrumb, .settings-breadcrumb
                ============================================== */
 
             .lcars-breadcrumb {
+                /* Configurable properties */
+                --lcars-breadcrumb-margin: 10px;
+                --lcars-breadcrumb-segment-bg: rgba(255, 153, 0, 0.18);
+                --lcars-breadcrumb-segment-bg-hover: rgba(255, 153, 0, 0.3);
+                --lcars-breadcrumb-segment-color: var(--lcars-orange);
+
                 display: flex;
                 align-items: center;
                 gap: 8px;
-
-                margin-bottom: 10px;
+                margin-bottom: var(--lcars-breadcrumb-margin);
                 font-size: 0.9rem;
                 letter-spacing: 1px;
-
                 color: var(--lcars-beige);
                 opacity: 0.85;
             }
@@ -798,24 +803,16 @@
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
-
                 padding: 2px 6px;
-                border-radius: var(--lcars-radius-xs);
-
-                background-color: transparent;
-                color: inherit;
-
+                border-radius: var(--lcars-radius-sm);
+                background-color: var(--lcars-breadcrumb-segment-bg);
+                color: var(--lcars-breadcrumb-segment-color);
                 font-size: 0.85rem;
+                font-family: var(--lcars-font);
                 text-transform: uppercase;
                 border: none;
                 cursor: default;
                 white-space: nowrap;
-            }
-
-            .lcars-breadcrumb-segment {
-                background-color: rgba(255, 153, 0, 0.18);
-                border-radius: var(--lcars-radius-sm);
-                color: var(--lcars-orange);
             }
 
             .lcars-breadcrumb-segment:not(.is-current) {
@@ -823,7 +820,7 @@
             }
 
             .lcars-breadcrumb-segment:not(.is-current):hover {
-                background-color: rgba(255, 153, 0, 0.3);
+                background-color: var(--lcars-breadcrumb-segment-bg-hover);
             }
 
             .lcars-breadcrumb-segment.is-current {
@@ -837,6 +834,25 @@
             .lcars-breadcrumb-segment:focus-visible {
                 outline: var(--lcars-focus-outline-width) solid var(--lcars-focus-outline-color);
                 outline-offset: var(--lcars-focus-outline-offset);
+            }
+
+            /* --- Breadcrumb Variants --- */
+
+            /* Settings variant: different margin and segment styling */
+            .lcars-breadcrumb--settings {
+                --lcars-breadcrumb-margin: 15px;
+                --lcars-breadcrumb-segment-bg: rgba(255, 255, 255, 0.04);
+                --lcars-breadcrumb-segment-bg-hover: rgba(255, 255, 255, 0.12);
+                --lcars-breadcrumb-segment-color: inherit;
+            }
+
+            .lcars-breadcrumb--settings .lcars-breadcrumb-segment.is-current {
+                color: var(--lcars-orange);
+            }
+
+            .lcars-breadcrumb--settings .lcars-breadcrumb-segment.is-root {
+                --lcars-breadcrumb-segment-bg: rgba(255, 153, 0, 0.18);
+                border-radius: var(--lcars-radius-sm);
             }
 
             /* Main view containers */
@@ -1338,8 +1354,13 @@
                 display: block;
             }
 
-            /* Settings breadcrumb */
+            /* ==============================================
+               SETTINGS BREADCRUMB (Legacy Alias)
+               TODO: Migrate to .lcars-breadcrumb.lcars-breadcrumb--settings
+               ============================================== */
+
             .settings-breadcrumb {
+                /* Alias: use lcars-breadcrumb lcars-breadcrumb--settings instead */
                 display: flex;
                 align-items: center;
                 gap: 8px;
@@ -2267,9 +2288,9 @@
                             </div>
 
                             <!-- Settings Breadcrumb -->
-                            <nav id="settingsBreadcrumb" class="settings-breadcrumb" aria-label="Settings Navigation">
-                                <span class="settings-breadcrumb-label">LOCATION:</span>
-                                <div class="settings-breadcrumb-path" id="settingsBreadcrumbPath">
+                            <nav id="settingsBreadcrumb" class="lcars-breadcrumb lcars-breadcrumb--settings" aria-label="Settings Navigation">
+                                <span class="lcars-breadcrumb-label">LOCATION:</span>
+                                <div class="lcars-breadcrumb-path" id="settingsBreadcrumbPath">
                                     <!-- Injected via JS -->
                                 </div>
                             </nav>
@@ -3487,7 +3508,7 @@
                 // Root segment (always present)
                 const rootBtn = document.createElement("button");
                 rootBtn.type = "button";
-                rootBtn.className = "settings-breadcrumb-segment is-root";
+                rootBtn.className = "lcars-breadcrumb-segment is-root";
                 if (!currentSettingsPage) {
                     rootBtn.classList.add("is-current");
                     rootBtn.setAttribute("aria-current", "page");
@@ -3503,12 +3524,12 @@
                 // Sub-page segment (if on a sub-page)
                 if (currentSettingsPage) {
                     const sep = document.createElement("span");
-                    sep.className = "settings-breadcrumb-separator";
+                    sep.className = "lcars-breadcrumb-separator";
                     sep.textContent = "▸";
                     settingsBreadcrumbPath.appendChild(sep);
 
                     const pageSpan = document.createElement("span");
-                    pageSpan.className = "settings-breadcrumb-segment is-current";
+                    pageSpan.className = "lcars-breadcrumb-segment is-current";
                     pageSpan.textContent = SETTINGS_PAGE_LABELS[currentSettingsPage] || currentSettingsPage.toUpperCase();
                     pageSpan.setAttribute("aria-current", "page");
                     settingsBreadcrumbPath.appendChild(pageSpan);
