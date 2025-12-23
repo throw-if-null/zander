@@ -22,26 +22,15 @@ This audit identifies issues and proposes a phased remediation plan.
 
 **Resolution:** Removed ~100 lines of duplicate CSS in Phase 1. All `.lcars-category-tile` selectors now exist only once.
 
-### 2. Three Tile Components That Should Be One
+### 2. ~~Three Tile Components That Should Be One~~ ✅ RESOLVED
 
-Three nearly identical tile patterns exist:
+~~Three nearly identical tile patterns exist.~~
 
-| Component | Used For | Grid Columns | Min-Height | Inner Corner Radius |
-|-----------|----------|--------------|------------|---------------------|
-| `.bookmark-tile` | Bookmarks | `15px 1fr` | 140px | 15px |
-| `.lcars-category-tile` | Categories in grid | `12px 1fr` | 110px | 14px |
-| `.settings-tile` | Settings navigation | `12px 1fr` | 110px | 14px |
-
-**Shared characteristics:**
-- Grid layout with left stripe column
-- Top-left corner cutout via `::before` radial-gradient
-- Bottom-right rounded corner (`--lcars-radius-lg`)
-- Label row spanning full width
-- Meta/description area with `border-top-left-radius`
-- Identical hover behavior (`filter: brightness(1.1); transform: scale(1.02)`)
-- Identical focus behavior (uses focus outline system)
-
-**Recommendation:** Create a single `lcars-tile` primitive with variants.
+**Resolution:** Created unified `.lcars-tile` primitive in Phase 2 with:
+- Base primitive with configurable CSS variables
+- Variant modifiers: `--bookmark`, `--category`, `--settings`, `--danger`
+- Shared sub-components: `.lcars-tile-label`, `.lcars-tile-meta`, `.lcars-tile-footer`
+- Legacy class aliases maintained for backward compatibility
 
 ### 3. Three Pin Components That Should Be One
 
@@ -114,13 +103,19 @@ Both share:
 | ~~`14px`~~ | ~~`.settings-tile-meta` border-radius~~ | ~~None~~ | ✅ Now uses `var(--lcars-radius-sm)` |
 | ~~`14px`~~ | ~~`.lcars-category-tile-meta` border-radius~~ | ~~None~~ | ✅ Now uses `var(--lcars-radius-sm)` |
 | ~~`15px`~~ | ~~`.bookmark-description` border-radius~~ | ~~None~~ | ✅ Now uses `var(--lcars-radius-sm)` |
-| `12px` | Tile stripe column width | None | ⏳ Create `--lcars-tile-stripe-width` |
-| `15px` | Bookmark tile stripe width | None | ⏳ Inconsistent with above |
-| `110px` | Category/settings tile min-height | None | ⏳ Create `--lcars-tile-min-height` |
-| `140px` | Bookmark tile min-height | None | ⏳ Create `--lcars-tile-min-height-lg` |
+| ~~`12px`~~ | ~~Tile stripe column width~~ | ~~None~~ | ✅ Now uses `var(--lcars-tile-stripe-width)` |
+| ~~`15px`~~ | ~~Bookmark tile stripe width~~ | ~~None~~ | ✅ Now uses `var(--lcars-tile-stripe-width-lg)` |
+| ~~`110px`~~ | ~~Category/settings tile min-height~~ | ~~None~~ | ✅ Now uses `var(--lcars-tile-min-height)` |
+| ~~`140px`~~ | ~~Bookmark tile min-height~~ | ~~None~~ | ✅ Now uses `var(--lcars-tile-min-height-lg)` |
 | `5px` | Various gaps | Uses `--lcars-gutter` sometimes | ⏳ Audit for consistency |
 
 **Note:** `--lcars-radius-sm` was adjusted from `16px` to `14px` in Phase 1 to match tile usage.
+
+**Tile tokens added in Phase 2:**
+- `--lcars-tile-stripe-width: 12px`
+- `--lcars-tile-stripe-width-lg: 15px`
+- `--lcars-tile-min-height: 110px`
+- `--lcars-tile-min-height-lg: 140px`
 
 ### 7. Font Family Inconsistencies
 
@@ -237,27 +232,42 @@ Level 4: Layout Shells (app-specific compositions)
 - Replaced hardcoded `14px` in `.lcars-category-tile-meta` with `var(--lcars-radius-sm)`
 - Replaced hardcoded `15px` in `.bookmark-description` with `var(--lcars-radius-sm)`
 
-### Phase 2: Unify Tiles ⏳
+### Phase 2: Unify Tiles ✅
 **Priority:** High  
-**Effort:** Medium
+**Effort:** Medium  
+**Completed:** 2025-01-20
 
-1. Create `lcars-tile` base primitive with:
+1. ✅ Create `lcars-tile` base primitive with:
    - CSS variables for stripe width, min-height, corner radius
    - Grid layout with configurable stripe column
-   - Shared `::before` corner cutout
-   - Shared `::after` bottom-right radius
+   - Shared `::before` stripe column
+   - Shared `::after` corner cutout
    - Shared hover/focus states
 
-2. Add variant modifiers:
+2. ✅ Add variant modifiers:
    - `lcars-tile--bookmark` — larger, with URL footer area
    - `lcars-tile--category` — standard size
-   - `lcars-tile--settings` — standard size
+   - `lcars-tile--settings` — standard size, button styling
    - `lcars-tile--danger` — red background
 
-3. Create shared sub-components:
-   - `.lcars-tile-label` — top row label
-   - `.lcars-tile-meta` — description/meta area
-   - `.lcars-tile-stripe` — left stripe (if needed explicitly)
+3. ✅ Create shared sub-components:
+   - `.lcars-tile-label` — top row label (+ `--bookmark` modifier)
+   - `.lcars-tile-meta` — description/meta area (+ `--bookmark` modifier)
+   - `.lcars-tile-meta-primary` — uppercase meta text
+   - `.lcars-tile-meta-secondary` — secondary meta text
+   - `.lcars-tile-footer` — footer row for bookmark actions
+
+**Changes made:**
+- Added tile tokens to `:root`: `--lcars-tile-stripe-width`, `--lcars-tile-stripe-width-lg`, `--lcars-tile-min-height`, `--lcars-tile-min-height-lg`
+- Created unified `.lcars-tile` primitive with variants and sub-components (~170 lines)
+- Updated `createBookmarkTile()` JS function to use new classes
+- Updated `createCategoryTile()` JS function to use new classes
+- Updated Settings panel HTML to use new classes
+- Updated event handlers to use new class selectors
+- Removed duplicate `createCategoryTile()` function (dead code)
+- Kept legacy aliases (`.bookmark-tile`, `.lcars-category-tile`, `.settings-tile`) for backward compatibility
+- All tiles now use `--tile-color` CSS variable consistently
+- Fixed pin positioning: changed `.lcars-tile .lcars-tile-pin` to `.lcars-tile > .lcars-tile-pin` so pins in footer use flexbox flow
 
 ### Phase 3: Unify Pins ⏳
 **Priority:** Medium  
@@ -342,5 +352,6 @@ Consider packaging the LCARS primitives as:
 
 - **Total CSS in `<style>` block (original):** ~1,885 lines
 - **After Phase 1 cleanup:** ~1,785 lines (~100 lines removed)
-- **Estimated after tile unification:** ~1,600 lines
+- **After Phase 2 tile unification:** ~1,750 lines (added unified primitive, legacy aliases kept for now)
+- **Estimated after legacy alias removal:** ~1,550 lines
 - **Estimated after full refactor:** ~1,400 lines (unified primitives reduce redundancy)

@@ -47,6 +47,12 @@
                 --lcars-radius-md: 20px;
                 --lcars-radius-lg: 30px;
 
+                /* Tile Tokens */
+                --lcars-tile-stripe-width: 12px;
+                --lcars-tile-stripe-width-lg: 15px;
+                --lcars-tile-min-height: 110px;
+                --lcars-tile-min-height-lg: 140px;
+
                 /* Legacy aliases (prefer --lcars-radius-*) */
                 --gutter: var(--lcars-gutter);
                 --radius: var(--lcars-radius-lg);
@@ -924,11 +930,199 @@
                 opacity: 0.9;
             }
 
-            .settings-tile {
+            /* ==============================================
+               LCARS TILE PRIMITIVE
+               Unified tile component with configurable variants.
+               Replaces: .bookmark-tile, .lcars-category-tile, .settings-tile
+               ============================================== */
+
+            .lcars-tile {
+                /* Configurable properties with defaults */
+                --lcars-tile-bg: var(--tile-color, var(--theme-main));
+                --lcars-tile-fg: var(--lcars-black);
+                --lcars-tile-stripe-bg: var(--lcars-tile-bg);
+
                 display: grid;
-                grid-template-columns: 12px 1fr;
+                grid-template-columns: var(--lcars-tile-stripe-width) 1fr;
                 grid-template-rows: auto 1fr;
-                min-height: 110px;
+                min-height: var(--lcars-tile-min-height);
+
+                position: relative;
+                border-radius: 0;
+                border-bottom-right-radius: var(--lcars-radius-lg);
+                overflow: hidden;
+                cursor: pointer;
+                text-decoration: none;
+
+                background-color: var(--lcars-tile-bg);
+                color: var(--lcars-tile-fg);
+
+                transition:
+                    transform 0.1s ease-out,
+                    filter 0.1s ease-out;
+            }
+
+            /* Stripe column */
+            .lcars-tile::before {
+                content: "";
+                grid-row: 1 / -1;
+                grid-column: 1;
+                background-color: var(--lcars-tile-stripe-bg);
+            }
+
+            /* Corner cutout */
+            .lcars-tile::after {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: var(--lcars-radius-md);
+                height: var(--lcars-radius-md);
+                background: radial-gradient(
+                    circle at 100% 100%,
+                    transparent var(--lcars-radius-md),
+                    var(--lcars-black) var(--lcars-radius-md)
+                );
+                z-index: 1;
+            }
+
+            .lcars-tile:hover {
+                filter: brightness(1.1);
+                transform: scale(1.02);
+            }
+
+            .lcars-tile:focus-visible {
+                outline: var(--lcars-focus-outline-width) solid var(--lcars-focus-outline-color);
+                outline-offset: var(--lcars-focus-outline-offset);
+            }
+
+            /* --- Tile Variants --- */
+
+            /* Bookmark variant: larger with footer row */
+            .lcars-tile--bookmark {
+                --lcars-tile-stripe-width: var(--lcars-tile-stripe-width-lg);
+                --lcars-tile-min-height: var(--lcars-tile-min-height-lg);
+                grid-template-rows: auto 1fr auto;
+                user-select: none;
+                cursor: default;
+            }
+
+            /* Category variant: uses --tile-color from JS */
+            .lcars-tile--category {
+                --lcars-tile-bg: var(--tile-color, var(--theme-main));
+            }
+
+            /* Settings variant: button element styling */
+            .lcars-tile--settings {
+                border: none;
+                text-align: left;
+                font-family: var(--lcars-font);
+            }
+
+            /* Danger variant: red background */
+            .lcars-tile--danger {
+                --lcars-tile-bg: var(--lcars-red);
+            }
+
+            /* --- Tile Sub-components --- */
+
+            /* Label: spans full width at top */
+            .lcars-tile-label {
+                grid-column: 1 / -1;
+                grid-row: 1;
+                padding: 8px 12px 6px 24px;
+                font-size: 0.95rem;
+                font-weight: bold;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                color: var(--lcars-tile-fg);
+            }
+
+            /* Bookmark label: slightly larger */
+            .lcars-tile-label--bookmark {
+                font-size: 1rem;
+                line-height: 1.2;
+                padding: 10px 15px 8px 25px;
+                background-color: var(--lcars-tile-bg);
+            }
+
+            /* Meta area: black background with rounded corner */
+            .lcars-tile-meta {
+                grid-column: 2;
+                grid-row: 2;
+                padding: 8px 12px 10px 8px;
+                font-size: 0.75rem;
+                line-height: 1.3;
+                background-color: var(--lcars-black);
+                color: var(--theme-secondary, var(--lcars-gray));
+                border-top-left-radius: var(--lcars-radius-sm);
+
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-end;
+                gap: 4px;
+            }
+
+            /* Bookmark meta: description styling with line clamping */
+            .lcars-tile-meta--bookmark {
+                font-size: 0.78rem;
+                line-height: 1.35;
+                padding: 10px 15px 10px 10px;
+                overflow: hidden;
+                word-wrap: break-word;
+                word-break: break-word;
+                display: -webkit-box;
+                -webkit-line-clamp: 4;
+                -webkit-box-orient: vertical;
+            }
+
+            .lcars-tile-meta-primary {
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+
+            .lcars-tile-meta-secondary {
+                opacity: 0.85;
+            }
+
+            /* Footer: for bookmark action buttons */
+            .lcars-tile-footer {
+                grid-column: 2;
+                grid-row: 3;
+                background-color: var(--lcars-black);
+                margin-left: 0;
+                z-index: 2;
+                padding: 8px 12px;
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+                gap: 10px;
+            }
+
+            /* Pin positioning within tiles (only for pins outside footer) */
+            .lcars-tile > .lcars-tile-pin {
+                position: absolute;
+                bottom: 8px;
+                right: 12px;
+                z-index: 10;
+            }
+
+            /* ==============================================
+               LEGACY TILE ALIASES
+               These map old class names to the new lcars-tile system.
+               TODO: Remove after full migration to lcars-tile classes.
+               ============================================== */
+
+            .settings-tile {
+                /* Alias: use lcars-tile lcars-tile--settings instead */
+                --lcars-tile-bg: var(--tile-color, var(--theme-main));
+                --lcars-tile-fg: var(--lcars-black);
+                --lcars-tile-stripe-bg: var(--lcars-tile-bg);
+
+                display: grid;
+                grid-template-columns: var(--lcars-tile-stripe-width) 1fr;
+                grid-template-rows: auto 1fr;
+                min-height: var(--lcars-tile-min-height);
 
                 position: relative;
                 border-radius: 0;
@@ -940,12 +1134,8 @@
                 text-align: left;
                 font-family: var(--lcars-font);
 
-                --settings-tile-bg: var(--tile-color, var(--theme-main));
-                --settings-tile-fg: var(--lcars-black);
-                --settings-tile-stripe-bg: var(--settings-tile-bg);
-
-                background-color: var(--settings-tile-bg);
-                color: var(--settings-tile-fg);
+                background-color: var(--lcars-tile-bg);
+                color: var(--lcars-tile-fg);
 
                 transition:
                     transform 0.1s ease-out,
@@ -956,7 +1146,7 @@
                 content: "";
                 grid-row: 1 / -1;
                 grid-column: 1;
-                background-color: var(--settings-tile-stripe-bg);
+                background-color: var(--lcars-tile-stripe-bg);
             }
 
             .settings-tile::after {
@@ -992,7 +1182,7 @@
                 font-weight: bold;
                 text-transform: uppercase;
                 letter-spacing: 1px;
-                color: var(--settings-tile-fg);
+                color: var(--lcars-tile-fg);
             }
 
             .settings-tile-meta {
@@ -1021,7 +1211,7 @@
             }
 
             .settings-tile--danger {
-                --settings-tile-bg: var(--lcars-red);
+                --lcars-tile-bg: var(--lcars-red);
             }
 
             /* Settings sub-page container */
@@ -1147,16 +1337,20 @@
 
 
             /* ==============================================
-               LCARS CATEGORY TILE
-               Reusable component representing a category/folder.
-               Designed to sit alongside .bookmark-tile in .bookmark-grid.
+               LCARS CATEGORY TILE (Legacy Alias)
+               TODO: Migrate to .lcars-tile.lcars-tile--category
                ============================================== */
 
             .lcars-category-tile {
+                /* Alias: use lcars-tile lcars-tile--category instead */
+                --lcars-tile-bg: var(--cat-color, var(--theme-main));
+                --lcars-tile-fg: var(--lcars-black);
+                --lcars-tile-stripe-bg: var(--lcars-tile-bg);
+
                 display: grid;
-                grid-template-columns: 12px 1fr;
+                grid-template-columns: var(--lcars-tile-stripe-width) 1fr;
                 grid-template-rows: auto 1fr;
-                min-height: 110px;
+                min-height: var(--lcars-tile-min-height);
 
                 position: relative;
                 border-radius: 0;
@@ -1165,12 +1359,8 @@
                 cursor: pointer;
                 text-decoration: none;
 
-                --lcars-category-bg: var(--cat-color, var(--theme-main));
-                --lcars-category-fg: var(--lcars-black);
-                --lcars-category-stripe-bg: var(--lcars-category-bg);
-
-                background-color: var(--lcars-category-bg);
-                color: var(--lcars-category-fg);
+                background-color: var(--lcars-tile-bg);
+                color: var(--lcars-tile-fg);
 
                 transition:
                     transform 0.1s ease-out,
@@ -1181,7 +1371,7 @@
                 content: "";
                 grid-row: 1 / -1;
                 grid-column: 1;
-                background-color: var(--lcars-category-stripe-bg);
+                background-color: var(--lcars-tile-stripe-bg);
             }
 
             .lcars-category-tile::after {
@@ -1204,6 +1394,12 @@
                 transform: scale(1.02);
             }
 
+            .lcars-category-tile:focus-visible {
+                outline: var(--lcars-focus-outline-width) solid var(--lcars-focus-outline-color);
+                outline-offset: var(--lcars-focus-outline-offset);
+            }
+
+            /* Category tile sub-components: alias to unified tile classes */
             .lcars-category-tile-label {
                 grid-column: 1 / -1;
                 grid-row: 1;
@@ -1212,7 +1408,7 @@
                 font-weight: bold;
                 text-transform: uppercase;
                 letter-spacing: 1px;
-                color: var(--lcars-category-fg);
+                color: var(--lcars-tile-fg);
             }
 
             .lcars-category-tile-meta {
@@ -1240,32 +1436,37 @@
                 opacity: 0.85;
             }
 
-            .lcars-category-tile:focus-visible {
-                outline: var(--lcars-focus-outline-width) solid var(--lcars-focus-outline-color);
-                outline-offset: var(--lcars-focus-outline-offset);
-            }
+            /* ==============================================
+               BOOKMARK TILE (Legacy Alias)
+               TODO: Migrate to .lcars-tile.lcars-tile--bookmark
+               ============================================== */
 
             .bookmark-tile {
+                /* Alias: use lcars-tile lcars-tile--bookmark instead */
+                --lcars-tile-bg: var(--theme-main);
+                --lcars-tile-fg: var(--lcars-black);
+                --lcars-tile-stripe-bg: var(--lcars-tile-bg);
+
                 position: relative;
-                background-color: var(--theme-main);
-                color: var(--lcars-black);
+                background-color: var(--lcars-tile-bg);
+                color: var(--lcars-tile-fg);
                 padding: 0;
                 border-radius: 0;
                 border-bottom-right-radius: var(--lcars-radius-lg);
                 cursor: default;
                 text-decoration: none;
                 display: grid;
-                grid-template-columns: 15px 1fr;
+                grid-template-columns: var(--lcars-tile-stripe-width-lg) 1fr;
                 grid-template-rows: auto 1fr auto;
-                min-height: 140px;
+                min-height: var(--lcars-tile-min-height-lg);
                 transition:
-                    transform 0.1s,
-                    filter 0.1s;
+                    transform 0.1s ease-out,
+                    filter 0.1s ease-out;
                 user-select: none;
                 overflow: hidden;
             }
 
-            /* Top-left corner cutout - shows body background with LCARS curve */
+            /* Top-left corner cutout */
             .bookmark-tile::before {
                 content: "";
                 position: absolute;
@@ -1282,6 +1483,12 @@
                 transform: scale(1.02);
             }
 
+            .bookmark-tile:focus-visible {
+                outline: var(--lcars-focus-outline-width) solid var(--lcars-focus-outline-color);
+                outline-offset: var(--lcars-focus-outline-offset);
+            }
+
+            /* Bookmark tile sub-components: alias to unified tile classes */
             .bookmark-title {
                 grid-column: 1 / -1;
                 grid-row: 1;
@@ -1290,8 +1497,8 @@
                 line-height: 1.2;
                 text-transform: uppercase;
                 padding: 10px 15px 8px 25px;
-                color: var(--lcars-black);
-                background-color: var(--theme-main);
+                color: var(--lcars-tile-fg);
+                background-color: var(--lcars-tile-bg);
             }
 
             .bookmark-description {
@@ -1885,17 +2092,17 @@
                                 <div class="settings-tile-group">
                                     <div class="settings-tile-group-label">CONFIGURATION</div>
                                     <div class="settings-tile-grid">
-                                        <button class="settings-tile" data-settings-page="categories" style="--tile-color: var(--lcars-orange)">
-                                            <span class="settings-tile-label">Categories</span>
-                                            <div class="settings-tile-meta">
-                                                <span class="settings-tile-meta-secondary">MANAGE CATEGORY HIERARCHY</span>
+                                        <button class="lcars-tile lcars-tile--settings" data-settings-page="categories" style="--tile-color: var(--lcars-orange)">
+                                            <span class="lcars-tile-label">Categories</span>
+                                            <div class="lcars-tile-meta">
+                                                <span class="lcars-tile-meta-secondary">MANAGE CATEGORY HIERARCHY</span>
                                             </div>
                                         </button>
-                                        <button class="settings-tile" data-settings-page="home" style="--tile-color: var(--lcars-beige)">
-                                            <span class="settings-tile-label">Home Category</span>
-                                            <div class="settings-tile-meta">
-                                                <span class="settings-tile-meta-primary" id="settingsHomeCategoryName">CURRENT HOME CATEGORY</span>
-                                                <span class="settings-tile-meta-secondary">SET LANDING DESTINATION</span>
+                                        <button class="lcars-tile lcars-tile--settings" data-settings-page="home" style="--tile-color: var(--lcars-beige)">
+                                            <span class="lcars-tile-label">Home Category</span>
+                                            <div class="lcars-tile-meta">
+                                                <span class="lcars-tile-meta-primary" id="settingsHomeCategoryName">CURRENT HOME CATEGORY</span>
+                                                <span class="lcars-tile-meta-secondary">SET LANDING DESTINATION</span>
                                             </div>
                                         </button>
                                     </div>
@@ -1905,11 +2112,11 @@
                                 <div class="settings-tile-group">
                                     <div class="settings-tile-group-label">APPEARANCE</div>
                                     <div class="settings-tile-grid">
-                                        <button class="settings-tile" data-settings-page="themes" style="--tile-color: var(--theme-main)">
-                                            <span class="settings-tile-label">Themes</span>
-                                            <div class="settings-tile-meta">
-                                                <span class="settings-tile-meta-primary" id="settingsActiveTheme">LA'AN</span>
-                                                <span class="settings-tile-meta-secondary">CHANGE THE COLOR THEME</span>
+                                        <button class="lcars-tile lcars-tile--settings" data-settings-page="themes" style="--tile-color: var(--theme-main)">
+                                            <span class="lcars-tile-label">Themes</span>
+                                            <div class="lcars-tile-meta">
+                                                <span class="lcars-tile-meta-primary" id="settingsActiveTheme">LA'AN</span>
+                                                <span class="lcars-tile-meta-secondary">CHANGE THE COLOR THEME</span>
                                             </div>
                                         </button>
                                     </div>
@@ -1919,10 +2126,10 @@
                                 <div class="settings-tile-group">
                                     <div class="settings-tile-group-label">DATA MANAGEMENT</div>
                                     <div class="settings-tile-grid">
-                                        <button class="settings-tile" data-settings-page="data" style="--tile-color: var(--lcars-blue)">
-                                            <span class="settings-tile-label">Import / Export</span>
-                                            <div class="settings-tile-meta">
-                                                <span class="settings-tile-meta-secondary">BACKUP & RESTORE DATA</span>
+                                        <button class="lcars-tile lcars-tile--settings" data-settings-page="data" style="--tile-color: var(--lcars-blue)">
+                                            <span class="lcars-tile-label">Import / Export</span>
+                                            <div class="lcars-tile-meta">
+                                                <span class="lcars-tile-meta-secondary">BACKUP & RESTORE DATA</span>
                                             </div>
                                         </button>
                                     </div>
@@ -1932,11 +2139,11 @@
                                 <div class="settings-tile-group">
                                     <div class="settings-tile-group-label">SYSTEM</div>
                                     <div class="settings-tile-grid">
-                                        <button class="settings-tile settings-tile--danger" data-settings-page="reset">
-                                            <span class="settings-tile-label">System Reset</span>
-                                            <div class="settings-tile-meta">
-                                                <span class="settings-tile-meta-primary">DANGER ZONE</span>
-                                                <span class="settings-tile-meta-secondary">RESTORE DEFAULT STATE</span>
+                                        <button class="lcars-tile lcars-tile--settings lcars-tile--danger" data-settings-page="reset">
+                                            <span class="lcars-tile-label">System Reset</span>
+                                            <div class="lcars-tile-meta">
+                                                <span class="lcars-tile-meta-primary">DANGER ZONE</span>
+                                                <span class="lcars-tile-meta-secondary">RESTORE DEFAULT STATE</span>
                                             </div>
                                         </button>
                                     </div>
@@ -2835,65 +3042,10 @@
                 }
             }
 
-            function createCategoryTile(category) {
-                const tile = document.createElement("button");
-                tile.type = "button";
-                tile.className = "lcars-category-tile";
-                tile.dataset.id = category.id;
-
-                const color = category.color || "var(--theme-main)";
-                tile.style.setProperty("--cat-color", color);
-
-                let childCount = 0;
-                if (Array.isArray(category.children)) {
-                    childCount = category.children.length;
-                }
-                const bookmarkCount = state.bookmarks.filter(
-                    (b) => b.categoryId === category.id,
-                ).length;
-
-                const primaryMetaParts = [];
-                if (childCount > 0) {
-                    primaryMetaParts.push(
-                        `${childCount} FOLDER${childCount > 1 ? "S" : ""}`,
-                    );
-                }
-                if (bookmarkCount > 0) {
-                    primaryMetaParts.push(
-                        `${bookmarkCount} LINK${bookmarkCount > 1 ? "S" : ""}`,
-                    );
-                }
-                const primaryMeta =
-                    primaryMetaParts.length > 0
-                        ? primaryMetaParts.join(" · ")
-                        : "EMPTY";
-
-                const createdAtLabel = category.createdAt
-                    ? `CREATED ST: ${category.createdAt}`
-                    : "";
-
-                tile.innerHTML = `
-        <div class="lcars-category-tile-label">${escapeHtml(category.name)}</div>
-        <div class="lcars-category-tile-meta">
-            <div class="lcars-category-tile-meta-primary">${primaryMeta}</div>
-            <div class="lcars-category-tile-meta-secondary">${escapeHtml(createdAtLabel)}</div>
-        </div>
-    `;
-
-                tile.setAttribute(
-                    "aria-label",
-                    `Category ${category.name}. ${primaryMeta}${
-                        createdAtLabel ? ". " + createdAtLabel : ""
-                    }`,
-                );
-
-                // Click behavior will be wired when we change the navigation model
-                return tile;
-            }
 
             function createBookmarkTile(bookmark) {
                 const tile = document.createElement("div");
-                tile.className = "bookmark-tile";
+                tile.className = "lcars-tile lcars-tile--bookmark";
                 tile.dataset.id = bookmark.id;
                 tile.setAttribute("role", "listitem");
 
@@ -2904,16 +3056,16 @@
                 });
                 const catColor = cat ? cat.color : "var(--lcars-orange)";
 
-                tile.style.setProperty("--cat-color", catColor);
+                tile.style.setProperty("--tile-color", catColor);
 
                 const descriptionHtml = bookmark.description
-                    ? `<div class="bookmark-description">${escapeHtml(bookmark.description)}</div>`
-                    : '<div class="bookmark-description"></div>';
+                    ? `<div class="lcars-tile-meta lcars-tile-meta--bookmark">${escapeHtml(bookmark.description)}</div>`
+                    : '<div class="lcars-tile-meta lcars-tile-meta--bookmark"></div>';
 
                 tile.innerHTML = `
-                    <div class="bookmark-title">${escapeHtml(bookmark.title)}</div>
+                    <div class="lcars-tile-label lcars-tile-label--bookmark">${escapeHtml(bookmark.title)}</div>
                     ${descriptionHtml}
-                    <div class="bookmark-url-footer">
+                    <div class="lcars-tile-footer">
                         <button class="lcars-tile-pin lcars-tile-pin--edit" type="button" title="Edit Bookmark" aria-label="Edit Bookmark"></button>
                         <button class="lcars-tile-pin lcars-tile-pin--url" type="button" title="${escapeHtml(bookmark.url)}" aria-label="Open Bookmark URL"></button>
                     </div>
@@ -2931,13 +3083,13 @@
 
             function createCategoryTile(category) {
                 const tile = document.createElement("div");
-                tile.className = "lcars-category-tile";
+                tile.className = "lcars-tile lcars-tile--category";
                 tile.dataset.id = category.id;
                 tile.setAttribute("role", "button");
                 tile.setAttribute("tabindex", "0");
 
                 const color = category.color || "var(--theme-main)";
-                tile.style.setProperty("--cat-color", color);
+                tile.style.setProperty("--tile-color", color);
 
                 let childCount = 0;
                 if (Array.isArray(category.children)) {
@@ -2969,10 +3121,10 @@
                     : "";
 
                 tile.innerHTML = `
-        <div class="lcars-category-tile-label">${escapeHtml(category.name)}</div>
-        <div class="lcars-category-tile-meta">
-            <div class="lcars-category-tile-meta-primary">${primaryMeta}</div>
-            <div class="lcars-category-tile-meta-secondary">${escapeHtml(createdAtLabel)}</div>
+        <div class="lcars-tile-label">${escapeHtml(category.name)}</div>
+        <div class="lcars-tile-meta">
+            <div class="lcars-tile-meta-primary">${primaryMeta}</div>
+            <div class="lcars-tile-meta-secondary">${escapeHtml(createdAtLabel)}</div>
         </div>
         <button class="lcars-tile-pin lcars-tile-pin--edit" type="button" title="Edit Category" aria-label="Edit Category ${escapeHtml(category.name)}"></button>
     `;
@@ -4469,7 +4621,7 @@
                 if (grid) {
                     grid.addEventListener("click", (e) => {
                         // Handle category tile clicks
-                        const categoryTile = e.target.closest(".lcars-category-tile");
+                        const categoryTile = e.target.closest(".lcars-tile--category");
                         if (categoryTile) {
                             // Check if edit pin was clicked
                             if (e.target.closest(".lcars-tile-pin--edit")) {
@@ -4495,7 +4647,7 @@
                         }
 
                         // Handle bookmark tile clicks
-                        const tile = e.target.closest(".bookmark-tile");
+                        const tile = e.target.closest(".lcars-tile--bookmark");
                         if (!tile) return;
 
                         // Check if edit pin was clicked
@@ -4546,7 +4698,7 @@
                 // Settings tile navigation delegation
                 if (settingsMainGrid) {
                     settingsMainGrid.addEventListener("click", (e) => {
-                        const tile = e.target.closest(".settings-tile");
+                        const tile = e.target.closest(".lcars-tile--settings");
                         if (tile && tile.dataset.settingsPage) {
                             navigateToSettingsPage(tile.dataset.settingsPage);
                         }
