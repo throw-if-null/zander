@@ -478,17 +478,19 @@ The **header title** (`.app-title`, showing “ZANDER”) functions as a **Home 
 
 ## 5. Bookmark Tiles
 
-Bookmarks are represented as `.bookmark-tile` elements rendered inside `.bookmark-grid`. In the current implementation they are anchors (`<a>`) with an embedded edit control.
+Bookmarks are represented as `.lcars-tile.lcars-tile--bookmark` elements rendered inside `.bookmark-grid`. They use the unified tile primitive (see Section 11.3) with bookmark-specific modifiers.
+
+> **Note:** Legacy `.bookmark-tile` class is maintained as an alias for backward compatibility.
 
 ### 5.1 Structure
 
 ```/dev/null/bookmark-tile.html#L1-40
-<div class="bookmark-tile">
-  <div class="bookmark-title">EXAMPLE SITE</div>
-  <div class="bookmark-description">Optional description text here...</div>
-  <div class="bookmark-url-footer">
-    <button class="lcars-tile-pin lcars-tile-pin--edit" type="button" title="Edit"></button>
-    <button class="lcars-tile-pin lcars-tile-pin--url" type="button" title="https://example.com"></button>
+<div class="lcars-tile lcars-tile--bookmark" style="--tile-color: #99ccff">
+  <div class="lcars-tile-label lcars-tile-label--bookmark">EXAMPLE SITE</div>
+  <div class="lcars-tile-meta lcars-tile-meta--bookmark">Optional description text here...</div>
+  <div class="lcars-tile-footer">
+    <button class="lcars-pin lcars-pin--sm lcars-pin--edit" type="button" title="Edit"></button>
+    <button class="lcars-pin lcars-pin--sm lcars-pin--url" type="button" title="https://example.com"></button>
   </div>
 </div>
 ```
@@ -502,33 +504,33 @@ A `::before` pseudo-element creates the signature LCARS rounded notch in the top
 
 Content breakdown:
 
-- **`.bookmark-title`**: The bookmark's title (max 64 characters). Spans full width (`grid-column: 1 / -1`). Displayed in uppercase with black text on the main theme color background.
-- **`.bookmark-description`**: Description text (max 512 characters). Displayed in secondary theme color on a black background. Uses `border-top-left-radius: 15px` to create an "elbow" shape against the left strip. Truncated via CSS line-clamping (4 lines).
-- **`.bookmark-url-footer`**: Compact footer strip with black background. Flex container for actions, aligned to the right.
-  - **`.lcars-tile-pin.lcars-tile-pin--edit`**: Circular button in LCARS orange (`--lcars-orange`). Opens edit dialog.
-  - **`.lcars-tile-pin.lcars-tile-pin--url`**: Circular button in main theme color. Opens bookmark URL. Full URL shown on hover via `title` attribute.
+- **`.lcars-tile-label.lcars-tile-label--bookmark`**: The bookmark's title (max 64 characters). Spans full width (`grid-column: 1 / -1`). Displayed in uppercase with black text on the tile color background.
+- **`.lcars-tile-meta.lcars-tile-meta--bookmark`**: Description text (max 512 characters). Displayed in secondary theme color on a black background. Uses `border-top-left-radius: var(--lcars-radius-sm)` to create an "elbow" shape against the left strip. Truncated via CSS line-clamping (4 lines).
+- **`.lcars-tile-footer`**: Compact footer strip with black background. Flex container for actions, aligned to the right.
+  - **`.lcars-pin.lcars-pin--sm.lcars-pin--edit`**: Circular button in LCARS orange (`--lcars-orange`). Opens edit dialog.
+  - **`.lcars-pin.lcars-pin--sm.lcars-pin--url`**: Circular button in main theme color. Opens bookmark URL. Full URL shown on hover via `title` attribute.
 
 ### 5.2 Visual Design
 
 - **Shape**:
   - Rounded rectangle with LCARS signature exaggeration on corners.
-  - Top-left: LCARS notch cutout via `::before` pseudo-element with `radial-gradient`
-  - Bottom-right: `border-bottom-right-radius: 30px`
-  - Min-height: `140px` — compact height since description is truncated.
+  - Top-left: LCARS notch cutout via `::after` pseudo-element with `radial-gradient`
+  - Bottom-right: `border-bottom-right-radius: var(--lcars-radius-lg)` (30px)
+  - Min-height: `var(--lcars-tile-min-height-lg)` (140px) — compact height since description is truncated.
 - **Color zones**:
-  - **Title area (row 1)**: Main theme color background (via `--theme-main`) with black text.
-  - **Description area (row 2)**: Black background with secondary theme-colored text (via `--theme-secondary`). The top-left corner is rounded (`15px`) to create the inner curve of the LCARS elbow shape.
+  - **Title area (row 1)**: Tile color background (via `--tile-color` → `--lcars-tile-bg`) with black text.
+  - **Description area (row 2)**: Black background with secondary theme-colored text (via `--theme-secondary`). The top-left corner is rounded (`var(--lcars-radius-sm)`) to create the inner curve of the LCARS elbow shape.
   - **URL footer (row 3)**: Black background with circular action buttons.
-  - **Left stripe**: 15px column in main theme color, visible in rows 2-3 as the "handle" of the elbow.
+  - **Left stripe**: `var(--lcars-tile-stripe-width-lg)` (15px) column in tile color, visible in rows 2-3 as the "handle" of the elbow.
 - **On hover**:
   - Slight scale up (`transform: scale(1.02)`).
   - Slightly brighter background (`filter: brightness(1.1)`).
-- **Action Buttons**:
-  - Replaces text/icons with 18px circular buttons (`border-radius: 50%`).
+- **Action Buttons** (using `.lcars-pin.lcars-pin--sm`):
+  - 18px circular buttons (`border-radius: 50%`).
   - Grouped on the right side of the footer.
-  - **Edit**: LCARS Orange (`--lcars-orange`).
-  - **Link**: Main theme color (`--theme-main`).
-  - **Hover**: Scale up (`1.2`) and brightness increase.
+  - **Edit** (`.lcars-pin--edit`): LCARS Orange (`--lcars-orange`).
+  - **Link** (`.lcars-pin--url`): Main theme color (`--theme-main`).
+  - **Hover**: Scale up (`1.1`) and brightness increase.
 
 ### 5.3 Behavior
 
@@ -699,35 +701,44 @@ Design details:
 
 #### Add Entry Menu
 
-The `ADD ENTRY` button (`.add-wrapper`) contains a popup menu with two options:
+The `ADD ENTRY` button uses the `.lcars-expandable` primitive (see Section 11.5) to create a popup menu with two options:
 
 - **BOOKMARK** – Opens the Add Bookmark dialog.
 - **CATEGORY** – Opens the Add Category dialog.
 
+> **Note:** Legacy `.add-wrapper`, `.add-menu`, `.add-menu-item` classes are maintained as aliases for backward compatibility.
+
 Menu structure (DOM order matters for Tab navigation):
 
 ```/dev/null/add-menu-structure.html#L1-7
-<div class="add-wrapper">
+<div class="lcars-expandable">
     <button id="addBtn">ADD ENTRY</button>
-    <div class="add-menu" role="menu">
-        <button class="add-menu-item" role="menuitem">BOOKMARK</button>
-        <button class="add-menu-item" role="menuitem">CATEGORY</button>
+    <div class="lcars-expandable-menu" role="menu">
+        <button class="lcars-expandable-item" role="menuitem">BOOKMARK</button>
+        <button class="lcars-expandable-item" role="menuitem">CATEGORY</button>
     </div>
 </div>
 ```
 
-Menu visibility:
+Menu visibility (CSS-only, no JavaScript required):
 
-- **Hover**: Menu appears when hovering over `.add-wrapper`.
-- **Focus-within**: Menu appears when any element inside `.add-wrapper` has focus (CSS `:focus-within`).
-- Menu is positioned absolutely above the `ADD ENTRY` button (`bottom: 100%`).
+- **Hover**: Menu appears when hovering over `.lcars-expandable`.
+- **Focus-within**: Menu appears when any element inside `.lcars-expandable` has focus (CSS `:focus-within`).
+- Menu is positioned absolutely above the trigger button (`bottom: 100%`) by default.
+- Direction can be changed via `.lcars-expandable--down` modifier.
 
-Menu item styling:
+Menu item styling (`.lcars-expandable-item`):
 
 - Background: Theme secondary color (light pink/beige mix).
 - Left border: 5px solid black (LCARS accent).
 - Hover state: White background.
 - Focus state: White focus bar on **top edge** (matching footer button focus style).
+
+Configurable via CSS variables:
+- `--lcars-expandable-gap` – gap between menu items (default: 5px).
+- `--lcars-expandable-offset` – gap between trigger and menu (default: 5px).
+- `--lcars-expandable-item-width` – width of menu items (default: 150px).
+- `--lcars-expandable-item-height` – height of menu items (default: 40px).
 
 ### 8.2 Status Display
 
@@ -883,24 +894,107 @@ This section lists the **reusable LCARS primitives** that ZANDER consumes. These
   - `lcars-settings-action` – buttons within the Settings panel.
   - `lcars-footer-bar-button` – footer action buttons that integrate with the frame and focus bar.
 
-### 11.3 Pins & Small Controls
+### 11.3 Tiles
+
+- `lcars-tile`
+  - Base primitive for LCARS content tiles (bookmarks, categories, settings navigation).
+  - Grid layout with left stripe column and rounded bottom-right corner.
+  - Top-left corner cutout via `::after` radial-gradient.
+  - Configurable via CSS variables:
+    - `--lcars-tile-stripe-width` (default: `12px`)
+    - `--lcars-tile-stripe-width-lg` (default: `15px`)
+    - `--lcars-tile-min-height` (default: `110px`)
+    - `--lcars-tile-min-height-lg` (default: `140px`)
+    - `--lcars-tile-bg` (tile background color)
+    - `--lcars-tile-fg` (tile foreground color)
+    - `--lcars-tile-stripe-bg` (stripe column color)
+  - Variant modifiers:
+    - `lcars-tile--bookmark` – larger tile with footer row for action buttons.
+    - `lcars-tile--category` – standard tile for category navigation.
+    - `lcars-tile--settings` – button element styling for settings navigation.
+    - `lcars-tile--danger` – red background for destructive actions.
+  - Sub-components:
+    - `lcars-tile-label` – top row label spanning full width.
+    - `lcars-tile-label--bookmark` – larger label variant for bookmarks.
+    - `lcars-tile-meta` – description/meta area with rounded top-left corner.
+    - `lcars-tile-meta--bookmark` – bookmark description with line clamping.
+    - `lcars-tile-meta-primary` – uppercase meta text.
+    - `lcars-tile-meta-secondary` – secondary meta text (reduced opacity).
+    - `lcars-tile-footer` – footer row for bookmark action buttons.
+  - Behavior:
+    - Hover: `filter: brightness(1.1); transform: scale(1.02)`.
+    - Focus: uses `lcars-focus-outline` system.
+
+### 11.4 Pins & Small Controls
 
 - `lcars-pin`
   - Base primitive for small circular LCARS controls ("pins").
-  - Extensible via:
-    - `--lcars-pin-size`
-    - `--lcars-pin-bg`
-    - `--lcars-pin-fg`
-  - Used conceptually for:
-    - Bookmark footer actions (open/edit icons).
-    - Small configuration controls where a circular LCARS button is appropriate.
-- `category-config-btn`
-  - Specialized pin for category configuration controls:
-    - Uses SVG glyphs (up, down, plus, delete).
-    - Larger `--lcars-pin-size` and inset border to read clearly in Settings.
-  - Still treated as a consumer of the `lcars-pin` visual language.
+  - Configurable via CSS variables:
+    - `--lcars-pin-size` (default: `20px`)
+    - `--lcars-pin-bg` (background color)
+    - `--lcars-pin-fg` (foreground/text color)
+  - Size modifiers:
+    - `lcars-pin--sm` – 18px (for tile action buttons).
+    - `lcars-pin--lg` – 40px (for configuration controls).
+  - Color variants:
+    - `lcars-pin--edit` – orange background.
+    - `lcars-pin--url` – theme-main background.
+    - `lcars-pin--delete` – red background.
+  - Style modifiers:
+    - `lcars-pin--bordered` – adds inset border (`box-shadow: inset 0 0 0 2px`).
+  - SVG icon support:
+    - Base SVG sizing (70% width/height).
+    - Glyph-specific sizing via `[data-glyph]` attributes (`up`, `down`, `plus`, `delete`).
+  - Behavior:
+    - Hover: `filter: brightness(1.1); transform: scale(1.1)`.
+    - Focus: uses `lcars-focus-outline` system.
 
-### 11.4 Arrow Buttons & Scroll Containers
+### 11.5 Expandable Menus
+
+- `lcars-expandable`
+  - Base primitive for dropdown/popup menu patterns.
+  - Shows menu on hover or focus-within (CSS-only, no JS required).
+  - Configurable via CSS variables:
+    - `--lcars-expandable-gap` (default: `5px`) – gap between menu items.
+    - `--lcars-expandable-offset` (default: `5px`) – gap between trigger and menu.
+    - `--lcars-expandable-item-width` (default: `150px`) – width of menu items.
+    - `--lcars-expandable-item-height` (default: `40px`) – height of menu items.
+  - Direction modifiers:
+    - `lcars-expandable--up` – menu appears above trigger (default).
+    - `lcars-expandable--down` – menu appears below trigger.
+  - Sub-components:
+    - `lcars-expandable-menu` – popup container with absolute positioning.
+    - `lcars-expandable-item` – individual menu items with LCARS styling.
+  - Behavior:
+    - Items use theme-secondary background with left border.
+    - Hover: background lightens to white.
+    - Focus: directional focus bar indicator.
+
+### 11.6 Breadcrumbs
+
+- `lcars-breadcrumb`
+  - Base primitive for location/path readout components.
+  - Horizontal layout with label, path segments, and separators.
+  - Configurable via CSS variables:
+    - `--lcars-breadcrumb-margin` (default: `10px`) – bottom margin.
+    - `--lcars-breadcrumb-segment-bg` (default: `rgba(255, 153, 0, 0.18)`) – segment background.
+    - `--lcars-breadcrumb-segment-bg-hover` (default: `rgba(255, 153, 0, 0.3)`) – hover background.
+    - `--lcars-breadcrumb-segment-color` (default: `var(--lcars-orange)`) – segment text color.
+  - Variant modifiers:
+    - `lcars-breadcrumb--settings` – different margin and subtle backgrounds for settings panel.
+  - Sub-components:
+    - `lcars-breadcrumb-label` – "LOCATION" label (orange, uppercase, bold).
+    - `lcars-breadcrumb-path` – container for path segments.
+    - `lcars-breadcrumb-segment` – individual path segments (buttons or spans).
+    - `lcars-breadcrumb-separator` – separator character between segments.
+  - Segment modifiers:
+    - `.is-current` – current location (bold, non-clickable).
+    - `.is-root` – root segment (special styling in settings variant).
+  - Behavior:
+    - Non-current segments are clickable for navigation.
+    - Focus: uses `lcars-focus-outline` system.
+
+### 11.7 Arrow Buttons & Scroll Containers
 
 - `lcars-arrow-btn`
   - Flat directional control with triangle/arrow indicator.
@@ -925,7 +1019,7 @@ This section lists the **reusable LCARS primitives** that ZANDER consumes. These
     - `::-webkit-scrollbar { display: none }` (Chrome/Safari)
   - Typically paired with `lcars-arrow-btn` controls for accessible navigation.
 
-### 11.5 Focus & Interaction Primitives
+### 11.8 Focus & Interaction Primitives
 
 - `lcars-focus-outline`
   - Helper class for elements that should use a strong outline:
@@ -948,7 +1042,7 @@ This section lists the **reusable LCARS primitives** that ZANDER consumes. These
     - Sidebar category buttons: vertical bar along the left edge.
     - Footer buttons: horizontal bar along the top edge.
 
-### 11.6 Theme & Color System Primitives
+### 11.9 Theme & Color System Primitives
 
 - Global theme variables (applied on `body`):
   - `--theme-main` – primary frame/accent color.
@@ -960,7 +1054,7 @@ This section lists the **reusable LCARS primitives** that ZANDER consumes. These
   - `body[data-theme="laan" | "data" | "doctor" | "chapel" | "spock" | "mbenga" | "seven" | "shran"]`
     - Each theme configures `--theme-main` and `--theme-secondary` for a distinct but consistent LCARS look.
 
-### 11.7 Layout Shell Conventions (Consumers, Not Primitives)
+### 11.10 Layout Shell Conventions (Consumers, Not Primitives)
 
 These classes are **not** primitives, but typical consumers that future apps can mirror:
 

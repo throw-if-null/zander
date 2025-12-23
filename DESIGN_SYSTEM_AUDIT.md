@@ -1,7 +1,7 @@
 # ZANDER Design System Audit
 
 **Date:** 2025-01-20  
-**Status:** In Progress  
+**Status:** Complete ✅
 **Purpose:** Document current state of the LCARS design system and plan for refactoring before Svelte 5 migration.
 
 ---
@@ -322,14 +322,24 @@ Level 4: Layout Shells (app-specific compositions)
 - Consolidated duplicate `.lcars-breadcrumb-segment` rules into single definition
 - Kept legacy aliases (`.settings-breadcrumb-*`) for backward compatibility
 
-### Phase 6: Update Documentation ⏳
+### Phase 6: Update Documentation ✅
 **Priority:** Medium  
-**Effort:** Medium
+**Effort:** Medium  
+**Completed:** 2025-01-20
 
-1. Add new primitives to DESIGN.md section 11 (Primitive Catalog)
-2. Document all CSS variables for each primitive
-3. Add usage examples
-4. Update ARCHITECTURE.md if any structural changes
+1. ✅ Add new primitives to DESIGN.md section 11 (Primitive Catalog)
+2. ✅ Document all CSS variables for each primitive
+3. ✅ Add usage examples
+4. ✅ Update related sections to reference new primitives
+
+**Changes made:**
+- Added Section 11.3: Tiles (`.lcars-tile` with variants and sub-components)
+- Updated Section 11.4: Pins & Small Controls (size/color/style modifiers)
+- Added Section 11.5: Expandable Menus (`.lcars-expandable` primitive)
+- Added Section 11.6: Breadcrumbs (`.lcars-breadcrumb` primitive)
+- Renumbered sections 11.7-11.10 (Arrow Buttons, Focus, Theme, Layout Shell)
+- Updated Section 5 (Bookmark Tiles) to reference unified `lcars-tile` primitive
+- Updated Section 8.1 (Add Entry Menu) to reference `lcars-expandable` primitive
 
 ---
 
@@ -374,5 +384,6 @@ Consider packaging the LCARS primitives as:
 - **After Phase 3 pin unification:** ~1,820 lines (added unified pin primitive with modifiers)
 - **After Phase 4 expandable component:** ~1,910 lines (added expandable primitive)
 - **After Phase 5 breadcrumb unification:** ~1,920 lines (added variant, consolidated duplicates)
+- **After Phase 6 documentation:** ~1,920 lines (no CSS changes, documentation only)
 - **Estimated after legacy alias removal:** ~1,400 lines
 - **Estimated after full refactor:** ~1,250 lines (unified primitives reduce redundancy)
