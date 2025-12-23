@@ -67,6 +67,22 @@
                 --lcars-focus-outline-color: var(--lcars-white);
                 --lcars-focus-outline-offset: 2px;
 
+                /* Z-index scale */
+                --lcars-z-index-dropdown: 1000;
+                --lcars-z-index-dialog: 2000;
+                --lcars-z-index-tooltip: 3000;
+
+                /* Transition timing */
+                --lcars-transition-fast: 0.1s ease-out;
+                --lcars-transition-normal: 0.2s ease-out;
+
+                /* Spacing scale */
+                --lcars-spacing-xs: 5px;
+                --lcars-spacing-sm: 8px;
+                --lcars-spacing-md: 15px;
+                --lcars-spacing-lg: 20px;
+                --lcars-spacing-xl: 30px;
+
                 /* ==============================================
                    COMPONENT-LEVEL VARIABLE DOCUMENTATION
                    These are set inline by JS or via component CSS:
@@ -630,7 +646,7 @@
                 background-color: var(--lcars-arrow-btn-bg);
                 border: none;
                 cursor: pointer;
-                transition: background-color 0.2s;
+                transition: background-color var(--lcars-transition-normal);
             }
 
             .lcars-arrow-btn:hover {
@@ -658,7 +674,7 @@
                 width: 40px;
                 height: 12px;
                 fill: var(--lcars-arrow-btn-arrow-color);
-                transition: fill 0.2s, opacity 0.2s;
+                transition: fill var(--lcars-transition-normal), opacity var(--lcars-transition-normal);
             }
 
             /* ==============================================
@@ -755,7 +771,7 @@
                 display: none;
                 flex-direction: column;
                 gap: var(--lcars-expandable-gap);
-                z-index: 1000;
+                z-index: var(--lcars-z-index-dropdown);
             }
 
             /* Direction: up (default) - menu appears above trigger */
@@ -848,7 +864,7 @@
                 flex-direction: column;
                 gap: 5px;
                 padding-bottom: 5px;
-                z-index: 1000;
+                z-index: var(--lcars-z-index-dropdown);
             }
 
             .add-wrapper:hover .add-menu,
@@ -922,7 +938,7 @@
                 padding-right: 15px;
                 text-align: right;
 
-                transition: background-color 0.2s;
+                transition: background-color var(--lcars-transition-normal);
 
                 /* Configure LCARS focus bar for left-edge vertical indicator */
                 --lcars-focus-bar-top: 0;
@@ -956,7 +972,7 @@
                 flex-direction: column;
                 gap: 5px;
                 padding-right: 10px; /* Space between levels */
-                z-index: 1000;
+                z-index: var(--lcars-z-index-dropdown);
                 /* Position will be set via JS */
             }
 
@@ -1914,7 +1930,7 @@
                 background-color: var(--lcars-pin-bg);
                 color: var(--lcars-pin-fg);
                 cursor: pointer;
-                transition: transform 0.2s, filter 0.2s;
+                transition: transform var(--lcars-transition-normal), filter var(--lcars-transition-normal);
                 z-index: 2;
             }
 
@@ -2250,7 +2266,7 @@
 
                 cursor: pointer;
                 position: relative;
-                transition: transform 0.2s, filter 0.2s;
+                transition: transform var(--lcars-transition-normal), filter var(--lcars-transition-normal);
             }
 
             .lcars-pin:hover {

@@ -225,7 +225,7 @@ vs
 
 | Category | Status | Action Needed |
 |----------|--------|---------------|
-| Design tokens | 🟡 Partial | Add z-index, transition, spacing scales |
+| Design tokens | 🟢 Good | ✅ Added z-index, transition, spacing scales |
 | Theme system | 🟡 Partial | Clarify `--shape-color` purpose or remove |
 | Primitives | 🟢 Good | Well-defined core set |
 | Legacy cleanup | 🔴 Blocking | Remove ~500 lines of duplicates |
@@ -240,11 +240,13 @@ vs
 
 ### Phase 1: Token Cleanup
 
-1. Add missing tokens to `:root`:
-   - `--lcars-z-index-*` scale
-   - `--lcars-transition-*` timing
-   - `--lcars-spacing-*` scale
-2. Replace hardcoded values with tokens throughout CSS
+1. ✅ Add missing tokens to `:root`:
+   - ✅ `--lcars-z-index-*` scale (`--lcars-z-index-dropdown`, `--lcars-z-index-dialog`, `--lcars-z-index-tooltip`)
+   - ✅ `--lcars-transition-*` timing (`--lcars-transition-fast`, `--lcars-transition-normal`)
+   - ✅ `--lcars-spacing-*` scale (`--lcars-spacing-xs` through `--lcars-spacing-xl`)
+2. ✅ Replace hardcoded values with tokens throughout CSS:
+   - ✅ Replaced `z-index: 1000` with `var(--lcars-z-index-dropdown)` in `.lcars-expandable-menu`, `.add-menu`, `.cat-submenu`
+   - ✅ Replaced `transition: ... 0.2s` with `var(--lcars-transition-normal)` in `.lcars-arrow-btn`, `.lcars-arrow-btn svg`, `.cat-btn`, `.lcars-tile-pin`, `.lcars-pin`
 3. Decide on `--shape-color` fate (remove or document purpose)
 
 ### Phase 2: Legacy Migration
