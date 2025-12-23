@@ -890,6 +890,233 @@
                 /* Extension point: footer bar button tweaks */
             }
 
+            /* ==============================================
+               SETTINGS TILE
+               Tile component for settings navigation
+               ============================================== */
+            .settings-tile-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 20px;
+                margin-top: 20px;
+            }
+
+            .settings-tile-group {
+                margin-bottom: 30px;
+            }
+
+            .settings-tile-group-label {
+                font-size: 0.85rem;
+                font-weight: bold;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                color: var(--lcars-orange);
+                margin-bottom: 12px;
+                opacity: 0.9;
+            }
+
+            .settings-tile {
+                display: grid;
+                grid-template-columns: 12px 1fr;
+                grid-template-rows: auto 1fr;
+                min-height: 110px;
+
+                position: relative;
+                border-radius: 0;
+                border-bottom-right-radius: var(--lcars-radius-lg);
+                overflow: hidden;
+                cursor: pointer;
+                text-decoration: none;
+                border: none;
+                text-align: left;
+                font-family: var(--lcars-font);
+
+                --settings-tile-bg: var(--tile-color, var(--theme-main));
+                --settings-tile-fg: var(--lcars-black);
+                --settings-tile-stripe-bg: var(--settings-tile-bg);
+
+                background-color: var(--settings-tile-bg);
+                color: var(--settings-tile-fg);
+
+                transition:
+                    transform 0.1s ease-out,
+                    filter 0.1s ease-out;
+            }
+
+            .settings-tile::before {
+                content: "";
+                grid-row: 1 / -1;
+                grid-column: 1;
+                background-color: var(--settings-tile-stripe-bg);
+            }
+
+            .settings-tile::after {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: var(--lcars-radius-md);
+                height: var(--lcars-radius-md);
+                background: radial-gradient(
+                    circle at 100% 100%,
+                    transparent var(--lcars-radius-md),
+                    var(--lcars-black) var(--lcars-radius-md)
+                );
+                z-index: 1;
+            }
+
+            .settings-tile:hover {
+                filter: brightness(1.1);
+                transform: scale(1.02);
+            }
+
+            .settings-tile:focus-visible {
+                outline: var(--lcars-focus-outline-width) solid var(--lcars-focus-outline-color);
+                outline-offset: var(--lcars-focus-outline-offset);
+            }
+
+            .settings-tile-label {
+                grid-column: 1 / -1;
+                grid-row: 1;
+                padding: 8px 12px 6px 24px;
+                font-size: 0.95rem;
+                font-weight: bold;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                color: var(--settings-tile-fg);
+            }
+
+            .settings-tile-meta {
+                grid-column: 2;
+                grid-row: 2;
+                padding: 8px 12px 10px 8px;
+                font-size: 0.75rem;
+                line-height: 1.3;
+                background-color: var(--lcars-black);
+                color: var(--theme-secondary, var(--lcars-gray));
+                border-top-left-radius: 14px;
+
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-end;
+                gap: 4px;
+            }
+
+            .settings-tile-meta-primary {
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+
+            .settings-tile-meta-secondary {
+                opacity: 0.85;
+            }
+
+            .settings-tile--danger {
+                --settings-tile-bg: var(--lcars-red);
+            }
+
+            /* Settings sub-page container */
+            .settings-subpage {
+                display: none;
+            }
+
+            .settings-subpage.active {
+                display: block;
+            }
+
+            .settings-main-grid {
+                display: none;
+            }
+
+            .settings-main-grid.active {
+                display: block;
+            }
+
+            /* Settings breadcrumb */
+            .settings-breadcrumb {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 15px;
+                font-size: 0.9rem;
+                letter-spacing: 1px;
+                color: var(--lcars-beige);
+                opacity: 0.85;
+            }
+
+            .settings-breadcrumb-label {
+                color: var(--lcars-orange);
+                text-transform: uppercase;
+                font-weight: bold;
+            }
+
+            .settings-breadcrumb-path {
+                display: inline-flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 6px;
+            }
+
+            .settings-breadcrumb-segment {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                padding: 2px 6px;
+                border-radius: var(--lcars-radius-xs);
+                background-color: transparent;
+                color: inherit;
+                font-size: 0.85rem;
+                text-transform: uppercase;
+                border: none;
+                cursor: default;
+                white-space: nowrap;
+                font-family: var(--lcars-font);
+            }
+
+            .settings-breadcrumb-segment:not(.is-current) {
+                cursor: pointer;
+                background-color: rgba(255, 255, 255, 0.04);
+            }
+
+            .settings-breadcrumb-segment:not(.is-current):hover {
+                background-color: rgba(255, 255, 255, 0.12);
+            }
+
+            .settings-breadcrumb-segment.is-current {
+                font-weight: bold;
+                color: var(--lcars-orange);
+            }
+
+            .settings-breadcrumb-segment.is-root {
+                border-radius: var(--lcars-radius-sm);
+                background-color: rgba(255, 153, 0, 0.18);
+            }
+
+            .settings-breadcrumb-separator {
+                opacity: 0.6;
+            }
+
+            .settings-breadcrumb-segment:focus-visible {
+                outline: var(--lcars-focus-outline-width) solid var(--lcars-focus-outline-color);
+                outline-offset: var(--lcars-focus-outline-offset);
+            }
+
+            /* Settings subpage content styling */
+            .settings-subpage-content {
+                margin-top: 10px;
+            }
+
+            .settings-subpage h2 {
+                font-size: 1.5rem;
+                margin: 0 0 15px 0;
+                letter-spacing: 1px;
+                color: var(--lcars-orange);
+            }
+
+            .settings-subpage .form-group {
+                margin-bottom: 15px;
+            }
+
             /* Theme selector layout */
             #themeControlsContainer {
                 display: flex;
@@ -1730,83 +1957,143 @@
                         <div class="settings-content">
                             <div class="settings-status">
                                 <span>CONFIGURATION MODE</span>
-                                <span id="settingsStardate"
-                                    >STARDATE 0000000.0000</span
-                                >
+                                <span id="settingsStardate">STARDATE 0000000.0000</span>
                             </div>
-                            <h1>SYSTEM SETTINGS</h1>
 
-                            <section class="settings-section">
-                                <h2>CATEGORY CONFIGURATION</h2>
-                                <div id="settingsCategorySectionMain">
-                                    <div
-                                        id="categoryConfigList"
-                                        class="category-config-list"
-                                    >
-                                        <!-- Rows injected via JS -->
-                                    </div>
-                                    <button
-                                        class="lcars-button lcars-pill lcars-focus-outline lcars-color-orange lcars-settings-action action-btn action-btn--small"
-                                        id="addCategoryBtnMain"
-                                        style="width: calc(100% - 20px); margin: 0 10px 20px 10px"
-                                    >
-                                        ADD ROOT CATEGORY
-                                    </button>
+                            <!-- Settings Breadcrumb -->
+                            <nav id="settingsBreadcrumb" class="settings-breadcrumb" aria-label="Settings Navigation">
+                                <span class="settings-breadcrumb-label">LOCATION:</span>
+                                <div class="settings-breadcrumb-path" id="settingsBreadcrumbPath">
+                                    <!-- Injected via JS -->
                                 </div>
-                            </section>
+                            </nav>
 
-                            <section class="settings-section">
-                                <h2>HOME CATEGORY</h2>
-                                <div class="form-group">
-                                    <label for="landingCategorySelect">LANDING CATEGORY</label>
-                                    <select id="landingCategorySelect" aria-label="Landing Category"></select>
-                                    <p style="font-size: 0.8rem; opacity: 0.8; margin-top: 6px;">
-                                        SELECT WHICH CATEGORY THE SYSTEM SHOULD LAND ON WHEN YOU PRESS HOME OR ACTIVATE THE ZANDER HEADER.
-                                    </p>
-                                </div>
-                            </section>
-
-                            <section class="settings-section">
-                                <h2>THEME</h2>
-                                <div class="form-group">
-                                    <div
-                                        id="themeControlsContainer"
-                                        style="margin-bottom: 10px"
-                                    ></div>
-                                    <div
-                                        id="themeStatusReadout"
-                                        style="
-                                            font-size: 0.85rem;
-                                            opacity: 0.8;
-                                            letter-spacing: 1px;
-                                        "
-                                    >
-                                        ACTIVE THEME: LA'AN
+                            <!-- Main Settings Grid (tile view) -->
+                            <div id="settingsMainGrid" class="settings-main-grid active">
+                                <!-- Configuration Group -->
+                                <div class="settings-tile-group">
+                                    <div class="settings-tile-group-label">CONFIGURATION</div>
+                                    <div class="settings-tile-grid">
+                                        <button class="settings-tile" data-settings-page="categories" style="--tile-color: var(--lcars-orange)">
+                                            <span class="settings-tile-label">Categories</span>
+                                            <div class="settings-tile-meta">
+                                                <span class="settings-tile-meta-secondary">MANAGE CATEGORY HIERARCHY</span>
+                                            </div>
+                                        </button>
+                                        <button class="settings-tile" data-settings-page="home" style="--tile-color: var(--lcars-beige)">
+                                            <span class="settings-tile-label">Home Category</span>
+                                            <div class="settings-tile-meta">
+                                                <span class="settings-tile-meta-primary" id="settingsHomeCategoryName">CURRENT HOME CATEGORY</span>
+                                                <span class="settings-tile-meta-secondary">SET LANDING DESTINATION</span>
+                                            </div>
+                                        </button>
                                     </div>
                                 </div>
-                            </section>
 
-                            <section class="settings-section">
-                                <h2>DATA MANAGEMENT</h2>
-</h2>                                <div id="settingsDataSectionMain">
+                                <!-- Appearance Group -->
+                                <div class="settings-tile-group">
+                                    <div class="settings-tile-group-label">APPEARANCE</div>
+                                    <div class="settings-tile-grid">
+                                        <button class="settings-tile" data-settings-page="themes" style="--tile-color: var(--theme-main)">
+                                            <span class="settings-tile-label">Themes</span>
+                                            <div class="settings-tile-meta">
+                                                <span class="settings-tile-meta-primary" id="settingsActiveTheme">LA'AN</span>
+                                                <span class="settings-tile-meta-secondary">CHANGE THE COLOR THEME</span>
+                                            </div>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Data Group -->
+                                <div class="settings-tile-group">
+                                    <div class="settings-tile-group-label">DATA MANAGEMENT</div>
+                                    <div class="settings-tile-grid">
+                                        <button class="settings-tile" data-settings-page="data" style="--tile-color: var(--lcars-blue)">
+                                            <span class="settings-tile-label">Import / Export</span>
+                                            <div class="settings-tile-meta">
+                                                <span class="settings-tile-meta-secondary">BACKUP & RESTORE DATA</span>
+                                            </div>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- System Group -->
+                                <div class="settings-tile-group">
+                                    <div class="settings-tile-group-label">SYSTEM</div>
+                                    <div class="settings-tile-grid">
+                                        <button class="settings-tile settings-tile--danger" data-settings-page="reset">
+                                            <span class="settings-tile-label">System Reset</span>
+                                            <div class="settings-tile-meta">
+                                                <span class="settings-tile-meta-primary">DANGER ZONE</span>
+                                                <span class="settings-tile-meta-secondary">RESTORE DEFAULT STATE</span>
+                                            </div>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Categories Sub-page -->
+                            <div id="settingsPageCategories" class="settings-subpage">
+                                <div class="settings-subpage-content">
+                                    <h2>CATEGORY CONFIGURATION</h2>
+                                    <div id="settingsCategorySectionMain">
+                                        <div id="categoryConfigList" class="category-config-list">
+                                            <!-- Rows injected via JS -->
+                                        </div>
+                                        <button
+                                            class="lcars-button lcars-pill lcars-focus-outline lcars-color-orange lcars-settings-action action-btn action-btn--small"
+                                            id="addCategoryBtnMain"
+                                            style="width: calc(100% - 20px); margin: 0 10px 20px 10px"
+                                        >
+                                            ADD ROOT CATEGORY
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Home Category Sub-page -->
+                            <div id="settingsPageHome" class="settings-subpage">
+                                <div class="settings-subpage-content">
+                                    <h2>HOME CATEGORY</h2>
+                                    <div class="form-group">
+                                        <label for="landingCategorySelect">LANDING CATEGORY</label>
+                                        <select id="landingCategorySelect" aria-label="Landing Category"></select>
+                                        <p style="font-size: 0.8rem; opacity: 0.8; margin-top: 6px;">
+                                            SELECT WHICH CATEGORY THE SYSTEM SHOULD LAND ON WHEN YOU PRESS HOME OR ACTIVATE THE ZANDER HEADER.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Themes Sub-page -->
+                            <div id="settingsPageThemes" class="settings-subpage">
+                                <div class="settings-subpage-content">
+                                    <h2>THEME SELECTION</h2>
+                                    <div class="form-group">
+                                        <div id="themeControlsContainer" style="margin-bottom: 10px"></div>
+                                        <div id="themeStatusReadout" style="font-size: 0.85rem; opacity: 0.8; letter-spacing: 1px;">
+                                            ACTIVE THEME: LA'AN
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Data Management Sub-page -->
+                            <div id="settingsPageData" class="settings-subpage">
+                                <div class="settings-subpage-content">
+                                    <h2>IMPORT / EXPORT</h2>
                                     <div class="form-group">
                                         <button
                                             class="lcars-button lcars-pill lcars-focus-outline lcars-color-orange lcars-settings-action action-btn action-btn--small"
                                             id="exportBtnMain"
-                                            style="
-                                                width: 100%;
-                                                margin-bottom: 10px;
-                                            "
+                                            style="width: 100%; margin-bottom: 10px;"
                                         >
                                             EXPORT DATABASE
                                         </button>
                                         <button
                                             class="lcars-button lcars-pill lcars-focus-outline lcars-color-orange lcars-settings-action action-btn action-btn--small"
                                             id="importBtnMain"
-                                            style="
-                                                width: 100%;
-                                                margin-bottom: 10px;
-                                            "
+                                            style="width: 100%; margin-bottom: 10px;"
                                         >
                                             IMPORT DATABASE
                                         </button>
@@ -1819,21 +2106,26 @@
                                         />
                                     </div>
                                 </div>
-                            </section>
-                            <section class="settings-section">
-                                <h2>DANGER ZONE</h2>
-</h2>                                <div id="settingsDataSectionMain">
+                            </div>
+
+                            <!-- System Reset Sub-page -->
+                            <div id="settingsPageReset" class="settings-subpage">
+                                <div class="settings-subpage-content">
+                                    <h2>SYSTEM RESET</h2>
+                                    <p style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 15px; line-height: 1.5;">
+                                        WARNING: THIS ACTION WILL PERMANENTLY DELETE ALL YOUR BOOKMARKS AND CATEGORIES AND RESTORE THE SYSTEM TO ITS DEFAULT STATE. THIS CANNOT BE UNDONE.
+                                    </p>
                                     <div class="form-group">
                                         <button
                                             class="lcars-button lcars-pill lcars-focus-outline lcars-color-danger lcars-settings-action reset"
                                             id="resetBtnMain"
                                             style="width: 100%"
                                         >
-                                            SYSTEM RESET
+                                            INITIATE SYSTEM RESET
                                         </button>
                                     </div>
                                 </div>
-                            </section>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -2233,6 +2525,19 @@
             // so we don't disturb the existing import/export format.
             let currentTheme = "laan";
 
+            // Settings page navigation state
+            // null = main settings grid, otherwise the sub-page id
+            let currentSettingsPage = null;
+
+            // Settings page name mapping for breadcrumb display
+            const SETTINGS_PAGE_LABELS = {
+                categories: "CATEGORIES",
+                home: "HOME CATEGORY",
+                themes: "THEMES",
+                data: "IMPORT / EXPORT",
+                reset: "SYSTEM RESET",
+            };
+
             const grid = document.getElementById("bookmarkGrid");
             const emptyState = document.getElementById("emptyState");
             const homeBtn = document.getElementById("homeBtn");
@@ -2266,6 +2571,15 @@
             const colorPickerDialog =
                 document.getElementById("colorPickerDialog");
             const colorGrid = document.getElementById("colorGrid");
+
+            // Settings page elements
+            const settingsMainGrid = document.getElementById("settingsMainGrid");
+            const settingsBreadcrumbPath = document.getElementById("settingsBreadcrumbPath");
+            const settingsPageCategories = document.getElementById("settingsPageCategories");
+            const settingsPageHome = document.getElementById("settingsPageHome");
+            const settingsPageThemes = document.getElementById("settingsPageThemes");
+            const settingsPageData = document.getElementById("settingsPageData");
+            const settingsPageReset = document.getElementById("settingsPageReset");
 
             // Category Dialog Elements
             const categoryDialog = document.getElementById("categoryDialog");
@@ -2356,6 +2670,8 @@
                 renderThemeControls();
                 updateStardateDisplay(aboutStardateEl);
                 updateStardateDisplay(settingsStardateEl);
+                updateSettingsTileMeta();
+                renderSettingsBreadcrumb();
             }
 
             function loadData() {
@@ -2527,6 +2843,7 @@
                 );
 
                 updateSystemStatus();
+                updateSettingsTileMeta();
                 updateBookmarkLocation();
             }
 
@@ -2755,6 +3072,7 @@
                 }
 
                 updateSystemStatus();
+                updateSettingsTileMeta();
                 updateBookmarkLocation();
             }
 
@@ -2846,6 +3164,137 @@
                     THEMES.find((t) => t.id === currentTheme) ||
                     THEMES[0];
                 themeStatusEl.textContent = `ACTIVE THEME: ${current.label}`;
+            }
+
+            // ==============================================
+            // SETTINGS PAGE NAVIGATION
+            // ==============================================
+
+            function navigateToSettingsPage(pageId) {
+                currentSettingsPage = pageId;
+                renderSettingsView();
+            }
+
+            function navigateToSettingsMain() {
+                currentSettingsPage = null;
+                renderSettingsView();
+            }
+
+            function renderSettingsBreadcrumb() {
+                if (!settingsBreadcrumbPath) return;
+                settingsBreadcrumbPath.innerHTML = "";
+
+                // Root segment (always present)
+                const rootBtn = document.createElement("button");
+                rootBtn.type = "button";
+                rootBtn.className = "settings-breadcrumb-segment is-root";
+                if (!currentSettingsPage) {
+                    rootBtn.classList.add("is-current");
+                    rootBtn.setAttribute("aria-current", "page");
+                }
+                rootBtn.textContent = "SETTINGS";
+                rootBtn.addEventListener("click", () => {
+                    if (currentSettingsPage) {
+                        navigateToSettingsMain();
+                    }
+                });
+                settingsBreadcrumbPath.appendChild(rootBtn);
+
+                // Sub-page segment (if on a sub-page)
+                if (currentSettingsPage) {
+                    const sep = document.createElement("span");
+                    sep.className = "settings-breadcrumb-separator";
+                    sep.textContent = "▸";
+                    settingsBreadcrumbPath.appendChild(sep);
+
+                    const pageSpan = document.createElement("span");
+                    pageSpan.className = "settings-breadcrumb-segment is-current";
+                    pageSpan.textContent = SETTINGS_PAGE_LABELS[currentSettingsPage] || currentSettingsPage.toUpperCase();
+                    pageSpan.setAttribute("aria-current", "page");
+                    settingsBreadcrumbPath.appendChild(pageSpan);
+                }
+            }
+
+            function renderSettingsView() {
+                // Hide all sub-pages
+                const subpages = [settingsPageCategories, settingsPageHome, settingsPageThemes, settingsPageData, settingsPageReset];
+                subpages.forEach(page => {
+                    if (page) page.classList.remove("active");
+                });
+
+                // Show main grid or sub-page
+                if (!currentSettingsPage) {
+                    if (settingsMainGrid) settingsMainGrid.classList.add("active");
+                    updateSettingsTileMeta();
+                } else {
+                    if (settingsMainGrid) settingsMainGrid.classList.remove("active");
+
+                    // Show the appropriate sub-page
+                    switch (currentSettingsPage) {
+                        case "categories":
+                            if (settingsPageCategories) settingsPageCategories.classList.add("active");
+                            renderCategoryConfig();
+                            break;
+                        case "home":
+                            if (settingsPageHome) settingsPageHome.classList.add("active");
+                            renderLandingCategoryOptions();
+                            break;
+                        case "themes":
+                            if (settingsPageThemes) settingsPageThemes.classList.add("active");
+                            renderThemeControls();
+                            updateThemeStatus();
+                            break;
+                        case "data":
+                            if (settingsPageData) settingsPageData.classList.add("active");
+                            break;
+                        case "reset":
+                            if (settingsPageReset) settingsPageReset.classList.add("active");
+                            break;
+                    }
+                }
+
+                renderSettingsBreadcrumb();
+            }
+
+            function updateSettingsTileMeta() {
+                // Update category count
+                const categoryCountEl = document.getElementById("settingsCategoryCount");
+                if (categoryCountEl) {
+                    let catCount = 0;
+                    walkCategories(state.categories, () => { catCount++; });
+                    categoryCountEl.textContent = `${catCount} CATEGOR${catCount === 1 ? "Y" : "IES"}`;
+                }
+
+                // Update home category name
+                const homeCategoryNameEl = document.getElementById("settingsHomeCategoryName");
+                if (homeCategoryNameEl) {
+                    let landingCat = null;
+                    if (state.landingCategoryId) {
+                        landingCat = walkCategories(state.categories, (cat) => {
+                            if (cat.id === state.landingCategoryId) return cat;
+                            return undefined;
+                        });
+                    }
+                    // Fallback to first category if no valid landing category
+                    if (!landingCat && state.categories.length > 0) {
+                        landingCat = state.categories[0];
+                    }
+                    homeCategoryNameEl.textContent = "LANDING CATEGORY: " + (landingCat ? landingCat.name : "NO CATEGORIES");
+                }
+
+                // Update active theme
+                const activeThemeEl = document.getElementById("settingsActiveTheme");
+                if (activeThemeEl) {
+                    const current = THEMES.find((t) => t.id === currentTheme) || THEMES[0];
+                    activeThemeEl.textContent = "CURRENT THEME: " + current.label;
+                }
+
+                // Update bookmark count
+                const bookmarkCountEl = document.getElementById("settingsBookmarkCount");
+                if (bookmarkCountEl) {
+                    const bmCount = state.bookmarks.length;
+                    bookmarkCountEl.textContent = `${bmCount} BOOKMARK${bmCount === 1 ? "" : "S"}`;
+                }
             }
 
             function calculateStardate(date = new Date()) {
@@ -3942,6 +4391,7 @@
                     btn.onclick = () => {
                         applyTheme(theme.id);
                         renderThemeControls();
+                        updateSettingsTileMeta();
                     };
                     container.appendChild(btn);
                 });
@@ -4124,9 +4574,20 @@
                     bookmarksView.classList.remove("active");
                     aboutView.classList.remove("active");
                     settingsView.classList.add("active");
-                    renderCategoryConfig();
+                    currentSettingsPage = null; // Reset to main settings grid
+                    renderSettingsView();
                     updateStardateDisplay(settingsStardateEl);
                 });
+
+                // Settings tile navigation delegation
+                if (settingsMainGrid) {
+                    settingsMainGrid.addEventListener("click", (e) => {
+                        const tile = e.target.closest(".settings-tile");
+                        if (tile && tile.dataset.settingsPage) {
+                            navigateToSettingsPage(tile.dataset.settingsPage);
+                        }
+                    });
+                }
 
 
 
@@ -4178,7 +4639,8 @@
                                 bookmarksView.classList.remove("active");
                                 aboutView.classList.remove("active");
                                 settingsView.classList.add("active");
-                                renderCategoryConfig();
+                                currentSettingsPage = null; // Reset to main settings grid
+                                renderSettingsView();
                                 updateStardateDisplay(settingsStardateEl);
                                 break;
                             case "c":
@@ -4209,10 +4671,11 @@
                 // Landing category select
                 if (landingCategorySelect) {
                     landingCategorySelect.addEventListener("change", (e) => {
-                        const value = e.target.value || null;
+                        const value = e.target.value;
                         if (value) {
                             state.landingCategoryId = value;
                             saveData();
+                            updateSettingsTileMeta();
                         }
                     });
                 }
