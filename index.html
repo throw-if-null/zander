@@ -244,7 +244,8 @@
                 grid-row: 1;
                 display: flex;
                 align-items: stretch;
-                justify-content: flex-end;
+                justify-content: flex-start;
+                padding-left: var(--lcars-gap);
                 padding-right: 0;
                 margin-right: -1px;
                 height: 40px;
@@ -2214,8 +2215,8 @@
         <div class="lcars-app">
             <!-- Header Bar (Left) -->
             <div class="header-bar lcars-frame-segment lcars-frame-segment--horizontal lcars-frame-segment--left-rounded">
-                <div class="header-fill"></div>
                 <button class="app-title" id="homeBtn" aria-label="Home - Bookmarks View">ZANDER</button>
+                <div class="header-fill"></div>
                 <div class="header-end-cap"></div>
             </div>
 
@@ -2234,12 +2235,12 @@
                     <div class="lcars-scroll-container sidebar-categories" id="categorySidebar" tabindex="-1">
                         <!-- Categories injected here -->
                     </div>
-                    <div class="sidebar-filler"></div>
                     <div class="lcars-arrow-btn sidebar-scroll-down" id="sidebarScrollDown" aria-hidden="true">
                         <svg viewBox="0 0 40 12">
                             <polygon points="0,0 40,0 20,12" />
                         </svg>
                     </div>
+                    <div class="sidebar-filler"></div>
                 </div>
 
                 <!-- Bottom Elbow -->
