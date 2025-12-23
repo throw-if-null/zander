@@ -16,24 +16,11 @@ This audit identifies issues and proposes a phased remediation plan.
 
 ## 🔴 Critical Issues
 
-### 1. Duplicate CSS Blocks
+### 1. ~~Duplicate CSS Blocks~~ ✅ RESOLVED
 
-The `.lcars-category-tile` and all its related selectors are defined **twice** in `index.html`:
+~~The `.lcars-category-tile` and all its related selectors are defined **twice** in `index.html`.~~
 
-- First occurrence: Lines 1145–1191
-- Second occurrence: Lines 1198–1244
-
-These are nearly identical copy-paste blocks that should be consolidated.
-
-**Related duplicates:**
-- `.lcars-category-tile::before` (twice)
-- `.lcars-category-tile::after` (twice)
-- `.lcars-category-tile:hover` (twice)
-- `.lcars-category-tile-label` (twice)
-- `.lcars-category-tile-meta` (twice at L1261-1275 and L1307-1321)
-- `.lcars-category-tile-meta-primary` (twice)
-- `.lcars-category-tile-meta-secondary` (twice)
-- `.lcars-category-tile:focus-visible` (twice)
+**Resolution:** Removed ~100 lines of duplicate CSS in Phase 1. All `.lcars-category-tile` selectors now exist only once.
 
 ### 2. Three Tile Components That Should Be One
 
@@ -122,16 +109,18 @@ Both share:
 
 ### 6. Magic Numbers That Should Be Tokens
 
-| Value | Where Used | Current Token | Suggested Action |
-|-------|------------|---------------|------------------|
-| `14px` | `.settings-tile-meta` border-radius | None | Use `--lcars-radius-sm` (adjust to 14px) |
-| `14px` | `.lcars-category-tile-meta` border-radius | None | Use `--lcars-radius-sm` |
-| `15px` | `.bookmark-description` border-radius | None | Inconsistent with above; standardize |
-| `12px` | Tile stripe column width | None | Create `--lcars-tile-stripe-width` |
-| `15px` | Bookmark tile stripe width | None | Inconsistent with above |
-| `110px` | Category/settings tile min-height | None | Create `--lcars-tile-min-height` |
-| `140px` | Bookmark tile min-height | None | Create `--lcars-tile-min-height-lg` |
-| `5px` | Various gaps | Uses `--lcars-gutter` sometimes | Audit for consistency |
+| Value | Where Used | Current Token | Status |
+|-------|------------|---------------|--------|
+| ~~`14px`~~ | ~~`.settings-tile-meta` border-radius~~ | ~~None~~ | ✅ Now uses `var(--lcars-radius-sm)` |
+| ~~`14px`~~ | ~~`.lcars-category-tile-meta` border-radius~~ | ~~None~~ | ✅ Now uses `var(--lcars-radius-sm)` |
+| ~~`15px`~~ | ~~`.bookmark-description` border-radius~~ | ~~None~~ | ✅ Now uses `var(--lcars-radius-sm)` |
+| `12px` | Tile stripe column width | None | ⏳ Create `--lcars-tile-stripe-width` |
+| `15px` | Bookmark tile stripe width | None | ⏳ Inconsistent with above |
+| `110px` | Category/settings tile min-height | None | ⏳ Create `--lcars-tile-min-height` |
+| `140px` | Bookmark tile min-height | None | ⏳ Create `--lcars-tile-min-height-lg` |
+| `5px` | Various gaps | Uses `--lcars-gutter` sometimes | ⏳ Audit for consistency |
+
+**Note:** `--lcars-radius-sm` was adjusted from `16px` to `14px` in Phase 1 to match tile usage.
 
 ### 7. Font Family Inconsistencies
 
@@ -231,14 +220,22 @@ Level 4: Layout Shells (app-specific compositions)
 
 ## Remediation Plan
 
-### Phase 1: Clean & Deduplicate ⏳
+### Phase 1: Clean & Deduplicate ✅
 **Priority:** High  
-**Effort:** Low
+**Effort:** Low  
+**Completed:** 2025-01-20
 
-1. Remove duplicate `.lcars-category-tile` block (L1198-1244)
-2. Remove duplicate related selectors (`:hover`, `:focus-visible`, `-label`, `-meta`, etc.)
-3. Consolidate hardcoded radii (`14px`, `15px`) to use tokens
-4. Add `--lcars-radius-sm` adjustment if needed (currently 16px, tiles use 14px)
+1. ✅ Remove duplicate `.lcars-category-tile` block (L1198-1244)
+2. ✅ Remove duplicate related selectors (`:hover`, `:focus-visible`, `-label`, `-meta`, etc.)
+3. ✅ Consolidate hardcoded radii (`14px`, `15px`) to use tokens
+4. ✅ Adjusted `--lcars-radius-sm` from 16px to 14px
+
+**Changes made:**
+- Removed ~100 lines of duplicate CSS for `.lcars-category-tile` and related selectors
+- Changed `--lcars-radius-sm` token from `16px` to `14px`
+- Replaced hardcoded `14px` in `.settings-tile-meta` with `var(--lcars-radius-sm)`
+- Replaced hardcoded `14px` in `.lcars-category-tile-meta` with `var(--lcars-radius-sm)`
+- Replaced hardcoded `15px` in `.bookmark-description` with `var(--lcars-radius-sm)`
 
 ### Phase 2: Unify Tiles ⏳
 **Priority:** High  
@@ -343,6 +340,7 @@ Consider packaging the LCARS primitives as:
 
 ## Appendix: Current CSS Size
 
-- **Total CSS in `<style>` block:** ~1,885 lines
-- **Estimated after cleanup:** ~1,600 lines (remove duplicates, consolidate tiles)
+- **Total CSS in `<style>` block (original):** ~1,885 lines
+- **After Phase 1 cleanup:** ~1,785 lines (~100 lines removed)
+- **Estimated after tile unification:** ~1,600 lines
 - **Estimated after full refactor:** ~1,400 lines (unified primitives reduce redundancy)
