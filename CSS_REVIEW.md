@@ -81,19 +81,18 @@ This is the biggest issue. There are TODO comments marking legacy aliases, but t
 
 ---
 
-### 3. Redundant `--shape-color` Variable
+### 3. ~~Redundant `--shape-color` Variable~~ ✅ RESOLVED
 
-In every theme, `--shape-color` is just set to `--theme-main`:
+~~In every theme, `--shape-color` is just set to `--theme-main`.~~
 
-```css
-body[data-theme="laan"] {
-    --theme-main: #830025;
-    --shape-color: var(--theme-main);  /* ← Always same as theme-main */
-    --theme-secondary: ...
-}
-```
+**Resolution:** Documented the purpose of `--shape-color` in the CSS. The indirection is intentional:
 
-**Action:** Either remove `--shape-color` and use `--theme-main` directly, or document why the indirection exists (perhaps for future per-component overrides).
+- `--shape-color` controls specifically the **LCARS frame color** (header, footer, sidebar, elbows, dialog borders)
+- By default it inherits from `--theme-main`, but can be overridden independently
+- This allows frame color customization without changing the entire theme
+- Used by 36+ CSS rules for frame elements
+
+A documentation comment was added to the `body` block in `index.html` explaining this pattern.
 
 ---
 
@@ -118,27 +117,18 @@ Primitives mix naming conventions:
 
 ---
 
-### 5. Empty Extension Points
+### 5. ~~Empty Extension Points~~ ✅ RESOLVED
 
-These role helpers are completely empty:
+~~These role helpers are completely empty. Empty classes add confusion.~~
 
-```css
-.lcars-dialog-action {
-    /* Extension point: dialog-specific button tweaks */
-}
+**Resolution:** Cleaned up the extension point classes:
 
-.lcars-settings-action {
-    /* Extension point: settings panel button tweaks */
-}
-
-.lcars-footer-action {
-    /* Extension point: footer bar button tweaks */
-}
-```
-
-Empty classes add confusion.
-
-**Action:** Either add actual styles that distinguish these contexts, or remove them and document the extension pattern in DESIGN.md.
+- ✅ Removed unused `.lcars-footer-action` (was not used anywhere in HTML)
+- ✅ Kept `.lcars-dialog-action` and `.lcars-settings-action` as they ARE used in HTML as semantic hooks
+- ✅ Improved documentation comment to explain the intentional pattern:
+  - Base classes are empty by design
+  - They serve as extension points for scoped overrides (e.g., `#themeControlsContainer .lcars-settings-action`)
+  - Styles should be added only if ALL buttons in that context need them
 
 ---
 
@@ -211,13 +201,13 @@ vs
 | Category | Status | Action Needed |
 |----------|--------|---------------|
 | Design tokens | 🟢 Complete | ✅ All tokens added and hardcoded values replaced |
-| Theme system | 🟡 Partial | Clarify `--shape-color` purpose or remove |
+| Theme system | 🟢 Complete | ✅ Documented `--shape-color` purpose |
 | Primitives | 🟢 Good | Well-defined core set |
 | Legacy cleanup | 🔴 Blocking | Remove ~500 lines of duplicates |
 | Naming convention | 🟡 Partial | Document and enforce BEM-like pattern |
 | Form primitives | 🔴 Blocking | Namespace as `lcars-input`, etc. |
 | Focus system | 🟡 Partial | Consolidate to use helper class consistently |
-| Extension points | 🟡 Partial | Remove empty classes or add real styles |
+| Extension points | 🟢 Complete | ✅ Removed unused class, documented pattern |
 
 ---
 
@@ -233,7 +223,7 @@ vs
    - ✅ Replaced `z-index: 1000` with `var(--lcars-z-index-dropdown)` in `.lcars-expandable-menu`, `.add-menu`, `.cat-submenu`
    - ✅ Replaced `transition: ... 0.2s` with `var(--lcars-transition-normal)` in `.lcars-arrow-btn`, `.lcars-arrow-btn svg`, `.cat-btn`, `.lcars-tile-pin`, `.lcars-pin`
    - ✅ Replaced `transition: ... 0.1s ease-out` with `var(--lcars-transition-fast)` in `.lcars-tile`, `.settings-tile`, `.lcars-category-tile`, `.bookmark-tile`
-3. Decide on `--shape-color` fate (remove or document purpose)
+3. ✅ Documented `--shape-color` purpose in CSS comment (intentional indirection for frame customization)
 
 ### Phase 2: Legacy Migration
 

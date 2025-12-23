@@ -224,6 +224,12 @@
             body {
                 /* Theme variables (can be overridden by data-theme) */
                 --theme-main: #830025; /* default: La'An */
+
+                /* --shape-color: Controls the LCARS frame color (header, footer, sidebar, elbows).
+                   By default it inherits from --theme-main, but can be overridden independently
+                   to allow frame color customization without changing the entire theme.
+                   Used by: .lcars-frame-segment, .lcars-header-bar, .lcars-footer-bar,
+                   .lcars-sidebar-bar-*, .lcars-elbow, dialog borders, and other frame elements. */
                 --shape-color: var(--theme-main);
                 --theme-secondary: color-mix(
                     in srgb,
@@ -1260,19 +1266,17 @@
 
             /* ==============================================
                LCARS ACTION ROLE HELPERS
-               Extension points for context-specific button styling.
-               These are intentionally minimal - add overrides as needed.
+               Semantic class hooks for context-specific button styling.
+               These base classes are intentionally empty - they serve as
+               extension points for scoped overrides (e.g., #themeControlsContainer .lcars-settings-action).
+               Add styles here only if ALL buttons in that context need them.
                ============================================== */
             .lcars-dialog-action {
-                /* Extension point: dialog-specific button tweaks */
+                /* Semantic hook for dialog action buttons (Cancel, Save, Delete) */
             }
 
             .lcars-settings-action {
-                /* Extension point: settings panel button tweaks */
-            }
-
-            .lcars-footer-action {
-                /* Extension point: footer bar button tweaks */
+                /* Semantic hook for settings panel action buttons */
             }
 
             /* ==============================================
