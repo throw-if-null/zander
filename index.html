@@ -2136,6 +2136,7 @@
                 {
                     id: "bm-tng-s2-captain",
                     title: "TNG S2 – Captain Picard",
+                    description: "Picard continues to lead the Enterprise through diplomatic and exploratory missions.",
                     url: "https://example.com/tng/season2/captain",
                     categoryId: "cat-tng-s2",
                     createdAt: "2025352.1302",
@@ -2143,6 +2144,7 @@
                 {
                     id: "bm-tng-s2-ship",
                     title: "TNG S2 – USS Enterprise-D",
+                    description: "The Galaxy-class flagship continues its mission of exploration in its second year.",
                     url: "https://example.com/tng/season2/ship",
                     categoryId: "cat-tng-s2",
                     createdAt: "2025352.1303",
@@ -2168,6 +2170,7 @@
                 {
                     id: "bm-ds9-s2-captain",
                     title: "DS9 S2 – Commander Sisko",
+                    description: "Continuing his role as station commander, Sisko faces new challenges in the Gamma Quadrant.",
                     url: "https://example.com/ds9/season2/captain",
                     categoryId: "cat-ds9-s2",
                     createdAt: "2025352.1306",
@@ -2175,6 +2178,7 @@
                 {
                     id: "bm-ds9-s2-ship",
                     title: "DS9 S2 – USS Defiant",
+                    description: "The first Federation starship designed purely for combat, assigned to Deep Space 9.",
                     url: "https://example.com/ds9/season2/ship",
                     categoryId: "cat-ds9-s2",
                     createdAt: "2025352.1307",
@@ -2607,9 +2611,10 @@
                 tile.setAttribute("role", "listitem");
 
                 // Use category color for tile if available
-                const cat = state.categories.find(
-                    (c) => c.id === bookmark.categoryId,
-                );
+                const cat = walkCategories(state.categories, (c) => {
+                    if (c.id === bookmark.categoryId) return c;
+                    return undefined;
+                });
                 const catColor = cat ? cat.color : "var(--lcars-orange)";
 
                 tile.style.setProperty("--cat-color", catColor);
