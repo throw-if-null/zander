@@ -689,23 +689,22 @@
                 white-space: nowrap;
             }
 
+            .lcars-breadcrumb-segment {
+                background-color: rgba(255, 153, 0, 0.18);
+                border-radius: var(--lcars-radius-sm);
+                color: var(--lcars-orange);
+            }
+
             .lcars-breadcrumb-segment:not(.is-current) {
                 cursor: pointer;
-                background-color: rgba(255, 255, 255, 0.04);
             }
 
             .lcars-breadcrumb-segment:not(.is-current):hover {
-                background-color: rgba(255, 255, 255, 0.12);
+                background-color: rgba(255, 153, 0, 0.3);
             }
 
             .lcars-breadcrumb-segment.is-current {
                 font-weight: bold;
-                color: var(--lcars-orange);
-            }
-
-            .lcars-breadcrumb-segment.is-root {
-                border-radius: var(--lcars-radius-sm);
-                background-color: rgba(255, 153, 0, 0.18);
             }
 
             .lcars-breadcrumb-separator {
@@ -2529,6 +2528,9 @@
             // null = main settings grid, otherwise the sub-page id
             let currentSettingsPage = null;
 
+            // Current main view state: "bookmarks", "settings", or "about"
+            let currentView = "bookmarks";
+
             // Settings page name mapping for breadcrumb display
             const SETTINGS_PAGE_LABELS = {
                 categories: "CATEGORIES",
@@ -2672,6 +2674,30 @@
                 updateStardateDisplay(settingsStardateEl);
                 updateSettingsTileMeta();
                 renderSettingsBreadcrumb();
+
+                // Apply restored view state
+                applyViewState();
+            }
+
+            function applyViewState() {
+                // Switch to the restored main view
+                bookmarksView.classList.remove("active");
+                settingsView.classList.remove("active");
+                aboutView.classList.remove("active");
+
+                switch (currentView) {
+                    case "settings":
+                        settingsView.classList.add("active");
+                        renderSettingsView();
+                        break;
+                    case "about":
+                        aboutView.classList.add("active");
+                        break;
+                    case "bookmarks":
+                    default:
+                        bookmarksView.classList.add("active");
+                        break;
+                }
             }
 
             function loadData() {
@@ -2690,6 +2716,22 @@
                         }
                         if (typeof data.landingCategoryId === "string") {
                             state.landingCategoryId = data.landingCategoryId;
+                        }
+
+                        // Restore current category if valid
+                        if (typeof data.currentCategory === "string") {
+                            state.currentCategory = data.currentCategory;
+                        }
+
+                        // Restore current view state
+                        if (["bookmarks", "settings", "about"].includes(data.currentView)) {
+                            currentView = data.currentView;
+                        }
+
+                        // Restore settings sub-page state
+                        if (data.currentSettingsPage === null ||
+                            ["categories", "home", "themes", "data", "reset"].includes(data.currentSettingsPage)) {
+                            currentSettingsPage = data.currentSettingsPage;
                         }
 
                         backfillBookmarkCreatedAt(state.bookmarks);
@@ -2713,12 +2755,10 @@
                     }
                 }
 
-                // Ensure current category is valid
-                if (
-                    !state.categories.find(
-                        (c) => c.id === state.currentCategory,
-                    )
-                ) {
+                // Ensure current category is valid (check nested categories too)
+                const currentCategoryExists = state.currentCategory &&
+                    getCategoryPath(state.currentCategory, state.categories)?.length > 0;
+                if (!currentCategoryExists) {
                     state.currentCategory =
                         state.categories[0]?.id || null;
                 }
@@ -2739,6 +2779,9 @@
                         bookmarks: state.bookmarks,
                         categories: state.categories,
                         landingCategoryId: state.landingCategoryId || null,
+                        currentCategory: state.currentCategory || null,
+                        currentView: currentView || "bookmarks",
+                        currentSettingsPage: currentSettingsPage || null,
                     }),
                 );
             }
@@ -3081,6 +3124,7 @@
                 bookmarksView.classList.add("active");
                 settingsView.classList.remove("active");
                 aboutView.classList.remove("active");
+                currentView = "bookmarks";
 
                 let targetCategoryId = null;
 
@@ -3113,8 +3157,10 @@
 
                 if (targetCategoryId) {
                     state.currentCategory = targetCategoryId;
-                    saveData();
                 }
+
+                // Always save to persist currentView change
+                saveData();
 
                 renderCategories();
                 renderGrid();
@@ -3172,11 +3218,13 @@
 
             function navigateToSettingsPage(pageId) {
                 currentSettingsPage = pageId;
+                saveData();
                 renderSettingsView();
             }
 
             function navigateToSettingsMain() {
                 currentSettingsPage = null;
+                saveData();
                 renderSettingsView();
             }
 
@@ -4495,8 +4543,10 @@
                             bookmarksView.classList.add("active");
                             settingsView.classList.remove("active");
                             aboutView.classList.remove("active");
+                            currentView = "bookmarks";
 
                             state.currentCategory = btn.dataset.id;
+                            saveData();
                             renderCategories();
                             renderGrid();
                         }
@@ -4574,7 +4624,9 @@
                     bookmarksView.classList.remove("active");
                     aboutView.classList.remove("active");
                     settingsView.classList.add("active");
+                    currentView = "settings";
                     currentSettingsPage = null; // Reset to main settings grid
+                    saveData();
                     renderSettingsView();
                     updateStardateDisplay(settingsStardateEl);
                 });
@@ -4595,6 +4647,8 @@
                     bookmarksView.classList.add("active");
                     settingsView.classList.remove("active");
                     aboutView.classList.remove("active");
+                    currentView = "bookmarks";
+                    saveData();
                     openAddDialog();
                 });
 
@@ -4602,6 +4656,8 @@
                     bookmarksView.classList.add("active");
                     settingsView.classList.remove("active");
                     aboutView.classList.remove("active");
+                    currentView = "bookmarks";
+                    saveData();
                     openAddCategoryDialog();
                 });
 
@@ -4618,6 +4674,8 @@
                     bookmarksView.classList.remove("active");
                     settingsView.classList.remove("active");
                     aboutView.classList.add("active");
+                    currentView = "about";
+                    saveData();
                     updateStardateDisplay(aboutStardateEl);
                 });
 
@@ -4639,7 +4697,9 @@
                                 bookmarksView.classList.remove("active");
                                 aboutView.classList.remove("active");
                                 settingsView.classList.add("active");
+                                currentView = "settings";
                                 currentSettingsPage = null; // Reset to main settings grid
+                                saveData();
                                 renderSettingsView();
                                 updateStardateDisplay(settingsStardateEl);
                                 break;

@@ -288,12 +288,20 @@ On any state mutation affecting bookmarks or categories:
 {
   bookmarks: Bookmark[],
   categories: Category[],
+  landingCategoryId: string | null,
+  currentCategory: string | null,
+  currentView: "bookmarks" | "settings" | "about",
+  currentSettingsPage: "categories" | "home" | "themes" | "data" | "reset" | null,
 }
 ```
 
 Notes:
 
-- `currentCategory` is **not** currently persisted; it is recalculated on load to a valid category id (or default).
+- **View state persistence**: The app preserves navigation state across page refreshes:
+  - `currentCategory`: The currently selected category in the bookmark view.
+  - `currentView`: Which main view is active (bookmarks, settings, or about).
+  - `currentSettingsPage`: Which settings sub-page is active (or `null` for the main settings grid).
+- On load, these values are validated; invalid ids fall back to defaults.
 - Theme selection is saved independently via `localStorage.setItem(THEME_STORAGE_KEY, currentTheme)`.
 
 ---
@@ -494,13 +502,20 @@ Visibility of each view is controlled by logic that adds/removes `.active` on `.
 
 - `loadData()`  
   - Reads from `localStorage` using `STORAGE_KEY`.
-  - Parses JSON and selectively adopts `bookmarks` and `categories` arrays.
+  - Parses JSON and selectively adopts `bookmarks`, `categories`, `landingCategoryId`, `currentCategory`, `currentView`, and `currentSettingsPage`.
   - Runs `backfillBookmarkCreatedAt()` and `backfillCategoryCreatedAt()` to ensure missing `createdAt` values are filled with a current stardate.
-  - Ensures `state.currentCategory` points to a valid category id, or falls back to a default.
+  - Validates `currentCategory` using `getCategoryPath()` to support nested categories; falls back to first root category if invalid.
+  - Validates `currentView` against allowed values (`"bookmarks"`, `"settings"`, `"about"`); defaults to `"bookmarks"`.
+  - Validates `currentSettingsPage` against allowed sub-page ids; defaults to `null`.
 
 - `saveData()`  
-  - Serializes `{ bookmarks: state.bookmarks, categories: state.categories }` to JSON.
+  - Serializes `{ bookmarks, categories, landingCategoryId, currentCategory, currentView, currentSettingsPage }` to JSON.
   - Writes to `localStorage` under `STORAGE_KEY`.
+
+- `applyViewState()`  
+  - Called during `init()` after `loadData()`.
+  - Switches the active main view based on `currentView`.
+  - If `currentView` is `"settings"`, also calls `renderSettingsView()` to restore the correct settings sub-page.
 
 - `loadTheme()`  
   - Reads `THEME_STORAGE_KEY` from `localStorage`.
