@@ -502,11 +502,12 @@
             }
 
             .add-wrapper:hover .add-menu,
-            .add-wrapper:focus-within .add-menu {
+            .add-wrapper.menu-open .add-menu {
                 display: flex;
             }
 
             .add-menu-item {
+                position: relative;
                 display: inline-flex;
                 align-items: center;
                 justify-content: flex-end;
@@ -529,7 +530,21 @@
                 white-space: nowrap;
             }
 
-            .add-menu-item:hover, .add-menu-item:focus-visible {
+            .add-menu-item:hover {
+                background-color: var(--lcars-white);
+            }
+
+            .add-menu-item:focus-visible {
+                outline: none;
+            }
+
+            .add-menu-item:focus-visible::after {
+                content: "";
+                position: absolute;
+                left: 0;
+                right: 0;
+                top: -5px;
+                height: 4px;
                 background-color: var(--lcars-white);
             }
 
@@ -1853,11 +1868,11 @@
             <div class="footer-bar lcars-frame-segment lcars-frame-segment--horizontal lcars-frame-segment--left-rounded">
                 <div id="systemStatus" class="status-display"></div>
                 <div class="add-wrapper">
-                    <div class="add-menu">
-                        <button class="add-menu-item" id="addBookmarkBtn">BOOKMARK</button>
-                        <button class="add-menu-item" id="addCategoryBtn">CATEGORY</button>
+                    <div class="add-menu" role="menu" id="addMenu">
+                        <button class="add-menu-item" id="addBookmarkBtn" role="menuitem" tabindex="-1">BOOKMARK</button>
+                        <button class="add-menu-item" id="addCategoryBtn" role="menuitem" tabindex="-1">CATEGORY</button>
                     </div>
-                    <button class="lcars-button lcars-focus-bar lcars-color-orange lcars-footer-bar-button" id="addBtn" aria-label="Add Entry (Alt+N)">ADD ENTRY</button>
+                    <button class="lcars-button lcars-focus-bar lcars-color-orange lcars-footer-bar-button" id="addBtn" aria-label="Add Entry (Alt+N)" aria-haspopup="menu" aria-expanded="false">ADD ENTRY</button>
                 </div>
                 <div class="settings-wrapper">
                     <button class="lcars-button lcars-focus-bar lcars-color-orange lcars-footer-bar-button" id="settingsBtn" aria-label="Settings (Alt+S)">
@@ -1879,7 +1894,7 @@
                         STARDATE 0000000.0000
                     </span>
                 </div>
-                <form id="bookmarkForm" method="dialog">
+                <form id="bookmarkForm">
                     <div class="lcars-dialog-body">
                         <input type="hidden" id="bookmarkId" />
                         <div class="form-group">
@@ -1955,7 +1970,7 @@
                         STARDATE 0000000.0000
                     </span>
                 </div>
-                <form id="categoryForm" method="dialog">
+                <form id="categoryForm">
                     <div class="lcars-dialog-body">
                         <input type="hidden" id="categoryId" />
                         <div class="form-group">
@@ -4119,6 +4134,7 @@
                     bookmarksView.classList.add("active");
                     settingsView.classList.remove("active");
                     aboutView.classList.remove("active");
+                    closeAddMenu();
                     openAddDialog();
                 });
 
@@ -4126,7 +4142,89 @@
                     bookmarksView.classList.add("active");
                     settingsView.classList.remove("active");
                     aboutView.classList.remove("active");
+                    closeAddMenu();
                     openAddCategoryDialog();
+                });
+
+                // Add Entry menu keyboard navigation
+                const addBtn = document.getElementById("addBtn");
+                const addMenu = document.getElementById("addMenu");
+                const addWrapper = addBtn?.closest(".add-wrapper");
+                const addMenuItems = addMenu ? Array.from(addMenu.querySelectorAll(".add-menu-item")) : [];
+
+                function openAddMenu() {
+                    if (!addWrapper || !addBtn) return;
+                    addWrapper.classList.add("menu-open");
+                    addBtn.setAttribute("aria-expanded", "true");
+                    addMenuItems.forEach(item => item.setAttribute("tabindex", "0"));
+                    if (addMenuItems.length > 0) {
+                        addMenuItems[0].focus();
+                    }
+                }
+
+                function closeAddMenu() {
+                    if (!addWrapper || !addBtn) return;
+                    addWrapper.classList.remove("menu-open");
+                    addBtn.setAttribute("aria-expanded", "false");
+                    addMenuItems.forEach(item => item.setAttribute("tabindex", "-1"));
+                }
+
+                if (addBtn) {
+                    addBtn.addEventListener("keydown", (e) => {
+                        if (e.key === "ArrowUp" || e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            openAddMenu();
+                        }
+                    });
+
+                    addBtn.addEventListener("click", (e) => {
+                        e.preventDefault();
+                        if (addWrapper?.classList.contains("menu-open")) {
+                            closeAddMenu();
+                            addBtn.focus();
+                        } else {
+                            openAddMenu();
+                        }
+                    });
+                }
+
+                if (addMenu) {
+                    addMenu.addEventListener("keydown", (e) => {
+                        const currentIndex = addMenuItems.indexOf(document.activeElement);
+
+                        if (e.key === "ArrowUp") {
+                            e.preventDefault();
+                            if (currentIndex > 0) {
+                                addMenuItems[currentIndex - 1].focus();
+                            } else {
+                                closeAddMenu();
+                                addBtn?.focus();
+                            }
+                        } else if (e.key === "ArrowDown") {
+                            e.preventDefault();
+                            if (currentIndex < addMenuItems.length - 1) {
+                                addMenuItems[currentIndex + 1].focus();
+                            }
+                        } else if (e.key === "Escape") {
+                            e.preventDefault();
+                            closeAddMenu();
+                            addBtn?.focus();
+                        } else if (e.key === "Tab") {
+                            // Allow Tab to navigate but close menu when leaving
+                            setTimeout(() => {
+                                if (!addWrapper?.contains(document.activeElement)) {
+                                    closeAddMenu();
+                                }
+                            }, 0);
+                        }
+                    });
+                }
+
+                // Close menu when clicking outside
+                document.addEventListener("click", (e) => {
+                    if (addWrapper && !addWrapper.contains(e.target)) {
+                        closeAddMenu();
+                    }
                 });
 
                 onClick("aboutBtn", () => {
