@@ -206,9 +206,9 @@
 
             /* Pill buttons, inputs, and config buttons use outline focus */
             .lcars-pill:focus-visible,
-            input:focus-visible,
-            select:focus-visible,
-            textarea:focus-visible,
+            .lcars-input:focus-visible,
+            .lcars-select:focus-visible,
+            .lcars-textarea:focus-visible,
             .category-config-btn:focus-visible {
                 outline: var(--lcars-focus-outline-width) solid var(--lcars-focus-outline-color);
                 outline-offset: var(--lcars-focus-outline-offset);
@@ -1635,9 +1635,14 @@
                 font-weight: bold;
             }
 
-            input,
-            select,
-            textarea {
+            /* ==============================================
+               LCARS FORM PRIMITIVES
+               Namespaced form controls for design system extraction.
+               Apply these classes explicitly to form elements.
+               ============================================== */
+            .lcars-input,
+            .lcars-select,
+            .lcars-textarea {
                 width: 100%;
                 padding: 10px;
                 background-color: var(--lcars-dark-2);
@@ -1648,7 +1653,7 @@
                 font-family: var(--lcars-font);
             }
 
-            textarea {
+            .lcars-textarea {
                 resize: vertical;
                 min-height: 60px;
                 max-height: 150px;
@@ -2029,7 +2034,7 @@
                                     <h2>HOME CATEGORY</h2>
                                     <div class="lcars-form-group">
                                         <label for="landingCategorySelect">LANDING CATEGORY</label>
-                                        <select id="landingCategorySelect" aria-label="Landing Category"></select>
+                                        <select id="landingCategorySelect" class="lcars-select" aria-label="Landing Category"></select>
                                         <p style="font-size: 0.8rem; opacity: 0.8; margin-top: 6px;">
                                             SELECT WHICH CATEGORY THE SYSTEM SHOULD LAND ON WHEN YOU PRESS HOME OR ACTIVATE THE ZANDER HEADER.
                                         </p>
@@ -2163,23 +2168,24 @@
                         <input type="hidden" id="bookmarkId" />
                         <div class="lcars-form-group">
                             <label for="titleInput">TITLE</label>
-                            <input type="text" id="titleInput" required aria-required="true" maxlength="64" />
+                            <input type="text" id="titleInput" class="lcars-input" required aria-required="true" maxlength="64" />
                         </div>
                         <div class="lcars-form-group">
                             <label for="descriptionInput">DESCRIPTION</label>
-                            <textarea id="descriptionInput" rows="3" maxlength="512" placeholder="Optional description..." aria-label="Bookmark Description"></textarea>
+                            <textarea id="descriptionInput" class="lcars-textarea" rows="3" maxlength="512" placeholder="Optional description..." aria-label="Bookmark Description"></textarea>
                         </div>
                         <div class="lcars-form-group">
                             <label for="urlInput">URL</label>
                             <div style="display: flex; gap: 10px">
                                 <label for="urlProtocol" style="display: none;">Protocol</label>
-                                <select id="urlProtocol" style="width: 120px" aria-label="URL Protocol">
+                                <select id="urlProtocol" class="lcars-select" style="width: 120px" aria-label="URL Protocol">
                                     <option value="https://">HTTPS://</option>
                                     <option value="http://">HTTP://</option>
                                 </select>
                                 <input
                                     type="text"
                                     id="urlInput"
+                                    class="lcars-input"
                                     required
                                     placeholder="example.com"
                                     style="flex: 1"
@@ -2189,7 +2195,7 @@
                         </div>
                         <div class="lcars-form-group">
                             <label for="categoryInput">CATEGORY</label>
-                            <select id="categoryInput" aria-label="Bookmark Category">
+                            <select id="categoryInput" class="lcars-select" aria-label="Bookmark Category">
                                 <!-- Options injected -->
                             </select>
                         </div>
@@ -2239,11 +2245,11 @@
                         <input type="hidden" id="categoryId" />
                         <div class="lcars-form-group">
                             <label for="categoryNameInput">NAME</label>
-                            <input type="text" id="categoryNameInput" required aria-required="true" maxlength="32" style="text-transform: uppercase;" />
+                            <input type="text" id="categoryNameInput" class="lcars-input" required aria-required="true" maxlength="32" style="text-transform: uppercase;" />
                         </div>
                         <div class="lcars-form-group">
                             <label for="categoryParentInput">PARENT CATEGORY</label>
-                            <select id="categoryParentInput" aria-label="Parent Category">
+                            <select id="categoryParentInput" class="lcars-select" aria-label="Parent Category">
                                 <option value="">(ROOT)</option>
                                 <!-- Options injected -->
                             </select>

@@ -147,22 +147,29 @@ A documentation comment was added to the `body` block in `index.html` explaining
 
 ---
 
-### 6. Form Inputs Not Namespaced
+### 6. ~~Form Inputs Not Namespaced~~ ✅ RESOLVED
 
-Global element styling will conflict if extracted to a design system:
+~~Global element styling will conflict if extracted to a design system.~~
 
-```css
-input,
-select,
-textarea {
-    width: 100%;
-    padding: 10px;
-    background-color: var(--lcars-dark-2);
-    ...
-}
-```
+**Resolution:** Created namespaced form primitive classes and applied them to all visible form elements:
 
-**Action:** Create `lcars-input`, `lcars-select`, `lcars-textarea` classes and apply them explicitly in HTML.
+- ✅ Created `.lcars-input`, `.lcars-select`, `.lcars-textarea` classes with shared base styles
+- ✅ Updated focus-visible selectors to use namespaced classes instead of element selectors
+- ✅ Added documentation comment block for "LCARS FORM PRIMITIVES" section
+- ✅ Applied classes to all visible form elements in HTML:
+
+| Element ID | Class Applied |
+|------------|---------------|
+| `#landingCategorySelect` | `.lcars-select` |
+| `#titleInput` | `.lcars-input` |
+| `#descriptionInput` | `.lcars-textarea` |
+| `#urlProtocol` | `.lcars-select` |
+| `#urlInput` | `.lcars-input` |
+| `#categoryInput` | `.lcars-select` |
+| `#categoryNameInput` | `.lcars-input` |
+| `#categoryParentInput` | `.lcars-select` |
+
+**Note:** Hidden inputs (`type="hidden"`, `type="file"` with `display: none`) were not modified as they don't require styling. The `#urlProtocol` ID-specific overrides remain as valid scoped customizations on top of the base `.lcars-select` styles.
 
 ---
 
@@ -220,7 +227,7 @@ vs
 | Primitives | 🟢 Good | Well-defined core set |
 | Legacy cleanup | 🟢 Complete | ✅ Removed ~470 lines of duplicates |
 | Naming convention | 🟢 Complete | ✅ Documented in DESIGN.md, legacy classes renamed |
-| Form primitives | 🔴 Blocking | Namespace as `lcars-input`, etc. |
+| Form primitives | 🟢 Complete | ✅ Namespaced as `.lcars-input`, `.lcars-select`, `.lcars-textarea` |
 | Focus system | 🟡 Partial | Consolidate to use helper class consistently |
 | Extension points | 🟢 Complete | ✅ Removed unused class, documented pattern |
 
@@ -253,11 +260,12 @@ vs
    - ✅ `status-display` → `lcars-status-display` (migrated HTML + JS)
 2. ✅ Deleted all legacy alias CSS blocks (~470 lines removed)
 
-### Phase 3: Form Primitives
+### Phase 3: Form Primitives ✅ COMPLETE
 
-1. Create `lcars-input`, `lcars-select`, `lcars-textarea` classes
-2. Update HTML to use namespaced classes
-3. Remove global `input, select, textarea` styling
+1. ✅ Created `.lcars-input`, `.lcars-select`, `.lcars-textarea` classes
+2. ✅ Updated HTML to use namespaced classes on all visible form elements
+3. ✅ Replaced global `input, select, textarea` styling with namespaced classes
+4. ✅ Updated focus-visible selectors to use namespaced classes
 
 ### Phase 4: Focus System Consolidation
 
