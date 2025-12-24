@@ -165,17 +165,30 @@
                 --theme-secondary: #78bff5;
             }
 
-            * {
+            /* ==============================================
+               SCOPED RESET
+               Box-sizing scoped to LCARS app and dialogs to avoid affecting host pages
+               ============================================== */
+            .lcars-app,
+            .lcars-app *,
+            .lcars-app *::before,
+            .lcars-app *::after,
+            .lcars-dialog-container,
+            .lcars-dialog-container *,
+            .lcars-dialog-container *::before,
+            .lcars-dialog-container *::after {
                 box-sizing: border-box;
             }
 
             /* ==============================================
                FOCUS SYSTEM
                Unified to 3px for strong a11y contrast
+               Scoped to .lcars-app and dialogs to avoid leaking into host pages
                ============================================== */
 
-            /* Default focus style for all interactive elements */
-            :focus-visible {
+            /* Default focus style for interactive elements within LCARS app and dialogs */
+            .lcars-app :focus-visible,
+            .lcars-dialog-container :focus-visible {
                 outline: var(--lcars-focus-outline-width) solid var(--lcars-focus-outline-color);
                 outline-offset: var(--lcars-focus-outline-offset);
                 box-shadow: none;
@@ -235,7 +248,9 @@
             }
 
             /* ==============================================
-               BODY: Layout + Theme Variables (merged)
+               BODY: Theme Variables
+               Theme variables live on body so data-theme can override them.
+               Visual styles are scoped to .lcars-app for embedding flexibility.
                ============================================== */
             body {
                 /* Theme variables (can be overridden by data-theme) */
@@ -253,25 +268,34 @@
                     var(--lcars-white) 70%
                 );
 
-                /* Layout */
+                /* Minimal body reset - only what's needed for full-page ZANDER */
+                margin: 0;
+            }
+
+            /* ==============================================
+               LCARS APP CONTAINER
+               All visual styles scoped here for embedding flexibility.
+               When used as full-page app, add .lcars-app--fullpage modifier.
+               ============================================== */
+            .lcars-app {
+                /* Visual styling scoped to the component */
                 background-color: var(--lcars-black);
                 color: var(--lcars-orange);
                 font-family: var(--lcars-font);
-                margin: 0;
-                height: 100vh;
-                overflow: hidden;
-                display: flex;
-                flex-direction: column;
-            }
 
-            /* LCARS Layout Grid */
-            .lcars-app {
+                /* Layout Grid */
                 display: grid;
                 grid-template-columns: 1fr 160px; /* Content | Sidebar */
                 grid-template-rows: 70px 1fr 70px; /* Header | Main | Footer */
                 height: 100%;
                 padding: 10px;
                 gap: 0; /* Seamless connections */
+            }
+
+            /* Full-page modifier for standalone ZANDER app */
+            .lcars-app--fullpage {
+                height: 100vh;
+                overflow: hidden;
             }
 
             /* Header (Left Part)
@@ -1489,10 +1513,15 @@
                 height: 40px;
             }
 
-            /* Dialogs */
-            dialog {
+            /* ==============================================
+               DIALOGS
+               Dialogs use native <dialog> which renders at document root.
+               We use .lcars-dialog class for scoping rather than element selector.
+               ============================================== */
+            .lcars-dialog-container {
                 background-color: var(--lcars-black);
                 color: var(--lcars-orange);
+                font-family: var(--lcars-font);
                 border: 2px solid var(--shape-color);
                 border-radius: var(--lcars-radius-md);
                 padding: 0;
@@ -1500,7 +1529,7 @@
                 width: 90%;
             }
 
-            dialog::backdrop {
+            .lcars-dialog-container::backdrop {
                 background-color: rgba(0, 0, 0, 0.8);
             }
 
@@ -1817,7 +1846,38 @@
         </style>
     </head>
     <body>
-        <div class="lcars-app">
+        <!-- ==============================================
+             SVG ICON SPRITE
+             Reusable icon definitions for the LCARS design system.
+             Reference icons with: <svg><use href="#icon-name"></use></svg>
+             ============================================== -->
+        <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+            <defs>
+                <!-- Arrow Up (wide) - for scroll buttons -->
+                <symbol id="icon-arrow-up-wide" viewBox="0 0 40 12">
+                    <polygon points="20,0 40,12 0,12" />
+                </symbol>
+                <!-- Arrow Down (wide) - for scroll buttons -->
+                <symbol id="icon-arrow-down-wide" viewBox="0 0 40 12">
+                    <polygon points="0,0 40,0 20,12" />
+                </symbol>
+                <!-- Arrow Up (square) - for config buttons -->
+                <symbol id="icon-arrow-up" viewBox="0 0 24 24">
+                    <polygon points="12,6 6,18 18,18" />
+                </symbol>
+                <!-- Arrow Down (square) - for config buttons -->
+                <symbol id="icon-arrow-down" viewBox="0 0 24 24">
+                    <polygon points="6,6 18,6 12,18" />
+                </symbol>
+                <!-- X/Delete icon -->
+                <symbol id="icon-delete" viewBox="0 0 24 24">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </symbol>
+            </defs>
+        </svg>
+
+        <div class="lcars-app lcars-app--fullpage">
             <!-- Header Bar (Left) -->
             <div class="lcars-header-bar">
                 <button class="lcars-focus-bar lcars-header-bar-home" id="homeBtn" aria-label="Home - Bookmarks View">ZANDER</button>
@@ -1833,17 +1893,13 @@
                 <!-- Middle Track with Scroll Buttons -->
                 <div class="sidebar-track">
                     <div class="lcars-arrow-btn sidebar-scroll-up" id="sidebarScrollUp" aria-hidden="true">
-                        <svg viewBox="0 0 40 12">
-                            <polygon points="20,0 40,12 0,12" />
-                        </svg>
+                        <svg><use href="#icon-arrow-up-wide"></use></svg>
                     </div>
                     <div class="lcars-scroll-container sidebar-categories" id="categorySidebar" tabindex="-1">
                         <!-- Categories injected here -->
                     </div>
                     <div class="lcars-arrow-btn sidebar-scroll-down" id="sidebarScrollDown" aria-hidden="true">
-                        <svg viewBox="0 0 40 12">
-                            <polygon points="0,0 40,0 20,12" />
-                        </svg>
+                        <svg><use href="#icon-arrow-down-wide"></use></svg>
                     </div>
                     <div class="sidebar-filler"></div>
                 </div>
@@ -2109,7 +2165,7 @@
         </div>
 
         <!-- Bookmark Dialog -->
-        <dialog id="bookmarkDialog" aria-labelledby="dialogTitle">
+        <dialog id="bookmarkDialog" class="lcars-dialog-container" aria-labelledby="dialogTitle">
             <div class="lcars-dialog">
                 <div class="lcars-dialog-header">
                     <h2 class="lcars-dialog-title" id="dialogTitle">
@@ -2186,7 +2242,7 @@
             </div>
         </dialog>
 
-        <dialog id="categoryDialog" aria-labelledby="categoryDialogTitle">
+        <dialog id="categoryDialog" class="lcars-dialog-container" aria-labelledby="categoryDialogTitle">
             <div class="lcars-dialog">
                 <div class="lcars-dialog-header">
                     <h2 class="lcars-dialog-title" id="categoryDialogTitle">
@@ -2246,7 +2302,7 @@
 
         <!-- Settings Dialog (no longer used for full settings UI, kept for potential small overlays if needed) -->
 
-        <dialog id="confirmDialog" aria-labelledby="confirmTitle">
+        <dialog id="confirmDialog" class="lcars-dialog-container" aria-labelledby="confirmTitle">
             <div class="lcars-dialog">
                 <div class="lcars-dialog-header">
                     <h2 class="lcars-dialog-title" id="confirmTitle">
@@ -2273,7 +2329,7 @@
             </div>
         </dialog>
 
-        <dialog id="colorPickerDialog" aria-labelledby="colorPickerDialogTitle">
+        <dialog id="colorPickerDialog" class="lcars-dialog-container" aria-labelledby="colorPickerDialogTitle">
             <div class="lcars-dialog">
                 <div class="lcars-dialog-header">
                     <h2 class="lcars-dialog-title" id="colorPickerDialogTitle">SELECT COLOR</h2>
@@ -3614,9 +3670,7 @@
                     upBtn.className = "lcars-pin lcars-pin--lg lcars-pin--bordered";
                     upBtn.dataset.glyph = "up";
                     upBtn.innerHTML = `
-                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                            <polygon points="12,6 6,18 18,18" />
-                        </svg>
+                        <svg aria-hidden="true" focusable="false"><use href="#icon-arrow-up"></use></svg>
                     `;
                     upBtn.setAttribute("aria-label", `Move ${cat.name} category up`);
                     upBtn.disabled = index === 0;
@@ -3628,9 +3682,7 @@
                     downBtn.className = "lcars-pin lcars-pin--lg lcars-pin--bordered";
                     downBtn.dataset.glyph = "down";
                     downBtn.innerHTML = `
-                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                            <polygon points="6,6 18,6 12,18" />
-                        </svg>
+                        <svg aria-hidden="true" focusable="false"><use href="#icon-arrow-down"></use></svg>
                     `;
                     downBtn.setAttribute("aria-label", `Move ${cat.name} category down`);
                     downBtn.disabled = index === state.categories.length - 1;
@@ -3643,10 +3695,7 @@
                     delBtn.className = "lcars-pin lcars-pin--lg lcars-pin--bordered lcars-pin--delete";
                     delBtn.dataset.glyph = "delete";
                     delBtn.innerHTML = `
-                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
+                        <svg aria-hidden="true" focusable="false"><use href="#icon-delete"></use></svg>
                     `;
                     delBtn.setAttribute("aria-label", `Delete ${cat.name} category`);
                     delBtn.onclick = () => deleteCategory(cat.id);

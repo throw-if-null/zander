@@ -435,6 +435,8 @@ Semantics:
 
 ### 6.1 DOM Structure (Key Containers)
 
+- **SVG Icon Sprite**  
+  A hidden `<svg><defs>` block at the top of `<body>` containing reusable `<symbol>` elements for icons. Icons are referenced throughout the app via `<use href="#icon-name">`. See DESIGN.md Section 11.12 for the icon catalog.
 - `.lcars-app`  
   Root grid container for the entire LCARS console, including header, sidebar frame, main content, and footer.
 - `.header-bar`  

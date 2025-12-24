@@ -27,10 +27,10 @@ At a high level, the shell consists of:
 
 ### 1.1 Structural DOM
 
-The outer structure is organized under `.lcars-app` and uses native view and dialog elements:
+The outer structure is organized under `.lcars-app` and uses native view and dialog elements. All visual styles are scoped to `.lcars-app` to enable embedding in other pages without style leakage.
 
 ```/dev/null/layout.html#L1-80
-<div class="lcars-app">
+<div class="lcars-app lcars-app--fullpage">
   <!-- Header band and title -->
   <div class="header-bar">
     <div class="header-fill"></div>
@@ -897,11 +897,25 @@ The following classes are the canonical LCARS primitives:
 
 This section lists the **reusable LCARS primitives** that ZANDER consumes. These are the building blocks for future LCARS-based applications; app-specific shells and layouts (like `header-bar` and `footer-bar`) are expected to compose these primitives rather than redefine LCARS visuals.
 
-### 11.1 Frame & Shell Primitives
+### 11.1 CSS Scoping Strategy
+
+All LCARS styles are scoped to avoid leaking into host pages when embedding the component:
+
+- **Reset styles** (`box-sizing`) are scoped to `.lcars-app *` and `.lcars-dialog-container *`
+- **Focus styles** (`:focus-visible`) are scoped to `.lcars-app :focus-visible` and `.lcars-dialog-container :focus-visible`
+- **Visual styles** (`background-color`, `color`, `font-family`) live on `.lcars-app`, not `body`
+- **Theme variables** (`--theme-main`, `--shape-color`, `--theme-secondary`) remain on `body` to support `data-theme` attribute overrides
+- **Dialogs** use `.lcars-dialog-container` class for styling (not the `dialog` element selector)
+
+**Modifiers:**
+- `.lcars-app--fullpage` – Adds `height: 100vh; overflow: hidden;` for standalone full-viewport usage
+
+### 11.2 Frame & Shell Primitives
 
 - `lcars-app`
   - Grid container for the overall LCARS shell.
   - Defines the 2×3 layout (header, main, footer × content, sidebar).
+  - Scopes visual styles (background, color, font) to the component.
 - `lcars-frame-segment`
   - Base LCARS frame surface.
   - Applies `background-color: var(--shape-color);`.
@@ -922,7 +936,7 @@ This section lists the **reusable LCARS primitives** that ZANDER consumes. These
     - `sidebar-top-cap` (header → sidebar connection).
     - `sidebar-bottom-cap` (sidebar → footer connection).
 
-### 11.2 Button & Control Primitives
+### 11.3 Button & Control Primitives
 
 - `lcars-button`
   - Base LCARS button:
@@ -944,7 +958,7 @@ This section lists the **reusable LCARS primitives** that ZANDER consumes. These
   - `lcars-settings-action` – buttons within the Settings panel.
   - `lcars-footer-bar-button` – footer action buttons that integrate with the frame and focus bar.
 
-### 11.3 Tiles
+### 11.4 Tiles
 
 - `lcars-tile`
   - Base primitive for LCARS content tiles (bookmarks, categories, settings navigation).
@@ -975,7 +989,7 @@ This section lists the **reusable LCARS primitives** that ZANDER consumes. These
     - Hover: `filter: brightness(1.1); transform: scale(1.02)`.
     - Focus: uses `lcars-focus-outline` system.
 
-### 11.4 Shell Bar Primitives
+### 11.5 Shell Bar Primitives
 
 These primitives form the outer frame of an LCARS application shell. They can be used independently or composed together to create a classic "C-shaped" LCARS console layout.
 
@@ -1120,7 +1134,7 @@ Structure:
 
 Can be embedded in `lcars-footer-bar-status` or used standalone in any view.
 
-### 11.5 Pins & Small Controls
+### 11.6 Pins & Small Controls
 
 - `lcars-pin`
   - Base primitive for small circular LCARS controls ("pins").
@@ -1144,7 +1158,7 @@ Can be embedded in `lcars-footer-bar-status` or used standalone in any view.
     - Hover: `filter: brightness(1.1); transform: scale(1.1)`.
     - Focus: uses `lcars-focus-outline` system.
 
-### 11.6 Expandable Menus
+### 11.7 Expandable Menus
 
 - `lcars-expandable`
   - Base primitive for dropdown/popup menu patterns.
@@ -1165,7 +1179,7 @@ Can be embedded in `lcars-footer-bar-status` or used standalone in any view.
     - Hover: background lightens to white.
     - Focus: directional focus bar indicator.
 
-### 11.7 Breadcrumbs
+### 11.8 Breadcrumbs
 
 - `lcars-breadcrumb`
   - Base primitive for location/path readout components.
@@ -1189,7 +1203,7 @@ Can be embedded in `lcars-footer-bar-status` or used standalone in any view.
     - Non-current segments are clickable for navigation.
     - Focus: uses `lcars-focus-outline` system.
 
-### 11.8 Arrow Buttons & Scroll Containers
+### 11.9 Arrow Buttons & Scroll Containers
 
 - `lcars-arrow-btn`
   - Flat directional control with triangle/arrow indicator.
@@ -1214,7 +1228,7 @@ Can be embedded in `lcars-footer-bar-status` or used standalone in any view.
     - `::-webkit-scrollbar { display: none }` (Chrome/Safari)
   - Typically paired with `lcars-arrow-btn` controls for accessible navigation.
 
-### 11.9 Focus & Interaction Primitives
+### 11.10 Focus & Interaction Primitives
 
 - `lcars-focus-outline`
   - Helper class for elements that should use a strong outline:
@@ -1237,7 +1251,7 @@ Can be embedded in `lcars-footer-bar-status` or used standalone in any view.
     - Sidebar category buttons: vertical bar along the left edge.
     - Footer buttons: horizontal bar along the top edge.
 
-### 11.10 Theme & Color System Primitives
+### 11.11 Theme & Color System Primitives
 
 - Global theme variables (applied on `body`):
   - `--theme-main` – primary frame/accent color.
@@ -1249,7 +1263,44 @@ Can be embedded in `lcars-footer-bar-status` or used standalone in any view.
   - `body[data-theme="laan" | "data" | "doctor" | "chapel" | "spock" | "mbenga" | "seven" | "shran"]`
     - Each theme configures `--theme-main` and `--theme-secondary` for a distinct but consistent LCARS look.
 
-### 11.11 Layout Shell Conventions (ZANDER-Specific Consumers)
+### 11.12 SVG Icon Sprite System
+
+All icons are defined once in a hidden `<svg><defs>` block at the top of `<body>` and referenced throughout the application using `<use href="#icon-name">`.
+
+**Icon Definitions:**
+
+| Icon ID | ViewBox | Description | Used By |
+|---------|---------|-------------|---------|
+| `icon-arrow-up-wide` | `0 0 40 12` | Wide triangle pointing up | Sidebar scroll up button |
+| `icon-arrow-down-wide` | `0 0 40 12` | Wide triangle pointing down | Sidebar scroll down button |
+| `icon-arrow-up` | `0 0 24 24` | Square triangle pointing up | Category move up button |
+| `icon-arrow-down` | `0 0 24 24` | Square triangle pointing down | Category move down button |
+| `icon-delete` | `0 0 24 24` | X/cross shape (two lines) | Category delete button |
+
+**Usage:**
+
+```html
+<!-- In HTML -->
+<svg><use href="#icon-arrow-up-wide"></use></svg>
+
+<!-- In JavaScript -->
+element.innerHTML = `<svg aria-hidden="true" focusable="false"><use href="#icon-delete"></use></svg>`;
+```
+
+**Styling:**
+
+- Icons inherit `fill` from their parent element via `fill: currentColor`.
+- The `lcars-pin` component provides glyph-specific sizing via `[data-glyph]` attributes.
+- For accessibility, decorative icons should include `aria-hidden="true" focusable="false"`.
+
+**Adding New Icons:**
+
+1. Add a new `<symbol>` element inside the `<svg><defs>` block.
+2. Use a consistent naming convention: `icon-{name}` or `icon-{category}-{name}`.
+3. Include `viewBox` on the symbol (not on consuming `<svg>` elements).
+4. Document the new icon in this table.
+
+### 11.13 Layout Shell Conventions (ZANDER-Specific Consumers)
 
 These classes are **ZANDER-specific** implementations that consume the shell bar primitives. Future apps should use the `lcars-*` primitives directly.
 

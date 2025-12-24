@@ -41,15 +41,23 @@ While the visual design and basic structure of the Zander component are solid an
 *   **Impact:** You cannot have two instances of this component on the same page (e.g., a "User Bookmarks" and "System Bookmarks" widget side-by-side).
 *   **Fix:** Refactor to use classes (e.g., `.js-bookmarks-view`) or scoped data attributes, and query elements within the component's root.
 
-### Inline SVGs
+### Inline SVGs ✅ FIXED
 *   **Issue:** SVGs are hardcoded directly in the HTML.
 *   **Impact:** This makes maintenance difficult and bloats the HTML.
-*   **Fix:** Extract these into an Icon component or an SVG sprite system.
+*   **Fix:** ~~Extract these into an Icon component or an SVG sprite system.~~
+*   **Resolution:** Extracted all inline SVGs to a central `<svg><defs>` block with `<symbol>` elements. Icons are now referenced via `<use href="#icon-name">`. Icons defined: `icon-arrow-up-wide`, `icon-arrow-down-wide`, `icon-arrow-up`, `icon-arrow-down`, `icon-delete`.
 
-### Global CSS Scope
+### Global CSS Scope ✅ FIXED
 *   **Issue:** Styles are defined globally (e.g., `body[data-theme]`, `.lcars-button`).
 *   **Impact:** These styles will leak into other parts of an application consuming this design system.
-*   **Fix:** Ensure all styles are strictly scoped (e.g., using BEM strictly or CSS Modules/Shadow DOM if moving to a framework).
+*   **Fix:** ~~Ensure all styles are strictly scoped (e.g., using BEM strictly or CSS Modules/Shadow DOM if moving to a framework).~~
+*   **Resolution:** Scoped styles to `.lcars-app` container:
+    - Universal `box-sizing` reset now scoped to `.lcars-app *` and `.lcars-dialog-container *`
+    - Global `:focus-visible` now scoped to `.lcars-app :focus-visible` and `.lcars-dialog-container :focus-visible`
+    - Visual styles (`background-color`, `color`, `font-family`) moved from `body` to `.lcars-app`
+    - Added `.lcars-app--fullpage` modifier for standalone full-viewport usage
+    - Dialog styles now use `.lcars-dialog-container` class instead of `dialog` element selector
+    - Theme variables remain on `body` (required for `data-theme` overrides) but inherit into scoped containers
 
 ## 3. Code Quality & Semantics
 
@@ -60,7 +68,7 @@ While the visual design and basic structure of the Zander component are solid an
 
 1.  **Refactor IDs to Classes:** Remove reliance on `document.getElementById` and use `container.querySelector` instead.
 2.  ~~**Fix ARIA States:** Implement a small JS utility to sync `aria-expanded` with the menu's visual state.~~ ✅ DONE
-3.  **Extract Icons:** Move inline SVGs to a reusable definition.
+3.  ~~**Extract Icons:** Move inline SVGs to a reusable definition.~~ ✅ DONE
 4.  ~~**Standardize Dialogs:** Update dialogs to use `aria-labelledby`.~~ ✅ DONE
 
 ## 5. Notes

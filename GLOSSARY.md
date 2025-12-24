@@ -98,7 +98,8 @@ When there is disagreement between documentation, this glossary, and the impleme
 
 - **Meaning**: The continuous C‑shaped LCARS structure that wraps the content area.
 - **Implementation (key elements)**:
-  - `.lcars-app` — Root layout container.
+  - `.lcars-app` — Root layout container. Scopes visual styles (background, color, font) to the component.
+  - `.lcars-app--fullpage` — Modifier for standalone full-viewport usage (`height: 100vh; overflow: hidden`).
   - `.header-bar` — Top horizontal band.
   - `.sidebar-container` — Right vertical frame:
     - `.sidebar-top-cap`
@@ -278,11 +279,13 @@ When there is disagreement between documentation, this glossary, and the impleme
 
 ## 5. Dialogs & Forms
 
+All dialogs use the `.lcars-dialog-container` class on the `<dialog>` element for scoped styling.
+
 ### 5.1 Bookmark Dialog
 
 - **Meaning**: Modal used to add or edit a bookmark.
 - **Implementation**:
-  - `<dialog id="bookmarkDialog">` with `.lcars-dialog` structure.
+  - `<dialog id="bookmarkDialog" class="lcars-dialog-container">` with `.lcars-dialog` structure.
   - Contains form elements for:
     - Title (max 64 characters)
     - Description (optional, max 512 characters)
