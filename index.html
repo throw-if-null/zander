@@ -1079,14 +1079,12 @@
                 flex-direction: column;
             }
 
-            #settingsCategorySectionMain,
             .js-settings-category-section-main {
                 flex: 1 1 auto;
                 display: flex;
                 flex-direction: column;
             }
 
-            #settingsCategorySectionMain .category-config-list,
             .js-settings-category-section-main .category-config-list {
                 flex: 1 1 auto;
             }
@@ -1181,7 +1179,7 @@
                LCARS ACTION ROLE HELPERS
                Semantic class hooks for context-specific button styling.
                These base classes are intentionally empty - they serve as
-               extension points for scoped overrides (e.g., #themeControlsContainer .lcars-settings-action).
+               extension points for scoped overrides (e.g., .js-theme-controls-container .lcars-settings-action).
                Add styles here only if ALL buttons in that context need them.
                ============================================== */
             .lcars-dialog-action {
@@ -1431,20 +1429,17 @@
             }
 
             /* Theme selector layout */
-            #themeControlsContainer,
             .js-theme-controls-container {
                 display: flex;
                 flex-wrap: wrap;
                 gap: 8px;
             }
 
-            #themeControlsContainer .lcars-settings-action,
             .js-theme-controls-container .lcars-settings-action {
                 min-width: 140px;
                 justify-content: center;
             }
 
-            #themeControlsContainer .lcars-settings-action.theme-active,
             .js-theme-controls-container .lcars-settings-action.theme-active {
                 background-color: var(--theme-main, var(--lcars-beige));
                 color: var(--lcars-black);
@@ -1502,7 +1497,6 @@
 
 
 
-            #aboutBtn,
             .js-about-btn {
                 border-right: 5px solid var(--lcars-black);
             }
@@ -1548,26 +1542,22 @@
 
             /* Color picker specific overlay */
             /* Color picker uses slightly larger radius for visual distinction */
-            #colorPickerDialog,
             .js-color-picker-dialog {
                 max-width: 520px;
                 border-radius: calc(var(--lcars-radius-md) + 6px);
                 border-color: var(--shape-color);
             }
 
-            #colorPickerDialog .lcars-dialog-header,
             .js-color-picker-dialog .lcars-dialog-header {
                 background-color: var(--shape-color);
                 color: var(--lcars-black);
             }
 
-            #colorPickerDialog .lcars-dialog-body,
             .js-color-picker-dialog .lcars-dialog-body {
                 padding: 20px;
                 background-color: var(--lcars-black);
             }
 
-            #colorPickerDialog .lcars-dialog-footer,
             .js-color-picker-dialog .lcars-dialog-footer {
                 display: flex;
                 justify-content: flex-end;
@@ -1651,7 +1641,6 @@
             }
 
             /* URL protocol select styled as compact LCARS control */
-            #urlProtocol,
             .js-url-protocol {
                 max-width: 140px;
                 border-radius: var(--lcars-radius-md);
