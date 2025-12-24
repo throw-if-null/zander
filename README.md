@@ -98,9 +98,9 @@ The layout is a continuous LCARS “C‑shaped” frame wrapping the content:
 
 2. **Sidebar (Right Column)**
    - Continuous vertical LCARS bar with:
-     - **Top Cap** – Curved connector linking header to sidebar (`.sidebar-top-cap`).
-     - **Track** – Vertical bar containing category buttons (`.sidebar-track`).
-     - **Bottom Cap** – Curved connector linking sidebar to footer (`.sidebar-bottom-cap`).
+     - **Top Cap** – Curved connector linking header to sidebar (`.lcars-sidebar-bar-top-cap`).
+     - **Track** – Vertical bar containing category buttons (`.lcars-sidebar-bar-track`).
+     - **Bottom Cap** – Curved connector linking sidebar to footer (``.lcars-sidebar-bar-bottom-cap``).
    - Category buttons (`.lcars-sidebar-btn`) are stacked along the sidebar track.
    - The active category visually “lights up”.
 

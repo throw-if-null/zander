@@ -98,14 +98,14 @@ When there is disagreement between documentation, this glossary, and the impleme
 
 - **Meaning**: The continuous C‑shaped LCARS structure that wraps the content area.
 - **Implementation (key elements)**:
-  - `.lcars-app` — Root layout container. Scopes visual styles (background, color, font) to the component.
+  - `.lcars-app` — Root layout container. Scopes visual styles (background, color, font) to the component
   - `.lcars-app--fullpage` — Modifier for standalone full-viewport usage (`height: 100vh; overflow: hidden`).
-  - `.header-bar` — Top horizontal band.
-  - `.sidebar-container` — Right vertical frame:
-    - `.sidebar-top-cap`
-    - `.sidebar-track`
-    - `.sidebar-bottom-cap`
-  - `.footer-bar` — Bottom horizontal band.
+  - `.lcars-header-bar` — Top horizontal band.
+  - `.lcars-sidebar-bar` — Right vertical frame:
+    - `.lcars-sidebar-bar-top-cap`
+    - `.lcars-sidebar-bar-track`
+    - `.lcars-sidebar-bar-bottom-cap`
+  - `.lcars-footer-bar` — Bottom horizontal band.
 - **Visual Concept**:
   - Represents a single continuous LCARS bracket:
     - Header → Top Cap → Sidebar Track → Bottom Cap → Footer.

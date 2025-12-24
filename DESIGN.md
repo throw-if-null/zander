@@ -962,8 +962,9 @@ All LCARS styles are scoped to avoid leaking into host pages when embedding the 
     - `--elbow-radius-top-left`, `--elbow-radius-top-right`,
       `--elbow-radius-bottom-right`, `--elbow-radius-bottom-left`.
   - Specialized by:
-    - `sidebar-top-cap` (header → sidebar connection).
-    - `sidebar-bottom-cap` (sidebar → footer connection).
+    - `lcars-sidebar-bar-top-cap` (header → sidebar connection).
+    - `lcars-sidebar-bar-bottom-cap` (sidebar → footer connection).
+    - `lcars-sidebar-bar-bottom-cap` (sidebar → footer connection).
 
 ### 11.3 Button & Control Primitives
 
