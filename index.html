@@ -91,7 +91,6 @@
                    --lcars-pin-size: Pin/circular button size
                    --lcars-pin-bg: Pin background color
                    --lcars-pin-fg: Pin foreground color
-                   --lcars-focus-bar-*: Focus bar positioning vars
                    ============================================== */
             }
 
@@ -198,43 +197,6 @@
             .lcars-focus-outline:focus-visible {
                 outline: var(--lcars-focus-outline-width) solid var(--lcars-focus-outline-color);
                 outline-offset: var(--lcars-focus-outline-offset);
-            }
-
-            /* ==============================================
-               LCARS FOCUS BAR HELPER
-               Draws a directional bar via ::after pseudo-element.
-
-               Usage:
-               1. Add `lcars-focus-bar` class to the element
-               2. Ensure element has `position: relative`
-               3. Configure position via CSS custom properties on the element:
-                  --lcars-focus-bar-top     (default: -10px)
-                  --lcars-focus-bar-bottom  (default: auto)
-                  --lcars-focus-bar-left    (default: 0)
-                  --lcars-focus-bar-right   (default: 0)
-                  --lcars-focus-bar-height  (default: 4px)
-                  --lcars-focus-bar-width   (default: auto)
-                  --lcars-focus-bar-color   (default: var(--lcars-white))
-
-               Components using this helper:
-               - .lcars-header-bar-home (bottom edge)
-               - .lcars-sidebar-btn (left edge, vertical)
-               - .lcars-footer-bar-button (top edge)
-               ============================================== */
-            .lcars-focus-bar:focus-visible::after {
-                content: "";
-                position: absolute;
-
-                /* Edge selection via custom properties */
-                top: var(--lcars-focus-bar-top, -10px);
-                bottom: var(--lcars-focus-bar-bottom, auto);
-                left: var(--lcars-focus-bar-left, 0);
-                right: var(--lcars-focus-bar-right, 0);
-
-                /* Size + color */
-                height: var(--lcars-focus-bar-height, 4px);
-                width: var(--lcars-focus-bar-width, auto);
-                background-color: var(--lcars-focus-bar-color, var(--lcars-white));
             }
 
             /* Pill buttons, inputs, and config buttons use outline focus */
@@ -358,14 +320,11 @@
                 border: none;
                 cursor: pointer;
                 position: relative;
-
-                /* Configure LCARS focus bar: bottom-edge indicator */
-                --lcars-focus-bar-top: auto;
-                --lcars-focus-bar-bottom: -10px;
             }
 
             .lcars-header-bar-home:focus-visible {
-                outline: none;
+                outline: var(--lcars-focus-outline-width) solid var(--lcars-focus-outline-color);
+                outline-offset: var(--lcars-focus-outline-offset);
                 box-shadow: none;
             }
 
@@ -797,26 +756,8 @@
             }
 
             .lcars-expandable-item:focus-visible {
-                outline: none;
-            }
-
-            /* Focus bar indicator for expandable items.
-               NOTE: Uses component-specific implementation (not lcars-focus-bar helper)
-               because position depends on --lcars-expandable-gap which is a component variable. */
-            .lcars-expandable-item:focus-visible::after {
-                content: "";
-                position: absolute;
-                left: 0;
-                right: 0;
-                top: calc(-1 * var(--lcars-expandable-gap));
-                height: 4px;
-                background-color: var(--lcars-white);
-            }
-
-            /* Down direction: focus bar at bottom */
-            .lcars-expandable--down .lcars-expandable-item:focus-visible::after {
-                top: auto;
-                bottom: calc(-1 * var(--lcars-expandable-gap));
+                outline: var(--lcars-focus-outline-width) solid var(--lcars-focus-outline-color);
+                outline-offset: var(--lcars-focus-outline-offset);
             }
 
             /* Sidebar Buttons (LCARS category actions) */
@@ -843,14 +784,6 @@
                 text-align: right;
 
                 transition: background-color var(--lcars-transition-normal);
-
-                /* Configure LCARS focus bar for left-edge vertical indicator */
-                --lcars-focus-bar-top: 0;
-                --lcars-focus-bar-bottom: 0;
-                --lcars-focus-bar-left: 0px;
-                --lcars-focus-bar-right: auto;
-                --lcars-focus-bar-width: 6px;
-                --lcars-focus-bar-height: 100%;
             }
 
             .lcars-sidebar-btn:hover,
@@ -859,7 +792,8 @@
             }
 
             .lcars-sidebar-btn:focus-visible {
-                outline: none;
+                outline: var(--lcars-focus-outline-width) solid var(--lcars-focus-outline-color);
+                outline-offset: var(--lcars-focus-outline-offset);
             }
 
             /* Nested Categories */
@@ -1455,13 +1389,6 @@
                 --lcars-button-fg: var(--lcars-black);
                 background-color: var(--lcars-button-bg);
                 color: var(--lcars-button-fg);
-
-                /* Configure LCARS focus bar: top-edge indicator */
-                --lcars-focus-bar-top: -9px;
-                --lcars-focus-bar-bottom: auto;
-                --lcars-focus-bar-left: 0;
-                --lcars-focus-bar-right: 0;
-                --lcars-focus-bar-height: 4px;
             }
 
             .lcars-footer-bar-button:hover {
@@ -1476,9 +1403,9 @@
                 justify-content: center;
             }
 
-            /* Footer buttons use the LCARS focus bar helper (no outline) */
             .lcars-footer-bar-button:focus-visible {
-                outline: none;
+                outline: var(--lcars-focus-outline-width) solid var(--lcars-focus-outline-color);
+                outline-offset: var(--lcars-focus-outline-offset);
             }
 
 
@@ -1867,7 +1794,7 @@
         <div class="lcars-app lcars-app--fullpage js-lcars-app">
             <!-- Header Bar (Left) -->
             <div class="lcars-header-bar">
-                <button class="lcars-focus-bar lcars-header-bar-home js-home-btn" aria-label="Home - Bookmarks View">ZANDER</button>
+                <button class="lcars-header-bar-home js-home-btn" aria-label="Home - Bookmarks View">ZANDER</button>
                 <div class="lcars-header-bar-fill"></div>
                 <div class="lcars-header-bar-end-cap"></div>
             </div>
@@ -2129,18 +2056,18 @@
             <div class="lcars-footer-bar lcars-frame-segment lcars-frame-segment--horizontal lcars-frame-segment--left-rounded">
                 <div class="lcars-status-display js-system-status"></div>
                 <div class="lcars-expandable">
-                    <button class="lcars-button lcars-focus-bar lcars-color-orange lcars-footer-bar-button js-add-btn" aria-label="Add Entry (Alt+N)" aria-haspopup="menu" aria-expanded="false">ADD ENTRY</button>
+                    <button class="lcars-button lcars-color-orange lcars-footer-bar-button js-add-btn" aria-label="Add Entry (Alt+N)" aria-haspopup="menu" aria-expanded="false">ADD ENTRY</button>
                     <div class="lcars-expandable-menu js-add-menu" role="menu">
                         <button class="lcars-expandable-item js-add-bookmark-btn" role="menuitem">BOOKMARK</button>
                         <button class="lcars-expandable-item js-add-category-btn" role="menuitem">CATEGORY</button>
                     </div>
                 </div>
                 <div class="lcars-settings-wrapper">
-                    <button class="lcars-button lcars-focus-bar lcars-color-orange lcars-footer-bar-button js-settings-btn" aria-label="Settings (Alt+S)">
+                    <button class="lcars-button lcars-color-orange lcars-footer-bar-button js-settings-btn" aria-label="Settings (Alt+S)">
                         SETTINGS
                     </button>
                 </div>
-                <button class="lcars-button lcars-focus-bar lcars-color-orange lcars-footer-bar-button js-about-btn" aria-label="About Zander">ABOUT</button>
+                <button class="lcars-button lcars-color-orange lcars-footer-bar-button js-about-btn" aria-label="About Zander">ABOUT</button>
             </div>
         </div>
 
@@ -2827,7 +2754,7 @@
                 state.categories.forEach((cat) => {
                     const btn = document.createElement("button");
                     btn.className =
-                        "lcars-button lcars-focus-bar lcars-sidebar-btn" +
+                        "lcars-button lcars-sidebar-btn" +
                         (currentRootId === cat.id ? " active" : "");
                     btn.textContent = cat.name;
                     btn.style.setProperty("--cat-color", cat.color);

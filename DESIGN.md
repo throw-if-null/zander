@@ -33,7 +33,7 @@ The outer structure is organized under `.lcars-app` and uses native view and dia
 <div class="lcars-app lcars-app--fullpage">
   <!-- Header band and title -->
   <div class="lcars-header-bar">
-    <button class="lcars-header-bar-home lcars-focus-bar js-home-btn" aria-label="Home - Bookmarks View">
+    <button class="lcars-header-bar-home js-home-btn" aria-label="Home - Bookmarks View">
       <!-- Title text, subtitle, and numeric callout; acts as a Home control -->
     </button>
     <div class="lcars-header-bar-fill"></div>
@@ -172,7 +172,7 @@ Examples:
 ```/dev/null/frame-segments.html#L1-24
 <!-- Header: structural shell that is also a frame segment -->
 <div class="lcars-header-bar">
-  <button class="lcars-header-bar-home lcars-focus-bar js-home-btn" aria-label="Home - Bookmarks View">ZANDER</button>
+  <button class="lcars-header-bar-home js-home-btn" aria-label="Home - Bookmarks View">ZANDER</button>
   <div class="lcars-header-bar-fill"></div>
   <div class="lcars-header-bar-end-cap"></div>
 </div>
@@ -474,7 +474,7 @@ The About view (`.about-panel`) is an informational screen:
 
 The About panel uses the same base layout as the Settings panel but is content-focused, with minimal controls and horizontal rules dividing the sections, matching the current `aboutView` markup in `index.html`.
 
-The **header title** (`.lcars-header-bar-home`, showing “ZANDER”) functions as a **Home control**: clicking it returns the main content to the Bookmarks view. This is mirrored by the `Alt+H` keyboard shortcut (see Keyboard & Accessibility section), giving both a prominent visual target and a power-user shortcut for returning “home”. When focused via keyboard, the header title button uses the same LCARS focus pattern as other primary controls: a single, solid white focus indicator rendered as a line along the **bottom edge** of the button, implemented via the shared `lcars-focus-bar` helper.
+The **header title** (`.lcars-header-bar-home`, showing “ZANDER”) functions as a **Home control**: clicking it returns the main content to the Bookmarks view. This is mirrored by the `Alt+H` keyboard shortcut (see Keyboard & Accessibility section), giving both a prominent visual target and a power-user shortcut for returning “home”. When focused via keyboard, the header title button uses the same LCARS focus pattern as other primary controls: a high-contrast outline rendered using the shared `--lcars-focus-outline-*` variables and `:focus-visible`.
 
 ---
 
@@ -781,10 +781,8 @@ Additional notes:
 
 - All focus styles are applied with `:focus-visible` so pointer users don’t see outlines on mouse click.
 - Each interactive control chooses either the outline helper or the bar helper so the experience is consistent and visually LCARS-like:
-  - Category buttons: focus bar (edge indicator).
-  - Footer buttons: focus bar (top edge indicator).
-  - Dialog buttons and form fields: outline (ring).
-  - Color options, pins, and small controls: simple white outline tuned to their size.
+- All interactive elements (header home button, category buttons, footer buttons, tiles, dialog buttons, form fields, color options, pins, and small controls) use the same high-contrast outline focus style, driven by the shared `--lcars-focus-outline-*` variables.
+- Focus styles are applied with `:focus-visible` so pointer users dont see outlines on mouse click.
 
 ### 9.2 Keyboard Navigation
 
@@ -891,7 +889,7 @@ The following classes are the canonical LCARS primitives and form the **public C
 - **Sidebar:** `lcars-sidebar-item`, `lcars-sidebar-submenu`
 - **Forms:** `lcars-form-group`, `lcars-input`, `lcars-select`, `lcars-textarea`
 - **Dialogs:** `lcars-dialog`, `lcars-dialog-header`, `lcars-dialog-body`, `lcars-dialog-footer`
-- **Utilities:** `lcars-focus-bar`, `lcars-focus-outline`, `lcars-breadcrumb`, `lcars-status-display`, `lcars-scroll-container`, `lcars-arrow-btn`
+- **Utilities:** `lcars-focus-outline`, `lcars-breadcrumb`, `lcars-status-display`, `lcars-scroll-container`, `lcars-arrow-btn`
 
 ---
 
@@ -1267,19 +1265,7 @@ Can be embedded in `lcars-footer-bar-status` or used standalone in any view.
     - Pill buttons (`lcars-button lcars-pill`).
     - Dialog actions.
     - Form inputs (text, select, textarea).
-- `lcars-focus-bar`
-  - Helper class that draws a directional focus bar using `:focus-visible::after`.
-  - Position and size are controlled by:
-    - `--lcars-focus-bar-top`
-    - `--lcars-focus-bar-bottom`
-    - `--lcars-focus-bar-left`
-    - `--lcars-focus-bar-right`
-    - `--lcars-focus-bar-width`
-    - `--lcars-focus-bar-height`
-    - `--lcars-focus-bar-color`
-  - Typical uses:
-    - Sidebar category buttons: vertical bar along the left edge.
-    - Footer buttons: horizontal bar along the top edge.
+
 
 ### 11.11 Theme & Color System Primitives
 
