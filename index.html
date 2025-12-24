@@ -2861,8 +2861,8 @@
                     </div>
                 `;
 
-                // Bookmark tiles are visual containers; open/edit via footer pins only
-                tile.setAttribute("role", "group");
+                // Bookmark tiles are list items in the bookmark list
+                tile.setAttribute("role", "listitem");
                 tile.setAttribute(
                     "aria-label",
                     `Bookmark: ${escapeHtml(bookmark.title)} - ${escapeHtml(bookmark.url)}`
@@ -2920,8 +2920,8 @@
                     </div>
                 `;
 
-                // Category tiles are visual containers; actions via footer buttons only
-                tile.setAttribute("role", "group");
+                // Category tiles are list items in the bookmark list
+                tile.setAttribute("role", "listitem");
                 tile.setAttribute(
                     "aria-label",
                     `Category: ${category.name}. ${primaryMeta}${
