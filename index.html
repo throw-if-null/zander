@@ -187,7 +187,27 @@
                 outline-offset: var(--lcars-focus-outline-offset);
             }
 
-            /* Focus bar helper: draws a directional bar using ::after pseudo-element */
+            /* ==============================================
+               LCARS FOCUS BAR HELPER
+               Draws a directional bar via ::after pseudo-element.
+
+               Usage:
+               1. Add `lcars-focus-bar` class to the element
+               2. Ensure element has `position: relative`
+               3. Configure position via CSS custom properties on the element:
+                  --lcars-focus-bar-top     (default: -10px)
+                  --lcars-focus-bar-bottom  (default: auto)
+                  --lcars-focus-bar-left    (default: 0)
+                  --lcars-focus-bar-right   (default: 0)
+                  --lcars-focus-bar-height  (default: 4px)
+                  --lcars-focus-bar-width   (default: auto)
+                  --lcars-focus-bar-color   (default: var(--lcars-white))
+
+               Components using this helper:
+               - .lcars-header-bar-home (bottom edge)
+               - .lcars-sidebar-btn (left edge, vertical)
+               - .lcars-footer-bar-button (top edge)
+               ============================================== */
             .lcars-focus-bar:focus-visible::after {
                 content: "";
                 position: absolute;
@@ -328,22 +348,16 @@
                 letter-spacing: -1px;
                 border: none;
                 cursor: pointer;
+                position: relative;
+
+                /* Configure LCARS focus bar: bottom-edge indicator */
+                --lcars-focus-bar-top: auto;
+                --lcars-focus-bar-bottom: -10px;
             }
 
             .lcars-header-bar-home:focus-visible {
                 outline: none;
                 box-shadow: none;
-                position: relative;
-            }
-
-            .lcars-header-bar-home:focus-visible::after {
-                content: "";
-                position: absolute;
-                left: 0;
-                right: 0;
-                bottom: -10px;
-                height: 4px;
-                background-color: var(--lcars-white);
             }
 
             .lcars-header-bar-fill {
@@ -525,39 +539,6 @@
             .header-end-cap {
                 width: 20px;
                 background-color: var(--shape-color);
-            }
-
-            .app-title {
-                color: var(--lcars-orange);
-                background-color: var(--lcars-black);
-                font-size: 44px;
-                line-height: 1;
-                font-weight: bold;
-                text-transform: uppercase;
-                padding: 0 10px;
-                margin: 0;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                letter-spacing: -1px;
-                border: none;
-                cursor: pointer;
-            }
-
-            .app-title:focus-visible {
-                outline: none;
-                box-shadow: none;
-                position: relative;
-            }
-
-            .app-title:focus-visible::after {
-                content: "";
-                position: absolute;
-                left: 0;
-                right: 0;
-                bottom: -10px;
-                height: 4px;
-                background-color: var(--lcars-white);
             }
 
             /* Sidebar (Full Height Column) */
@@ -829,7 +810,9 @@
                 outline: none;
             }
 
-            /* Focus bar indicator for expandable items */
+            /* Focus bar indicator for expandable items.
+               NOTE: Uses component-specific implementation (not lcars-focus-bar helper)
+               because position depends on --lcars-expandable-gap which is a component variable. */
             .lcars-expandable-item:focus-visible::after {
                 content: "";
                 position: absolute;
@@ -1306,9 +1289,12 @@
                 cursor: default;
             }
 
-            /* Category variant: uses --tile-color from JS */
+            /* Category variant: uses --tile-color from JS, includes footer */
             .lcars-tile--category {
                 --lcars-tile-bg: var(--tile-color, var(--theme-main));
+                grid-template-rows: auto 1fr auto;
+                user-select: none;
+                cursor: default;
             }
 
             /* Settings variant: button element styling */
@@ -1503,19 +1489,6 @@
             /* Footer buttons use the LCARS focus bar helper (no outline) */
             .lcars-footer-bar-button:focus-visible {
                 outline: none;
-            }
-
-            .lcars-footer-bar-button:focus-visible::after {
-                /* use lcars-focus-bar helper via variables configured on .lcars-footer-bar-button */
-                content: "";
-                position: absolute;
-                left: 0;
-                right: 0;
-                top: var(--lcars-focus-bar-top, -9px);
-                bottom: var(--lcars-focus-bar-bottom, auto);
-                height: var(--lcars-focus-bar-height, 4px);
-                background-color: var(--lcars-focus-bar-color, var(--lcars-white));
-                border-radius: 0;
             }
 
 
@@ -1808,6 +1781,10 @@
                 --lcars-pin-bg: var(--theme-main);
             }
 
+            .lcars-pin--open {
+                --lcars-pin-bg: var(--lcars-blue);
+            }
+
             .lcars-pin--delete {
                 --lcars-pin-bg: var(--lcars-red);
             }
@@ -1864,7 +1841,7 @@
         <div class="lcars-app">
             <!-- Header Bar (Left) -->
             <div class="lcars-header-bar">
-                <button class="lcars-header-bar-home" id="homeBtn" aria-label="Home - Bookmarks View">ZANDER</button>
+                <button class="lcars-focus-bar lcars-header-bar-home" id="homeBtn" aria-label="Home - Bookmarks View">ZANDER</button>
                 <div class="lcars-header-bar-fill"></div>
                 <div class="lcars-header-bar-end-cap"></div>
             </div>
@@ -2945,8 +2922,6 @@
                 const tile = document.createElement("div");
                 tile.className = "lcars-tile lcars-tile--category";
                 tile.dataset.id = category.id;
-                tile.setAttribute("role", "button");
-                tile.setAttribute("tabindex", "0");
 
                 const color = category.color || "var(--theme-main)";
                 tile.style.setProperty("--tile-color", color);
@@ -2981,17 +2956,22 @@
                     : "";
 
                 tile.innerHTML = `
-        <div class="lcars-tile-label">${escapeHtml(category.name)}</div>
-        <div class="lcars-tile-meta">
-            <div class="lcars-tile-meta-primary">${primaryMeta}</div>
-            <div class="lcars-tile-meta-secondary">${escapeHtml(createdAtLabel)}</div>
-        </div>
-        <button class="lcars-pin lcars-pin--sm lcars-pin--edit" type="button" title="Edit Category" aria-label="Edit Category ${escapeHtml(category.name)}"></button>
-    `;
+                    <div class="lcars-tile-label">${escapeHtml(category.name)}</div>
+                    <div class="lcars-tile-meta">
+                        <div class="lcars-tile-meta-primary">${escapeHtml(primaryMeta)}</div>
+                        <div class="lcars-tile-meta-secondary">${escapeHtml(createdAtLabel)}</div>
+                    </div>
+                    <div class="lcars-tile-footer">
+                        <button class="lcars-pin lcars-pin--sm lcars-pin--edit" type="button" title="Edit Category" aria-label="Edit Category ${escapeHtml(category.name)}"></button>
+                        <button class="lcars-pin lcars-pin--sm lcars-pin--open" type="button" title="Open Category" aria-label="Open Category ${escapeHtml(category.name)}"></button>
+                    </div>
+                `;
 
+                // Category tiles are visual containers; actions via footer buttons only
+                tile.setAttribute("role", "group");
                 tile.setAttribute(
                     "aria-label",
-                    `Category ${category.name}. ${primaryMeta}${
+                    `Category: ${category.name}. ${primaryMeta}${
                         createdAtLabel ? ". " + createdAtLabel : ""
                     }`,
                 );
@@ -4424,12 +4404,20 @@
                 const observer = new MutationObserver(updateScrollButtons);
                 observer.observe(sidebarCategories, { childList: true, subtree: true });
 
-                // Keyboard arrow navigation for category buttons
+                // Keyboard navigation for category buttons
                 sidebarCategories.addEventListener("keydown", (e) => {
-                    if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
-
                     const focusedBtn = document.activeElement;
                     if (!focusedBtn || !focusedBtn.classList.contains("lcars-sidebar-btn")) return;
+
+                    // Handle Enter/Space to activate category (explicit keyboard activation)
+                    if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        focusedBtn.click();
+                        return;
+                    }
+
+                    // Handle arrow key navigation
+                    if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
 
                     e.preventDefault();
 
@@ -4496,13 +4484,18 @@
                                 return;
                             }
 
-                            // Click on tile body navigates into category
-                            e.preventDefault();
-                            e.stopPropagation();
-                            state.currentCategory = categoryTile.dataset.id;
-                            saveData();
-                            renderGrid();
-                            renderCategories();
+                            // Check if open pin was clicked
+                            if (e.target.closest(".lcars-pin--open")) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                state.currentCategory = categoryTile.dataset.id;
+                                saveData();
+                                renderGrid();
+                                renderCategories();
+                                return;
+                            }
+
+                            // Clicks on tile body do nothing; use footer buttons
                             return;
                         }
 
@@ -4534,6 +4527,7 @@
 
                         // Clicks on the tile body do not trigger open/edit; pins are the only controls
                     });
+
 
                 }
 

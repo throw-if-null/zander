@@ -173,27 +173,33 @@ A documentation comment was added to the `body` block in `index.html` explaining
 
 ---
 
-### 7. Focus Bar Pattern Not Applied Consistently
+### 7. ~~Focus Bar Pattern Not Applied Consistently~~ ✅ RESOLVED
 
-`.lcars-focus-bar` is defined as a helper class, but many components duplicate the focus bar logic instead of using it:
+~~`.lcars-focus-bar` is defined as a helper class, but many components duplicate the focus bar logic instead of using it.~~
 
-```css
-.lcars-footer-bar-button:focus-visible::after {
-    /* Duplicates the focus bar pattern instead of using helper */
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: var(--lcars-focus-bar-top, -9px);
-    ...
-}
-```
+**Resolution:** Consolidated focus bar implementations to use the helper class consistently:
 
-The same duplication exists for `.app-title`, `.lcars-header-bar-home`, `.lcars-sidebar-btn`, etc.
+- ✅ Added `lcars-focus-bar` class to `.lcars-header-bar-home` in HTML
+- ✅ Configured `.lcars-header-bar-home` with focus bar CSS variables (bottom edge indicator)
+- ✅ Removed duplicate `.lcars-header-bar-home:focus-visible::after` rule
+- ✅ Removed duplicate `.lcars-footer-bar-button:focus-visible::after` rule (already had class + variables)
+- ✅ Removed dead `.app-title` CSS (was not used in HTML or JS)
+- ✅ Added comprehensive documentation comment to the focus bar helper explaining usage pattern
+- ✅ Added note to `.lcars-expandable-item` explaining why it uses component-specific implementation
 
-**Action:** Either:
-- Apply `lcars-focus-bar` class in HTML and remove duplicate CSS, or
-- Accept that focus bar is per-component (and remove the helper class)
+**Components now using `lcars-focus-bar` helper:**
+
+| Component | Focus Bar Position | Notes |
+|-----------|-------------------|-------|
+| `.lcars-header-bar-home` | Bottom edge | Configured via `--lcars-focus-bar-bottom: -10px` |
+| `.lcars-sidebar-btn` | Left edge (vertical) | Configured via width/height variables |
+| `.lcars-footer-bar-button` | Top edge | Configured via `--lcars-focus-bar-top: -9px` |
+
+**Component-specific implementations (intentionally not using helper):**
+
+| Component | Reason |
+|-----------|--------|
+| `.lcars-expandable-item` | Uses `calc(-1 * var(--lcars-expandable-gap))` which depends on component variable |
 
 ---
 
@@ -228,7 +234,7 @@ vs
 | Legacy cleanup | 🟢 Complete | ✅ Removed ~470 lines of duplicates |
 | Naming convention | 🟢 Complete | ✅ Documented in DESIGN.md, legacy classes renamed |
 | Form primitives | 🟢 Complete | ✅ Namespaced as `.lcars-input`, `.lcars-select`, `.lcars-textarea` |
-| Focus system | 🟡 Partial | Consolidate to use helper class consistently |
+| Focus system | 🟢 Complete | ✅ Consolidated to use `lcars-focus-bar` helper class |
 | Extension points | 🟢 Complete | ✅ Removed unused class, documented pattern |
 
 ---
@@ -267,11 +273,15 @@ vs
 3. ✅ Replaced global `input, select, textarea` styling with namespaced classes
 4. ✅ Updated focus-visible selectors to use namespaced classes
 
-### Phase 4: Focus System Consolidation
+### Phase 4: Focus System Consolidation ✅ COMPLETE
 
-1. Decide on focus bar strategy (helper class vs per-component)
-2. Consolidate duplicate focus bar implementations
-3. Test keyboard navigation across all components
+1. ✅ Decided on focus bar strategy: use helper class with component-specific exceptions
+2. ✅ Consolidated duplicate focus bar implementations:
+   - Added `lcars-focus-bar` class to `.lcars-header-bar-home` in HTML
+   - Removed duplicate `::after` rules for `.lcars-header-bar-home` and `.lcars-footer-bar-button`
+   - Removed dead `.app-title` CSS
+3. ✅ Documented helper usage pattern and component-specific exceptions
+4. Test keyboard navigation across all components (manual verification recommended)
 
 ### Phase 5: Documentation ✅ COMPLETE
 
