@@ -2472,6 +2472,10 @@
             const settingsPageReset = $(".js-settings-page-reset");
             const categoryConfigList = $(".js-category-config-list");
             const importInput = $(".js-import-input");
+            const aboutViewRoot = $(".js-about-view");
+            const aboutStardateEl = aboutViewRoot
+                ? aboutViewRoot.querySelector(".js-about-stardate")
+                : null;
 
             // Dialogs (query from document since they render at root level)
             const bookmarkDialog = $dialog(".js-bookmark-dialog");
@@ -2509,6 +2513,69 @@
             const colorPickerDialog = $dialog(".js-color-picker-dialog");
             const colorGrid = colorPickerDialog?.querySelector(".js-color-grid");
 
+            // --- Dialog focus management helper ---
+            // Ensures focus is moved into the dialog on open, trapped while open,
+            // and returned to the element that triggered the dialog on close.
+            function openDialogWithFocusTrap(dialog, initialFocusSelector, triggerElement) {
+                if (!dialog) return;
+
+                const previouslyFocused = triggerElement || document.activeElement;
+
+                const getFocusableElements = () => {
+                    return Array.from(
+                        dialog.querySelectorAll(
+                            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+                        ),
+                    ).filter((el) => !el.hasAttribute("disabled") && !el.getAttribute("aria-hidden"));
+                };
+
+                const handleKeydown = (event) => {
+                    if (event.key !== "Tab") return;
+
+                    const focusable = getFocusableElements();
+                    if (focusable.length === 0) return;
+
+                    const first = focusable[0];
+                    const last = focusable[focusable.length - 1];
+                    const current = document.activeElement;
+
+                    if (event.shiftKey) {
+                        // Shift+Tab
+                        if (current === first || !dialog.contains(current)) {
+                            event.preventDefault();
+                            last.focus();
+                        }
+                    } else {
+                        // Tab
+                        if (current === last || !dialog.contains(current)) {
+                            event.preventDefault();
+                            first.focus();
+                        }
+                    }
+                };
+
+                const handleClose = () => {
+                    dialog.removeEventListener("close", handleClose);
+                    dialog.removeEventListener("keydown", handleKeydown);
+                    if (previouslyFocused && previouslyFocused.focus) {
+                        previouslyFocused.focus();
+                    }
+                };
+
+                dialog.addEventListener("keydown", handleKeydown);
+                dialog.addEventListener("close", handleClose);
+
+                dialog.showModal();
+
+                // After opening, move focus to the requested initial control or first focusable
+                const desiredInitial =
+                    (initialFocusSelector && dialog.querySelector(initialFocusSelector)) ||
+                    getFocusableElements()[0];
+                if (desiredInitial && desiredInitial.focus) {
+                    desiredInitial.focus();
+                }
+            }
+
             function showConfirm(title, message, onOk) {
                 confirmTitle.textContent = title;
                 confirmMessage.textContent = message;
@@ -2530,7 +2597,7 @@
 
                 confirmOkBtn.addEventListener("click", handleOk);
                 confirmCancelBtn.addEventListener("click", handleCancel);
-                confirmDialog.showModal();
+                openDialogWithFocusTrap(confirmDialog, ".js-confirm-ok-btn", document.activeElement);
             }
 
             function openColorPicker(current, onSelect) {
@@ -2550,7 +2617,7 @@
                     };
                     colorGrid.appendChild(btn);
                 });
-                colorPickerDialog.showModal();
+                openDialogWithFocusTrap(colorPickerDialog, ".color-option[aria-current='true']", document.activeElement);
             }
 
             function showAlert(title, message) {
@@ -2572,7 +2639,7 @@
                 };
 
                 confirmOkBtn.addEventListener("click", handleOk);
-                confirmDialog.showModal();
+                openDialogWithFocusTrap(confirmDialog, ".js-confirm-ok-btn", document.activeElement);
             }
 
             function init() {
@@ -3402,7 +3469,7 @@
                 urlProtocolSelect.value = "https://";
                 categoryInput.value = state.currentCategory;
                 deleteBtn.style.display = "none";
-                bookmarkDialog.showModal();
+                openDialogWithFocusTrap(bookmarkDialog, "#titleInput", document.activeElement);
             }
 
             function openEditDialog(bookmark) {
@@ -3440,7 +3507,7 @@
                     bookmark.categoryId || state.categories[0].id;
                 deleteBtn.style.display = "inline-block";
                 deleteBtn.onclick = () => deleteBookmark(bookmark.id);
-                bookmarkDialog.showModal();
+                openDialogWithFocusTrap(bookmarkDialog, "#titleInput", document.activeElement);
             }
 
             function saveBookmark(e) {
@@ -3449,8 +3516,9 @@
                 const id = bookmarkIdInput.value;
                 const title = titleInput.value;
                 const description = descriptionInput.value.trim();
-                const protocol = urlProtocolSelect.value;
-                const rawUrl = urlInput.value.trim();
+                 const protocol = (urlProtocolSelect && urlProtocolSelect.value) || "https://";
+                 const rawUrl = urlInput.value.trim();
+
                 const categoryId = categoryInput.value;
 
                 if (!title.trim()) {
@@ -3502,172 +3570,34 @@
                 bookmarkDialog.close();
             }
 
-            function deleteBookmark(id) {
-                showConfirm("DELETE ENTRY", "CONFIRM DELETION?", () => {
-                    state.bookmarks = state.bookmarks.filter(
-                        (b) => b.id !== id,
-                    );
-                    saveData();
-                    renderGrid();
-                    bookmarkDialog.close();
-                });
-            }
-
-            // --- Category Management ---
-
-            function findCategoryAndParent(id, cats, parent) {
-                return walkCategories(
-                    cats,
-                    (cat, parentNode, depth, index, siblings) => {
-                        if (cat.id === id) {
-                            return {
-                                category: cat,
-                                parent: parentNode,
-                                siblings,
-                                index,
-                            };
-                        }
-                        return undefined;
-                    },
-                    parent,
-                ) || null;
-            }
-
-            function renderCategoryConfig() {
-                categoryConfigList.innerHTML = "";
-
-                // Only render root categories
-                state.categories.forEach((cat, index) => {
-                    const row = document.createElement("div");
-                    row.className = "category-config-row";
-
-                    // Color Picker
-                    const colorBtn = document.createElement("button");
-                    colorBtn.className = "category-color-swatch";
-                    colorBtn.style.backgroundColor = cat.color;
-                    colorBtn.setAttribute("aria-label", `Change color for ${cat.name} category`);
-                    colorBtn.onclick = () => {
-                        openColorPicker(cat.color, (newColor) => {
-                            cat.color = newColor;
-                            saveData();
-                            renderCategories();
-                            renderGrid();
-                            renderCategoryConfig();
-                        });
-                    };
-
-                    // Name Input
-                    const nameInput = document.createElement("input");
-                    nameInput.type = "text";
-                    nameInput.value = cat.name;
-                    nameInput.style.width = "100%";
-                    nameInput.style.backgroundColor = "var(--lcars-dark-2)";
-                    nameInput.style.border = "1px solid var(--lcars-blue)";
-                    nameInput.style.color = "var(--lcars-beige)";
-                    nameInput.style.borderRadius = "var(--lcars-radius-md)";
-                    nameInput.style.padding = "8px 12px";
-                    nameInput.setAttribute("aria-label", `Edit name for ${cat.name} category`);
-                    nameInput.onchange = (e) => {
-                        cat.name = e.target.value.toUpperCase();
-                        saveData();
-                        renderCategories();
-                    };
-
-                    // Move Up
-                    const upBtn = document.createElement("button");
-                    upBtn.className = "lcars-pin lcars-pin--lg lcars-pin--bordered";
-                    upBtn.dataset.glyph = "up";
-                    upBtn.innerHTML = `
-                        <svg aria-hidden="true" focusable="false"><use href="#icon-arrow-up"></use></svg>
-                    `;
-                    upBtn.setAttribute("aria-label", `Move ${cat.name} category up`);
-                    upBtn.disabled = index === 0;
-                    if (index === 0) upBtn.style.opacity = "0.5";
-                    upBtn.onclick = () => moveCategory(cat.id, -1);
-
-                    // Move Down
-                    const downBtn = document.createElement("button");
-                    downBtn.className = "lcars-pin lcars-pin--lg lcars-pin--bordered";
-                    downBtn.dataset.glyph = "down";
-                    downBtn.innerHTML = `
-                        <svg aria-hidden="true" focusable="false"><use href="#icon-arrow-down"></use></svg>
-                    `;
-                    downBtn.setAttribute("aria-label", `Move ${cat.name} category down`);
-                    downBtn.disabled = index === state.categories.length - 1;
-                    if (index === state.categories.length - 1)
-                        downBtn.style.opacity = "0.5";
-                    downBtn.onclick = () => moveCategory(cat.id, 1);
-
-                    // Delete
-                    const delBtn = document.createElement("button");
-                    delBtn.className = "lcars-pin lcars-pin--lg lcars-pin--bordered lcars-pin--delete";
-                    delBtn.dataset.glyph = "delete";
-                    delBtn.innerHTML = `
-                        <svg aria-hidden="true" focusable="false"><use href="#icon-delete"></use></svg>
-                    `;
-                    delBtn.setAttribute("aria-label", `Delete ${cat.name} category`);
-                    delBtn.onclick = () => deleteCategory(cat.id);
-
-                    const controls = document.createElement("div");
-                    controls.className = "category-config-row-controls";
-                    controls.appendChild(upBtn);
-                    controls.appendChild(downBtn);
-                    controls.appendChild(delBtn);
-
-                    row.appendChild(colorBtn);
-                    row.appendChild(nameInput);
-                    row.appendChild(controls);
-
-                    categoryConfigList.appendChild(row);
-                });
-            }
-
-
-            function openAddCategoryDialog(preselectedParentId = null) {
+            function openAddCategoryDialog() {
                 categoryForm.reset();
                 categoryIdInput.value = "";
                 categoryDialogTitle.textContent = "NEW CATEGORY";
                 categoryDeleteBtn.style.display = "none";
+
+                // Show current stardate in the category dialog meta
                 updateStardateDisplay(categoryStardateEl);
 
-                // Populate Parent Options
-                categoryParentInput.innerHTML = '<option value="">(ROOT)</option>';
+                // This dialog only creates sub-categories; no ROOT option
+                categoryParentInput.innerHTML = "";
+                walkCategories(state.categories, (cat) => {
+                    const opt = document.createElement("option");
+                    opt.value = cat.id;
+                    opt.textContent = cat.name;
+                    categoryParentInput.appendChild(opt);
+                });
 
-                function renderOptions(cats, level = 0) {
-                    cats.forEach(cat => {
-                        const opt = document.createElement("option");
-                        opt.value = cat.id;
-                        opt.textContent = "- ".repeat(level) + cat.name;
-
-                        if (preselectedParentId) {
-                            if (cat.id === preselectedParentId) {
-                                opt.selected = true;
-                            }
-                        } else if (state.currentCategory === cat.id) {
-                            opt.selected = true;
-                        }
-
-                        categoryParentInput.appendChild(opt);
-                        if (cat.children) {
-                            renderOptions(cat.children, level + 1);
-                        }
-                    });
-                }
-                renderOptions(state.categories);
-
-                // Helper to update color picker visibility based on parent selection
                 function updateColorPickerVisibility() {
-                    const isSubCategory = categoryParentInput.value !== "";
-                    if (isSubCategory) {
+                    const isSubCat = categoryParentInput.value !== "";
+                    if (isSubCat) {
                         categoryColorFormGroup.style.display = "none";
                         categoryColorInput.value = "var(--theme-secondary)";
                     } else {
                         categoryColorFormGroup.style.display = "block";
-                        // Reset to default color for root categories
                         const defaultColor = getDefaultCategoryColor(currentTheme);
                         categoryColorInput.value = defaultColor;
-                        // Update visual selection
-                        Array.from(categoryColorGrid.children).forEach(c => {
+                        Array.from(categoryColorGrid.children).forEach((c) => {
                             c.style.border = c.style.backgroundColor === defaultColor ? "2px solid white" : "none";
                         });
                     }
@@ -3678,7 +3608,7 @@
                 const defaultColor = getDefaultCategoryColor(currentTheme);
                 categoryColorInput.value = defaultColor;
 
-                LCARS_PALETTE.forEach(color => {
+                LCARS_PALETTE.forEach((color) => {
                     const div = document.createElement("div");
                     div.className = "color-option";
                     div.style.backgroundColor = color;
@@ -3689,19 +3619,16 @@
                     }
                     div.onclick = () => {
                         categoryColorInput.value = color;
-                        Array.from(categoryColorGrid.children).forEach(c => c.style.border = "none");
+                        Array.from(categoryColorGrid.children).forEach((c) => (c.style.border = "none"));
                         div.style.border = "2px solid white";
                     };
                     categoryColorGrid.appendChild(div);
                 });
 
-                // Add change listener for parent selection
                 categoryParentInput.onchange = updateColorPickerVisibility;
-
-                // Initial visibility check
                 updateColorPickerVisibility();
 
-                categoryDialog.showModal();
+                openDialogWithFocusTrap(categoryDialog, "#categoryNameInput", document.activeElement);
             }
 
             function openEditCategoryDialog(category) {
@@ -3814,7 +3741,27 @@
                 // Set initial visibility
                 categoryColorFormGroup.style.display = isSubCategory ? "none" : "block";
 
-                categoryDialog.showModal();
+                openDialogWithFocusTrap(categoryDialog, "#categoryNameInput", document.activeElement);
+            }
+
+            function findCategoryAndParent(id, cats, parent) {
+                return (
+                    walkCategories(
+                        cats,
+                        (cat, parentNode, depth, index, siblings) => {
+                            if (cat.id === id) {
+                                return {
+                                    category: cat,
+                                    parent: parentNode,
+                                    siblings,
+                                    index,
+                                };
+                            }
+                            return undefined;
+                        },
+                        parent,
+                    ) || null
+                );
             }
 
             function saveCategory(e) {
@@ -3941,6 +3888,118 @@
                     renderCategories();
                     renderCategoryConfig();
                 }
+            }
+
+            function renderCategoryConfig() {
+                if (!categoryConfigList) return;
+
+                categoryConfigList.innerHTML = "";
+
+                // Only render root categories in the configuration list for now
+                state.categories.forEach((cat, index) => {
+                    const row = document.createElement("div");
+                    row.className = "category-config-row";
+                    row.dataset.id = cat.id;
+
+                    // Color swatch button
+                    const swatchBtn = document.createElement("button");
+                    swatchBtn.type = "button";
+                    swatchBtn.className = "category-color-swatch";
+                    swatchBtn.style.backgroundColor = cat.color || getDefaultCategoryColor();
+                    swatchBtn.setAttribute(
+                        "aria-label",
+                        `Change color for category ${cat.name}`,
+                    );
+                    swatchBtn.addEventListener("click", () => {
+                        openColorPicker(cat.color || getDefaultCategoryColor(), (newColor) => {
+                            cat.color = newColor;
+                            swatchBtn.style.backgroundColor = newColor;
+                            saveData();
+                            renderCategories();
+                            renderGrid();
+                        });
+                    });
+
+                    // Name input
+                    const nameInput = document.createElement("input");
+                    nameInput.type = "text";
+                    nameInput.className = "lcars-input";
+                    nameInput.value = cat.name;
+                    nameInput.maxLength = 32;
+                    nameInput.style.textTransform = "uppercase";
+                    nameInput.setAttribute(
+                        "aria-label",
+                        `Category name for ${cat.name}`,
+                    );
+                    nameInput.addEventListener("change", () => {
+                        const value = nameInput.value.trim();
+                        if (!value) return;
+                        cat.name = value.toUpperCase();
+                        saveData();
+                        renderCategories();
+                        renderGrid();
+                        updateSettingsTileMeta();
+                    });
+
+                    // Controls: up, down, delete
+                    const controls = document.createElement("div");
+                    controls.className = "category-config-row-controls";
+
+                    const upBtn = document.createElement("button");
+                    upBtn.type = "button";
+                    upBtn.className =
+                        "lcars-pin lcars-pin--lg lcars-pin--bordered lcars-pin--edit";
+                    upBtn.setAttribute("data-glyph", "up");
+                    upBtn.setAttribute(
+                        "aria-label",
+                        `Move category ${cat.name} up`,
+                    );
+                    upBtn.innerHTML =
+                        '<svg><use href="#icon-arrow-up"></use></svg>';
+                    upBtn.addEventListener("click", () => {
+                        moveCategory(cat.id, -1);
+                    });
+
+                    const downBtn = document.createElement("button");
+                    downBtn.type = "button";
+                    downBtn.className =
+                        "lcars-pin lcars-pin--lg lcars-pin--bordered lcars-pin--edit";
+                    downBtn.setAttribute("data-glyph", "down");
+                    downBtn.setAttribute(
+                        "aria-label",
+                        `Move category ${cat.name} down`,
+                    );
+                    downBtn.innerHTML =
+                        '<svg><use href="#icon-arrow-down"></use></svg>';
+                    downBtn.addEventListener("click", () => {
+                        moveCategory(cat.id, 1);
+                    });
+
+                    const deleteBtn = document.createElement("button");
+                    deleteBtn.type = "button";
+                    deleteBtn.className =
+                        "lcars-pin lcars-pin--lg lcars-pin--bordered lcars-pin--delete";
+                    deleteBtn.setAttribute("data-glyph", "delete");
+                    deleteBtn.setAttribute(
+                        "aria-label",
+                        `Delete category ${cat.name}`,
+                    );
+                    deleteBtn.innerHTML =
+                        '<svg><use href="#icon-delete"></use></svg>';
+                    deleteBtn.addEventListener("click", () => {
+                        deleteCategory(cat.id);
+                    });
+
+                    controls.appendChild(upBtn);
+                    controls.appendChild(downBtn);
+                    controls.appendChild(deleteBtn);
+
+                    row.appendChild(swatchBtn);
+                    row.appendChild(nameInput);
+                    row.appendChild(controls);
+
+                    categoryConfigList.appendChild(row);
+                });
             }
 
             function deleteCategory(id) {
