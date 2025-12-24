@@ -846,6 +846,9 @@
                 display: grid;
                 grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
                 gap: 20px;
+                list-style: none;
+                padding-left: 0;
+                margin: 0;
             }
 
             /* ==============================================
@@ -1834,9 +1837,9 @@
                             <!-- Segments injected via JS -->
                         </nav>
                     </div>
-                    <div class="bookmark-grid js-bookmark-grid" role="list">
+                    <ul class="bookmark-grid js-bookmark-grid">
                         <!-- Bookmarks injected here -->
-                    </div>
+                    </ul>
                     <div
                         class="empty-state js-empty-state"
                         style="display: none; text-align: center; padding: 50px"
@@ -2834,12 +2837,12 @@
 
 
             function createBookmarkTile(bookmark) {
-                const tile = document.createElement("div");
+                const tile = document.createElement("li");
                 tile.className = "lcars-tile lcars-tile--bookmark";
                 tile.dataset.id = bookmark.id;
-                tile.setAttribute("role", "listitem");
 
                 // Use category color for tile if available
+
                 const cat = walkCategories(state.categories, (c) => {
                     if (c.id === bookmark.categoryId) return c;
                     return undefined;
@@ -2862,7 +2865,6 @@
                 `;
 
                 // Bookmark tiles are list items in the bookmark list
-                tile.setAttribute("role", "listitem");
                 tile.setAttribute(
                     "aria-label",
                     `Bookmark: ${escapeHtml(bookmark.title)} - ${escapeHtml(bookmark.url)}`
@@ -2872,7 +2874,7 @@
             }
 
             function createCategoryTile(category) {
-                const tile = document.createElement("div");
+                const tile = document.createElement("li");
                 tile.className = "lcars-tile lcars-tile--category";
                 tile.dataset.id = category.id;
 
@@ -2921,7 +2923,6 @@
                 `;
 
                 // Category tiles are list items in the bookmark list
-                tile.setAttribute("role", "listitem");
                 tile.setAttribute(
                     "aria-label",
                     `Category: ${category.name}. ${primaryMeta}${
