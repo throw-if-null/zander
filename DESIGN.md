@@ -32,22 +32,24 @@ The outer structure is organized under `.lcars-app` and uses native view and dia
 ```/dev/null/layout.html#L1-80
 <div class="lcars-app lcars-app--fullpage">
   <!-- Header band and title -->
-  <div class="header-bar">
-    <div class="header-fill"></div>
-    <button class="app-title" id="homeBtn">
+  <div class="lcars-header-bar">
+    <button class="lcars-header-bar-home lcars-focus-bar js-home-btn" aria-label="Home - Bookmarks View">
       <!-- Title text, subtitle, and numeric callout; acts as a Home control -->
     </button>
-    <div class="header-end-cap"></div>
+    <div class="lcars-header-bar-fill"></div>
+    <div class="lcars-header-bar-end-cap"></div>
   </div>
 
   <!-- Sidebar + Frame -->
-  <aside class="sidebar-container">
-    <div class="sidebar-top-cap"></div>
-    <div class="sidebar-track" id="categorySidebar">
+<aside class="lcars-sidebar-bar">
+  <div class="lcars-sidebar-bar-top-cap"></div>
+  <div class="lcars-sidebar-bar-track" id="categorySidebar">
+
       <!-- Category buttons and filler -->
     </div>
-    <div class="sidebar-bottom-cap"></div>
-  </aside>
+  <div class="lcars-sidebar-bar-bottom-cap"></div>
+</aside>
+
 
   <!-- Main content (views and grid) -->
   <main class="main-content">
@@ -122,7 +124,7 @@ Key properties:
 
 - No gaps between grid cells: the header, sidebar caps, track, and footer visually join into a single continuous element.
 - The sidebar container spans all rows, with top and bottom caps forming the curved “elbow” connectors.
-- The sidebar track (`.sidebar-track`) hosts dynamically created category buttons and a `.sidebar-filler` that visually completes the LCARS band.
+- The sidebar track (`.lcars-sidebar-bar-track`) hosts dynamically created category buttons and a `.lcars-sidebar-bar-filler` that visually completes the LCARS band.
 - Header, sidebar filler, and footer segments are all visual consumers of a shared LCARS frame primitive, ensuring a consistent “C-shaped” navigation frame around the content.
 
 The main content sits *inside* the frame, with internal padding and margins to visually float away from the LCARS shell. The active view is controlled by applying or removing the `.active` class on `.main-view` sections via JavaScript.
@@ -131,21 +133,21 @@ The main content sits *inside* the frame, with internal padding and margins to v
 
 The continuous LCARS frame (header bar, sidebar track, footer bar) is built from a small set of reusable “frame segment” primitives. These primitives define the LCARS chrome, while structural shells like `.header-bar` and `.footer-bar` handle layout and semantics, and can themselves act as frame segments when combined with the `lcars-frame-segment` modifiers.
 
-- `.lcars-frame-segment`
+- `.lcars-frame-segment`  
   - Base visual primitive for any LCARS frame piece.
   - Applies the core frame color: `background-color: var(--shape-color);`.
   - Used for:
-    - Header bar container (when combined with `.header-bar`).
+    - Header bar container (when combined with `.lcars-header-bar`).
     - Sidebar filler segment between category buttons and bottom elbow.
-    - Footer bar container (when combined with `.footer-bar`).
+    - Footer bar container (when combined with `.lcars-footer-bar`).
 - `.lcars-frame-segment--horizontal`
   - Marks a frame segment as a horizontal bar.
   - Applies:
     - `display: flex;`
     - `align-items: center;`
   - Used for:
-    - Header bar (`.header-bar` when combined with this modifier).
-    - Footer bar (`.footer-bar` when combined with this modifier).
+    - Header bar (`.lcars-header-bar` when combined with this modifier).
+    - Footer bar (`.lcars-footer-bar` when combined with this modifier).
 - `.lcars-frame-segment--left-rounded`
   - Adds LCARS rounding on the left side of a horizontal segment:
     - `border-top-left-radius: var(--radius);`
@@ -154,40 +156,40 @@ The continuous LCARS frame (header bar, sidebar track, footer bar) is built from
     - Header bar.
     - Footer bar.
 
-Structural shells:
+Structural shells (ZANDER implementation):
 
-- `.header-bar`
+- `.lcars-header-bar`
   - Grid cell for the top-left header region.
   - Provides layout: grid placement, flex alignment for the header fill, title button, and end cap.
-  - Receives LCARS chrome by also using `lcars-frame-segment` modifiers on the same element.
-- `.footer-bar`
+  - Receives LCARS chrome via the LCARS header primitive.
+- `.lcars-footer-bar`
   - Grid cell for the bottom-left footer region.
   - Provides layout: grid placement, flex alignment, and spacing for the system status and action buttons.
-  - Receives LCARS chrome by also using `lcars-frame-segment` modifiers on the same element.
+  - Receives LCARS chrome via the LCARS footer primitive.
 
 Examples:
 
 ```/dev/null/frame-segments.html#L1-24
 <!-- Header: structural shell that is also a frame segment -->
-<div class="header-bar lcars-frame-segment lcars-frame-segment--horizontal lcars-frame-segment--left-rounded">
-  <div class="header-fill"></div>
-  <button class="app-title" id="homeBtn">ZANDER</button>
-  <div class="header-end-cap"></div>
+<div class="lcars-header-bar">
+  <button class="lcars-header-bar-home lcars-focus-bar js-home-btn" aria-label="Home - Bookmarks View">ZANDER</button>
+  <div class="lcars-header-bar-fill"></div>
+  <div class="lcars-header-bar-end-cap"></div>
 </div>
 
 <!-- Sidebar: structural track + vertical filler frame segment -->
-<div class="sidebar-track">
+<div class="lcars-sidebar-bar-track">
   <!-- category buttons injected here -->
-  <div class="sidebar-filler lcars-frame-segment"></div>
+  <div class="lcars-sidebar-bar-filler lcars-frame-segment"></div>
 </div>
 
 <!-- Footer: structural shell that is also a frame segment -->
-<div class="footer-bar lcars-frame-segment lcars-frame-segment--horizontal lcars-frame-segment--left-rounded">
+<div class="lcars-footer-bar lcars-frame-segment lcars-frame-segment--horizontal lcars-frame-segment--left-rounded">
   <!-- system status + action buttons -->
 </div>
 ```
 
-These primitives allow future LCARS UIs to reuse the same frame language (horizontal bands, vertical fillers, rounded frame corners), while structural shells like `.header-bar` and `.footer-bar` remain app-specific layout containers that *opt into* LCARS visuals by composing the `lcars-frame-segment` modifiers.
+These primitives allow future LCARS UIs to reuse the same frame language (horizontal bands, vertical fillers, rounded frame corners), while LCARS shell bars like `.lcars-header-bar`, `.lcars-sidebar-bar`, and `.lcars-footer-bar` remain app-specific layout containers that *opt into* LCARS visuals by composing the `lcars-frame-segment` modifiers.
 
 ---
 
@@ -287,9 +289,9 @@ Implementation notes:
 
 The sidebar is embedded in the right-hand frame and divided into:
 
-- **Top cap**: `.sidebar-top-cap` – rounded LCARS “elbow” connecting header to sidebar track.
-- **Track**: `.sidebar-track` – vertical orange band hosting category buttons and filler.
-- **Bottom cap**: `.sidebar-bottom-cap` – mirrored “elbow” connecting sidebar track to footer.
+- **Top cap**: `.lcars-sidebar-bar-top-cap` – rounded LCARS “elbow” connecting header to sidebar track.
+- **Track**: `.lcars-sidebar-bar-track` – vertical orange band hosting category buttons and filler.
+- **Bottom cap**: `.lcars-sidebar-bar-bottom-cap` – mirrored “elbow” connecting sidebar track to footer.
 
 ### 3.1 Visual Design
 
@@ -305,9 +307,9 @@ The sidebar is embedded in the right-hand frame and divided into:
 Example structure:
 
 ```/dev/null/sidebar.html#L1-40
-<aside class="sidebar-container">
-  <div class="sidebar-top-cap"></div>
-  <div class="sidebar-track">
+<aside class="lcars-sidebar-bar">
+  <div class="lcars-sidebar-bar-top-cap"></div>
+  <div class="lcars-sidebar-bar-track">
     <div class="lcars-sidebar-item">
       <button class="lcars-sidebar-btn active">DATABANKS</button>
       <div class="lcars-sidebar-submenu">
@@ -317,9 +319,9 @@ Example structure:
 
     <!-- More .lcars-sidebar-item entries -->
 
-    <div class="sidebar-filler"></div>
+    <div class="lcars-sidebar-bar-filler"></div>
   </div>
-  <div class="sidebar-bottom-cap"></div>
+  <div class="lcars-sidebar-bar-bottom-cap"></div>
 </aside>
 ```
 
@@ -327,14 +329,14 @@ Example structure:
 
 The top and bottom caps use CSS gradients to carve internal curves out of the LCARS band, creating continuous elbow shapes without extra SVG assets:
 
-- `.sidebar-top-cap`: uses a radial gradient at bottom-left to curve into the header.
-- `.sidebar-bottom-cap`: uses a radial gradient at top-left to curve into the footer.
+- `.lcars-sidebar-bar-top-cap`: uses a radial gradient at bottom-left to curve into the header.
+- `.lcars-sidebar-bar-bottom-cap`: uses a radial gradient at top-left to curve into the footer.
 
 Visually, the flow is:
 
 `HEADER` → `TOP CAP` → `SIDEBAR TRACK` → `BOTTOM CAP` → `FOOTER`.
 
-Category buttons and nested submenus are placed within the `.sidebar-track` and must not break the visual continuity of this frame.
+Category buttons and nested submenus are placed within the `.lcars-sidebar-bar-track` and must not break the visual continuity of this frame.
 
 ### 3.3 Category Button States
 
@@ -472,7 +474,7 @@ The About view (`.about-panel`) is an informational screen:
 
 The About panel uses the same base layout as the Settings panel but is content-focused, with minimal controls and horizontal rules dividing the sections, matching the current `aboutView` markup in `index.html`.
 
-The **header title** (`.app-title`, showing “ZANDER”) functions as a **Home control**: clicking it returns the main content to the Bookmarks view. This is mirrored by the `Alt+H` keyboard shortcut (see Keyboard & Accessibility section), giving both a prominent visual target and a power-user shortcut for returning “home”. When focused via keyboard, the header title button uses the same LCARS focus pattern as other primary controls: a single, solid white focus indicator rendered as a line along the **bottom edge** of the button, implemented via `:focus-visible::after`.
+The **header title** (`.lcars-header-bar-home`, showing “ZANDER”) functions as a **Home control**: clicking it returns the main content to the Bookmarks view. This is mirrored by the `Alt+H` keyboard shortcut (see Keyboard & Accessibility section), giving both a prominent visual target and a power-user shortcut for returning “home”. When focused via keyboard, the header title button uses the same LCARS focus pattern as other primary controls: a single, solid white focus indicator rendered as a line along the **bottom edge** of the button, implemented via the shared `lcars-focus-bar` helper.
 
 ---
 
@@ -677,7 +679,7 @@ Design notes:
 
 ### 8.1 Footer Bar
 
-The footer bar (`.footer-bar`) anchors global controls:
+The footer bar (`.lcars-footer-bar`) anchors global controls:
 
 - Left: Indicator stub aligning with the LCARS frame.
 - Center/right: Action buttons:
@@ -878,24 +880,51 @@ All CSS class names in ZANDER follow a **BEM-like naming convention** with the `
 
 ### Canonical Class List
 
-The following classes are the canonical LCARS primitives:
+The following classes are the canonical LCARS primitives and form the **public CSS API** for the LCARS design system. Application shells (including ZANDER) should use these primitives directly rather than redefining LCARS visuals.
 
 - **Frame:** `lcars-app`, `lcars-frame-segment`, `lcars-elbow`
 - **Bars:** `lcars-header-bar`, `lcars-footer-bar`, `lcars-sidebar-bar`
 - **Buttons:** `lcars-button`, `lcars-pill`, `lcars-sidebar-btn`, `lcars-footer-bar-button`, `lcars-action-btn`
-- **Tiles:** `lcars-tile`, `lcars-tile--bookmark`, `lcars-tile--category`, `lcars-tile--settings`
-- **Pins:** `lcars-pin`, `lcars-pin--sm`, `lcars-pin--lg`, `lcars-pin--bordered`
+- **Tiles:** `lcars-tile`, `lcars-tile--bookmark`, `lcars-tile--category`, `lcars-tile--settings`, `lcars-tile--danger`
+- **Pins:** `lcars-pin`, `lcars-pin--sm`, `lcars-pin--lg`, `lcars-pin--bordered`, `lcars-pin--edit`, `lcars-pin--url`, `lcars-pin--delete`
 - **Menus:** `lcars-expandable`, `lcars-expandable-menu`, `lcars-expandable-item`
 - **Sidebar:** `lcars-sidebar-item`, `lcars-sidebar-submenu`
-- **Forms:** `lcars-form-group`
-- **Dialogs:** `lcars-dialog-header`, `lcars-dialog-body`, `lcars-dialog-footer`
-- **Utilities:** `lcars-focus-bar`, `lcars-focus-outline`, `lcars-breadcrumb`, `lcars-status-display`
+- **Forms:** `lcars-form-group`, `lcars-input`, `lcars-select`, `lcars-textarea`
+- **Dialogs:** `lcars-dialog`, `lcars-dialog-header`, `lcars-dialog-body`, `lcars-dialog-footer`
+- **Utilities:** `lcars-focus-bar`, `lcars-focus-outline`, `lcars-breadcrumb`, `lcars-status-display`, `lcars-scroll-container`, `lcars-arrow-btn`
+
+---
+
+### 10.6 LCARS Primitive → Svelte Component Mapping
+
+The table below summarizes how each LCARS primitive maps to a proposed Svelte 5 component API. CSS classes remain the primary styling contract; components are thin wrappers that wire markup and ARIA.
+
+| LCARS Primitive (CSS) | Svelte Component | Notes |
+|-----------------------|------------------|-------|
+| `.lcars-app` | `LcarsApp` | Root shell container; prop: `fullpage`. |
+| `.lcars-header-bar` + children (`-home`, `-fill`, `-end-cap`) | `LcarsHeaderBar` | Slots: `home`, `fill`, `endCap`. |
+| `.lcars-footer-bar`, `.lcars-footer-bar-status`, `.lcars-footer-bar-actions` | `LcarsFooterBar` | Slots: `status`, `actions`. |
+| `.lcars-sidebar-bar` + children (`-top-cap`, `-track`, `-filler`, `-bottom-cap`) | `LcarsSidebarBar` | Default slot renders inside `-track`. |
+| `.lcars-status-display` (+ `-text`, `-info`, `-label`, `-value`) | `LcarsStatusDisplay` | Props: `metrics`, optional label. |
+| `.lcars-breadcrumb` (+ segments/separators) | `LcarsBreadcrumb` | Props: `segments`, `variant`; emits `segmentClick`. |
+| `.lcars-button`, `.lcars-pill`, color utilities | `LcarsButton` | Prop: `variant = "orange"\|"dark"\|"danger"\|"beige"\|"custom"`. |
+| `.lcars-footer-bar-button` | `LcarsFooterButton` | For use inside `LcarsFooterBar`; composes `LcarsButton`. |
+| `.lcars-sidebar-btn`, `.lcars-sidebar-item`, `.lcars-sidebar-submenu` | `LcarsSidebarButton` | Props: `active`, `color`, `label`; emits `click`. |
+| `.lcars-tile` (+ `--bookmark`, `--category`, `--settings`, `--danger`) | `LcarsTile` | Props: `variant`, `color`; slots: `label`, `meta`, `footer`. |
+| `.lcars-pin` (+ size/color modifiers) | `LcarsPin` | Props: `size`, `kind`; optional `data-glyph` for icons. |
+| `.lcars-expandable`, `.lcars-expandable-menu`, `.lcars-expandable-item` | `LcarsExpandable`, `LcarsExpandableItem` | Slots: `trigger`, `menu`; prop: `direction`. |
+| `.lcars-input`, `.lcars-select`, `.lcars-textarea` | `LcarsInput`, `LcarsSelect`, `LcarsTextarea` | Forward native attributes/ARIA. |
+| `.lcars-dialog-container`, `.lcars-dialog`, header/body/footer | `LcarsDialog` | Props: `open`; slots: `header`, `body`, `footer`. |
+| `.lcars-scroll-container` | `LcarsScrollContainer` | Wraps scrollable regions with hidden scrollbars. |
+| `.lcars-arrow-btn` | `LcarsArrowButton` | Prop: `direction` (`"up"\|"down"\|"left"\|"right"`). |
+| Theme helpers on `body[data-theme]` | `LcarsThemeStore` | Manages `data-theme` + `localStorage`. |
+| SVG `#icon-*` symbols | `LcarsIcon` | Renders `<svg><use href="#id"/></svg>`. |
 
 ---
 
 ## 11. LCARS Primitive Catalog
 
-This section lists the **reusable LCARS primitives** that ZANDER consumes. These are the building blocks for future LCARS-based applications; app-specific shells and layouts (like `header-bar` and `footer-bar`) are expected to compose these primitives rather than redefine LCARS visuals.
+This section lists the **reusable LCARS primitives** that ZANDER consumes. These are the building blocks for future LCARS-based applications; app-specific shells and layouts should be built from these primitives rather than redefine LCARS visuals.
 
 ### 11.1 CSS Scoping Strategy
 
@@ -1302,20 +1331,10 @@ element.innerHTML = `<svg aria-hidden="true" focusable="false"><use href="#icon-
 
 ### 11.13 Layout Shell Conventions (ZANDER-Specific Consumers)
 
-These classes are **ZANDER-specific** implementations that consume the shell bar primitives. Future apps should use the `lcars-*` primitives directly.
+ZANDER now uses the shell bar primitives directly in the DOM:
 
-- `header-bar` → Migrating to `lcars-header-bar`
-  - ZANDER's top-left header region.
-  - Contains the "ZANDER" home button and end cap.
-- `sidebar-container`, `sidebar-track`, `sidebar-top-cap`, `sidebar-bottom-cap` → Migrating to `lcars-sidebar-bar`
-  - ZANDER's right-hand sidebar with scrollable category buttons.
-  - Uses:
-    - `lcars-elbow` for curved elbows.
-    - `lcars-scroll-container` for scrollable category list.
-    - `lcars-arrow-btn` for scroll navigation.
-- `footer-bar` → Migrating to `lcars-footer-bar`
-  - ZANDER's bottom-left footer with status display and action buttons.
-
-**Migration path:** When refactoring, replace ZANDER-specific classes with the equivalent `lcars-*` primitives documented in Section 11.4 (Shell Bar Primitives). The primitives provide the same visual appearance with standardized naming and configuration options.
+- Header shell uses `lcars-header-bar` with `lcars-header-bar-home`, `lcars-header-bar-fill`, and `lcars-header-bar-end-cap`.
+- Sidebar shell uses `lcars-sidebar-bar` with `lcars-sidebar-bar-top-cap`, `lcars-sidebar-bar-track`, `lcars-sidebar-bar-filler`, and `lcars-sidebar-bar-bottom-cap`.
+- Footer shell uses `lcars-footer-bar` with `lcars-footer-bar-status`, `lcars-footer-bar-actions`, and `lcars-footer-bar-button`.
 
 When extracting a standalone LCARS design system, the `lcars-*` primitives listed above should form the **public API**. Application shells (like those in ZANDER) are responsible for arranging these primitives into a complete console layout.

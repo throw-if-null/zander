@@ -94,7 +94,7 @@ The layout is a continuous LCARS “C‑shaped” frame wrapping the content:
 1. **Header Bar (Top‑Left)**
    - Displays the system title and decorative LCARS band.
    - The `ZANDER` title in the header acts as a **Home control**: clicking it returns to the main Bookmarks view (same behavior as `Alt + H`).
-   - Connects into the sidebar via the **top elbow** (`.sidebar-top-cap`).
+    - Connects into the sidebar via the **top elbow** (`.lcars-sidebar-bar-top-cap`).
 
 2. **Sidebar (Right Column)**
    - Continuous vertical LCARS bar with:

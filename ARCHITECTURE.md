@@ -439,24 +439,26 @@ Semantics:
   A hidden `<svg><defs>` block at the top of `<body>` containing reusable `<symbol>` elements for icons. Icons are referenced throughout the app via `<use href="#icon-name">`. See DESIGN.md Section 11.12 for the icon catalog.
 - `.lcars-app`  
   Root grid container for the entire LCARS console, including header, sidebar frame, main content, and footer.
-- `.header-bar`  
+- `.lcars-header-bar`  
   Top LCARS band with title text and decorative elements.
-- `.sidebar-container`  
+- `.lcars-sidebar-bar`  
   Column on the right forming the vertical LCARS frame:
-  - `.sidebar-top-cap`
-  - `.sidebar-track`
-  - `.sidebar-bottom-cap`
+  - `.lcars-sidebar-bar-top-cap`
+  - `.lcars-sidebar-bar-track`
+  - `.lcars-sidebar-bar-bottom-cap`
+  - `.lcars-sidebar-bar-filler`
 - `.main-content`  
+
   Central pane for primary application views:
   - Bookmarks grid (`.bookmark-grid`)
   - Settings panel (`.settings-panel`)
   - About panel (`.about-panel`)
   - Location display (`.bookmark-location`)
   - Status display (`.status-display`)
-- `.footer-bar`  
+- `.lcars-footer-bar`  
   Bottom LCARS band with:
-  - Global action buttons (`.lcars-action-btn`)
-  - Status / meta display.
+  - Global action buttons (`.lcars-footer-bar-button`)
+  - Status / meta display (`.lcars-footer-bar-status` with `.lcars-status-display`).
 
 ### 6.2 Views & Rendering Responsibilities
 

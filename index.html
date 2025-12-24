@@ -298,21 +298,6 @@
                 overflow: hidden;
             }
 
-            /* Header (Left Part)
-               - Structural grid container and LCARS frame segment shell
-               - Receives LCARS chrome via lcars-frame-segment modifiers */
-            .header-bar {
-                grid-column: 1;
-                grid-row: 1;
-                display: flex;
-                align-items: stretch;
-                justify-content: flex-start;
-                padding-left: var(--lcars-gap);
-                padding-right: 0;
-                margin-right: -1px;
-                height: 40px;
-                align-self: start;
-            }
 
             /* LCARS frame segment primitives */
             .lcars-frame-segment {
@@ -545,7 +530,7 @@
             }
 
             /* Sidebar (Full Height Column) */
-            .sidebar-container {
+            .lcars-sidebar-bar {
                 grid-column: 2;
                 grid-row: 1 / 4;
                 display: flex;
@@ -579,13 +564,13 @@
             }
 
             /* Top Elbow Connector (right side, opening downward) */
-            .sidebar-top-cap {
+            .lcars-sidebar-bar-top-cap {
                 --elbow-position: bottom left;
                 --elbow-radius-top-right: var(--lcars-radius-lg);
             }
 
             /* Middle Sidebar Track - now a flex container for scroll buttons + categories */
-            .sidebar-track {
+            .lcars-sidebar-bar-track {
                 flex: 1;
                 min-height: 0; /* Allow flex item to shrink below content size */
                 background: none;
@@ -671,7 +656,7 @@
                ============================================== */
 
             /* Scrollable category container - composes lcars-scroll-container */
-            .sidebar-categories {
+            .lcars-sidebar-bar-track .lcars-scroll-container {
                 flex: 0 1 auto;
                 min-height: 0;
                 display: flex;
@@ -681,30 +666,32 @@
             }
 
             /* Sidebar filler - fills remaining space with theme color */
-            .sidebar-filler {
+            .lcars-sidebar-bar-filler {
                 flex: 1;
                 min-height: var(--lcars-gap);
                 background-color: var(--shape-color);
             }
 
             /* Sidebar scroll buttons - compose lcars-arrow-btn */
-            .sidebar-scroll-up {
+            .sidebar-scroll-up,
+            .lcars-sidebar-bar-track .sidebar-scroll-up {
                 width: 100%;
                 margin-bottom: 2px;
             }
 
-            .sidebar-scroll-down {
+            .sidebar-scroll-down,
+            .lcars-sidebar-bar-track .sidebar-scroll-down {
                 width: 100%;
                 margin-top: 2px;
             }
 
             /* Bottom Elbow Connector (right side, opening upward) */
-            .sidebar-bottom-cap {
+            .lcars-sidebar-bar-bottom-cap {
                 --elbow-position: top left;
                 --elbow-radius-bottom-right: var(--lcars-radius-lg);
             }
 
-            .footer-bar {
+            .lcars-footer-bar {
                 grid-column: 1;
                 grid-row: 3;
                 display: flex;
@@ -718,17 +705,17 @@
                 align-self: end;
             }
 
-            .footer-bar > .lcars-footer-bar-button,
-            .footer-bar > .lcars-settings-wrapper > .lcars-footer-bar-button,
-            .footer-bar > .lcars-expandable > .lcars-footer-bar-button {
+            .lcars-footer-bar > .lcars-footer-bar-button,
+            .lcars-footer-bar > .lcars-settings-wrapper > .lcars-footer-bar-button,
+            .lcars-footer-bar > .lcars-expandable > .lcars-footer-bar-button {
                 height: 100%;
                 border-radius: 0;
                 margin: 0;
                 border-left: 5px solid var(--lcars-black);
             }
 
-            .footer-bar .lcars-settings-wrapper,
-            .footer-bar .lcars-expandable {
+            .lcars-footer-bar .lcars-settings-wrapper,
+            .lcars-footer-bar .lcars-expandable {
                 height: 100%;
                 display: flex;
             }
@@ -1886,26 +1873,26 @@
             </div>
 
             <!-- Sidebar (Right - Full Height) -->
-            <aside class="sidebar-container">
+            <aside class="lcars-sidebar-bar">
                 <!-- Top Elbow -->
-                <div class="lcars-elbow sidebar-top-cap"></div>
+                <div class="lcars-elbow lcars-sidebar-bar-top-cap"></div>
 
                 <!-- Middle Track with Scroll Buttons -->
-                <div class="sidebar-track">
+                <div class="lcars-sidebar-bar-track">
                     <div class="lcars-arrow-btn sidebar-scroll-up js-sidebar-scroll-up" aria-hidden="true">
                         <svg><use href="#icon-arrow-up-wide"></use></svg>
                     </div>
-                    <div class="lcars-scroll-container sidebar-categories js-category-sidebar" tabindex="-1">
+                    <div class="lcars-scroll-container js-category-sidebar" tabindex="-1">
                         <!-- Categories injected here -->
                     </div>
                     <div class="lcars-arrow-btn sidebar-scroll-down js-sidebar-scroll-down" aria-hidden="true">
                         <svg><use href="#icon-arrow-down-wide"></use></svg>
                     </div>
-                    <div class="sidebar-filler"></div>
+                    <div class="lcars-sidebar-bar-filler"></div>
                 </div>
 
                 <!-- Bottom Elbow -->
-                <div class="lcars-elbow sidebar-bottom-cap"></div>
+                <div class="lcars-elbow lcars-sidebar-bar-bottom-cap"></div>
             </aside>
 
             <main class="main-content">
@@ -2139,7 +2126,7 @@
                 </div>
             </main>
 
-            <div class="footer-bar lcars-frame-segment lcars-frame-segment--horizontal lcars-frame-segment--left-rounded">
+            <div class="lcars-footer-bar lcars-frame-segment lcars-frame-segment--horizontal lcars-frame-segment--left-rounded">
                 <div class="lcars-status-display js-system-status"></div>
                 <div class="lcars-expandable">
                     <button class="lcars-button lcars-focus-bar lcars-color-orange lcars-footer-bar-button js-add-btn" aria-label="Add Entry (Alt+N)" aria-haspopup="menu" aria-expanded="false">ADD ENTRY</button>

@@ -116,8 +116,8 @@ When there is disagreement between documentation, this glossary, and the impleme
 
 - **Meaning**: The right-hand vertical LCARS band that functions as the primary navigation controller for categories.
 - **Implementation**:
-  - `.sidebar-container` (outer column).
-  - `.sidebar-top-cap`, `.sidebar-track`, `.sidebar-bottom-cap`.
+  - `.lcars-sidebar-bar` (outer column).
+  - `.lcars-sidebar-bar-top-cap`, `.lcars-sidebar-bar-track`, `.lcars-sidebar-bar-bottom-cap`, `.lcars-sidebar-bar-filler`.
   - `.lcars-sidebar-item`, `.lcars-sidebar-btn`, `.lcars-sidebar-submenu` for categories and subcategories.
 - **Behavior**:
   - Clicking a `.lcars-sidebar-btn` sets `state.currentCategory`.
@@ -185,8 +185,8 @@ When there is disagreement between documentation, this glossary, and the impleme
 
 - **Meaning**: The bottom LCARS band containing global actions (and sometimes status UI).
 - **Implementation**:
-  - `.footer-bar`
-  - `.lcars-action-btn` elements for:
+  - `.lcars-footer-bar`
+  - `.lcars-footer-bar-button` elements for:
     - `ADD ENTRY`
     - `SETTINGS`
     - `ABOUT`
