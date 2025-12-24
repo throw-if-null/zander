@@ -203,24 +203,11 @@ A documentation comment was added to the `body` block in `index.html` explaining
 
 ---
 
-### 8. Legacy Alias Comment Style Inconsistency
+### 8. ~~Legacy Alias Comment Style Inconsistency~~ ✅ RESOLVED (N/A)
 
-TODO comments use inconsistent styles:
+~~TODO comments use inconsistent styles.~~
 
-```css
-.settings-tile {
-    /* Alias: use lcars-tile lcars-tile--settings instead */
-```
-
-vs
-
-```css
-/* ==============================================
-   SETTINGS BREADCRUMB (Legacy Alias)
-   TODO: Migrate to .lcars-breadcrumb.lcars-breadcrumb--settings
-```
-
-**Action:** Pick one style and apply consistently.
+**Resolution:** This issue is no longer applicable. The legacy alias CSS blocks (and their inconsistent TODO comments) were deleted as part of Issue #1's resolution (~470 lines removed). There are no legacy alias comments remaining in the codebase to standardize.
 
 ---
 
@@ -236,6 +223,7 @@ vs
 | Form primitives | 🟢 Complete | ✅ Namespaced as `.lcars-input`, `.lcars-select`, `.lcars-textarea` |
 | Focus system | 🟢 Complete | ✅ Consolidated to use `lcars-focus-bar` helper class |
 | Extension points | 🟢 Complete | ✅ Removed unused class, documented pattern |
+| Comment consistency | 🟢 Complete | ✅ N/A - legacy alias blocks deleted |
 
 ---
 
