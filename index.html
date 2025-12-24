@@ -441,27 +441,6 @@
                 background-color: var(--shape-color);
             }
 
-            .lcars-sidebar-bar-toggle {
-                width: 100%;
-                height: 50px;
-                background-color: var(--shape-color);
-                border: none;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: var(--lcars-black);
-            }
-
-            .lcars-sidebar-bar-toggle:hover {
-                filter: brightness(1.1);
-            }
-
-            .lcars-sidebar-bar-toggle:focus-visible {
-                outline: 3px solid var(--lcars-white);
-                outline-offset: -3px;
-            }
-
             .lcars-sidebar-bar-bottom-cap {
                 height: var(--lcars-sidebar-bar-elbow-height);
                 width: 100%;
@@ -772,9 +751,9 @@
                 padding-top: var(--lcars-expandable-offset);
             }
 
-            /* Show menu on hover or focus-within */
+            /* Show menu on hover or when explicitly opened via JS */
             .lcars-expandable:hover .lcars-expandable-menu,
-            .lcars-expandable:focus-within .lcars-expandable-menu {
+            .lcars-expandable.is-open .lcars-expandable-menu {
                 display: flex;
             }
 
@@ -2130,7 +2109,7 @@
         </div>
 
         <!-- Bookmark Dialog -->
-        <dialog id="bookmarkDialog" aria-label="Bookmark Entry Dialog">
+        <dialog id="bookmarkDialog" aria-labelledby="dialogTitle">
             <div class="lcars-dialog">
                 <div class="lcars-dialog-header">
                     <h2 class="lcars-dialog-title" id="dialogTitle">
@@ -2207,7 +2186,7 @@
             </div>
         </dialog>
 
-        <dialog id="categoryDialog" aria-label="Category Dialog">
+        <dialog id="categoryDialog" aria-labelledby="categoryDialogTitle">
             <div class="lcars-dialog">
                 <div class="lcars-dialog-header">
                     <h2 class="lcars-dialog-title" id="categoryDialogTitle">
@@ -2267,7 +2246,7 @@
 
         <!-- Settings Dialog (no longer used for full settings UI, kept for potential small overlays if needed) -->
 
-        <dialog id="confirmDialog" aria-label="Confirmation Dialog">
+        <dialog id="confirmDialog" aria-labelledby="confirmTitle">
             <div class="lcars-dialog">
                 <div class="lcars-dialog-header">
                     <h2 class="lcars-dialog-title" id="confirmTitle">
@@ -2294,10 +2273,10 @@
             </div>
         </dialog>
 
-        <dialog id="colorPickerDialog" aria-label="Color Picker Dialog">
+        <dialog id="colorPickerDialog" aria-labelledby="colorPickerDialogTitle">
             <div class="lcars-dialog">
                 <div class="lcars-dialog-header">
-                    <h2 class="lcars-dialog-title">SELECT COLOR</h2>
+                    <h2 class="lcars-dialog-title" id="colorPickerDialogTitle">SELECT COLOR</h2>
                 </div>
                 <div class="lcars-dialog-body">
                     <div id="colorGrid" class="color-grid" role="group" aria-label="Color Palette"></div>
@@ -4579,13 +4558,85 @@
                     openAddCategoryDialog();
                 });
 
-                // Add Entry button click opens first menu item
+                // Add Entry button: toggle aria-expanded and manage focus
+                // Uses JS-controlled .is-open class for keyboard interaction (not CSS :focus-within)
                 const addBtn = document.getElementById("addBtn");
-                if (addBtn) {
+                const addMenu = document.getElementById("addMenu");
+                if (addBtn && addMenu) {
+                    const expandable = addBtn.closest(".lcars-expandable");
+
+                    function openMenu() {
+                        if (expandable) expandable.classList.add("is-open");
+                        addBtn.setAttribute("aria-expanded", "true");
+                    }
+
+                    function closeMenu() {
+                        if (expandable) expandable.classList.remove("is-open");
+                        addBtn.setAttribute("aria-expanded", "false");
+                    }
+
+                    function isMenuOpen() {
+                        return expandable && expandable.classList.contains("is-open");
+                    }
+
+                    // Update aria-expanded based on visual state (for hover)
+                    function updateAddMenuExpanded() {
+                        const isVisible = window.getComputedStyle(addMenu).display !== "none";
+                        addBtn.setAttribute("aria-expanded", isVisible ? "true" : "false");
+                    }
+
+                    // Monitor hover changes on the expandable container
+                    if (expandable) {
+                        expandable.addEventListener("mouseenter", () => {
+                            requestAnimationFrame(updateAddMenuExpanded);
+                        });
+                        expandable.addEventListener("mouseleave", () => {
+                            // Only close if not explicitly opened via keyboard
+                            if (!isMenuOpen()) {
+                                requestAnimationFrame(updateAddMenuExpanded);
+                            }
+                        });
+                    }
+
+                    // Click on button opens menu and focuses first item
                     addBtn.addEventListener("click", (e) => {
                         e.preventDefault();
-                        document.getElementById("addBookmarkBtn")?.focus();
+                        openMenu();
+                        const firstItem = document.getElementById("addBookmarkBtn");
+                        if (firstItem) firstItem.focus();
                     });
+
+                    // Keyboard: Enter/Space opens menu and moves focus to first item
+                    addBtn.addEventListener("keydown", (e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            openMenu();
+                            const firstItem = document.getElementById("addBookmarkBtn");
+                            if (firstItem) firstItem.focus();
+                        }
+                    });
+
+                    // Escape closes the menu and returns focus to trigger
+                    if (expandable) {
+                        expandable.addEventListener("keydown", (e) => {
+                            if (e.key === "Escape" && isMenuOpen()) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                closeMenu();
+                                addBtn.focus();
+                            }
+                        });
+
+                        // Close menu when focus leaves the expandable entirely
+                        expandable.addEventListener("focusout", (e) => {
+                            // Use setTimeout to allow focus to settle on the new element
+                            setTimeout(() => {
+                                if (!expandable.contains(document.activeElement)) {
+                                    closeMenu();
+                                }
+                            }, 0);
+                        });
+                    }
                 }
 
                 onClick("aboutBtn", () => {
