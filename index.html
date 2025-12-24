@@ -1079,13 +1079,15 @@
                 flex-direction: column;
             }
 
-            #settingsCategorySectionMain {
+            #settingsCategorySectionMain,
+            .js-settings-category-section-main {
                 flex: 1 1 auto;
                 display: flex;
                 flex-direction: column;
             }
 
-            #settingsCategorySectionMain .category-config-list {
+            #settingsCategorySectionMain .category-config-list,
+            .js-settings-category-section-main .category-config-list {
                 flex: 1 1 auto;
             }
 
@@ -1429,18 +1431,21 @@
             }
 
             /* Theme selector layout */
-            #themeControlsContainer {
+            #themeControlsContainer,
+            .js-theme-controls-container {
                 display: flex;
                 flex-wrap: wrap;
                 gap: 8px;
             }
 
-            #themeControlsContainer .lcars-settings-action {
+            #themeControlsContainer .lcars-settings-action,
+            .js-theme-controls-container .lcars-settings-action {
                 min-width: 140px;
                 justify-content: center;
             }
 
-            #themeControlsContainer .lcars-settings-action.theme-active {
+            #themeControlsContainer .lcars-settings-action.theme-active,
+            .js-theme-controls-container .lcars-settings-action.theme-active {
                 background-color: var(--theme-main, var(--lcars-beige));
                 color: var(--lcars-black);
                 box-shadow: 0 0 0 2px var(--lcars-white);
@@ -1497,7 +1502,8 @@
 
 
 
-            #aboutBtn {
+            #aboutBtn,
+            .js-about-btn {
                 border-right: 5px solid var(--lcars-black);
             }
 
@@ -1542,23 +1548,27 @@
 
             /* Color picker specific overlay */
             /* Color picker uses slightly larger radius for visual distinction */
-            #colorPickerDialog {
+            #colorPickerDialog,
+            .js-color-picker-dialog {
                 max-width: 520px;
                 border-radius: calc(var(--lcars-radius-md) + 6px);
                 border-color: var(--shape-color);
             }
 
-            #colorPickerDialog .lcars-dialog-header {
+            #colorPickerDialog .lcars-dialog-header,
+            .js-color-picker-dialog .lcars-dialog-header {
                 background-color: var(--shape-color);
                 color: var(--lcars-black);
             }
 
-            #colorPickerDialog .lcars-dialog-body {
+            #colorPickerDialog .lcars-dialog-body,
+            .js-color-picker-dialog .lcars-dialog-body {
                 padding: 20px;
                 background-color: var(--lcars-black);
             }
 
-            #colorPickerDialog .lcars-dialog-footer {
+            #colorPickerDialog .lcars-dialog-footer,
+            .js-color-picker-dialog .lcars-dialog-footer {
                 display: flex;
                 justify-content: flex-end;
                 padding: 10px 20px 18px 20px;
@@ -1641,7 +1651,8 @@
             }
 
             /* URL protocol select styled as compact LCARS control */
-            #urlProtocol {
+            #urlProtocol,
+            .js-url-protocol {
                 max-width: 140px;
                 border-radius: var(--lcars-radius-md);
                 text-transform: uppercase;
@@ -1877,10 +1888,10 @@
             </defs>
         </svg>
 
-        <div class="lcars-app lcars-app--fullpage">
+        <div class="lcars-app lcars-app--fullpage js-lcars-app">
             <!-- Header Bar (Left) -->
             <div class="lcars-header-bar">
-                <button class="lcars-focus-bar lcars-header-bar-home" id="homeBtn" aria-label="Home - Bookmarks View">ZANDER</button>
+                <button class="lcars-focus-bar lcars-header-bar-home js-home-btn" aria-label="Home - Bookmarks View">ZANDER</button>
                 <div class="lcars-header-bar-fill"></div>
                 <div class="lcars-header-bar-end-cap"></div>
             </div>
@@ -1892,13 +1903,13 @@
 
                 <!-- Middle Track with Scroll Buttons -->
                 <div class="sidebar-track">
-                    <div class="lcars-arrow-btn sidebar-scroll-up" id="sidebarScrollUp" aria-hidden="true">
+                    <div class="lcars-arrow-btn sidebar-scroll-up js-sidebar-scroll-up" aria-hidden="true">
                         <svg><use href="#icon-arrow-up-wide"></use></svg>
                     </div>
-                    <div class="lcars-scroll-container sidebar-categories" id="categorySidebar" tabindex="-1">
+                    <div class="lcars-scroll-container sidebar-categories js-category-sidebar" tabindex="-1">
                         <!-- Categories injected here -->
                     </div>
-                    <div class="lcars-arrow-btn sidebar-scroll-down" id="sidebarScrollDown" aria-hidden="true">
+                    <div class="lcars-arrow-btn sidebar-scroll-down js-sidebar-scroll-down" aria-hidden="true">
                         <svg><use href="#icon-arrow-down-wide"></use></svg>
                     </div>
                     <div class="sidebar-filler"></div>
@@ -1909,10 +1920,9 @@
             </aside>
 
             <main class="main-content">
-                <div id="bookmarksView" class="main-view active">
+                <div class="main-view active js-bookmarks-view">
                     <div
-                        id="bookmarkLocation"
-                        class="lcars-breadcrumb"
+                        class="lcars-breadcrumb js-bookmark-location"
                         aria-live="polite"
                         aria-label="Current Category Location"
                     >
@@ -1921,12 +1931,11 @@
                             <!-- Segments injected via JS -->
                         </nav>
                     </div>
-                    <div id="bookmarkGrid" class="bookmark-grid" role="list">
+                    <div class="bookmark-grid js-bookmark-grid" role="list">
                         <!-- Bookmarks injected here -->
                     </div>
                     <div
-                        id="emptyState"
-                        class="empty-state"
+                        class="empty-state js-empty-state"
                         style="display: none; text-align: center; padding: 50px"
                         role="status"
                         aria-live="assertive"
@@ -1935,8 +1944,7 @@
                     </div>
                 </div>
                 <div
-                    id="settingsView"
-                    class="main-view"
+                    class="main-view js-settings-view"
                     style="padding: 20px; height: 100%"
                     role="region"
                     aria-label="Settings Panel"
@@ -1946,19 +1954,19 @@
                         <div class="settings-content">
                             <div class="settings-status">
                                 <span>CONFIGURATION MODE</span>
-                                <span id="settingsStardate">STARDATE 0000000.0000</span>
+                                <span class="js-settings-stardate">STARDATE 0000000.0000</span>
                             </div>
 
                             <!-- Settings Breadcrumb -->
-                            <nav id="settingsBreadcrumb" class="lcars-breadcrumb lcars-breadcrumb--settings" aria-label="Settings Navigation">
+                            <nav class="lcars-breadcrumb lcars-breadcrumb--settings js-settings-breadcrumb" aria-label="Settings Navigation">
                                 <span class="lcars-breadcrumb-label">LOCATION:</span>
-                                <div class="lcars-breadcrumb-path" id="settingsBreadcrumbPath">
+                                <div class="lcars-breadcrumb-path js-settings-breadcrumb-path">
                                     <!-- Injected via JS -->
                                 </div>
                             </nav>
 
                             <!-- Main Settings Grid (tile view) -->
-                            <div id="settingsMainGrid" class="settings-main-grid active">
+                            <div class="settings-main-grid active js-settings-main-grid">
                                 <!-- Configuration Group -->
                                 <div class="settings-tile-group">
                                     <div class="settings-tile-group-label">CONFIGURATION</div>
@@ -1972,7 +1980,7 @@
                                         <button class="lcars-tile lcars-tile--settings" data-settings-page="home" style="--tile-color: var(--lcars-beige)">
                                             <span class="lcars-tile-label">Home Category</span>
                                             <div class="lcars-tile-meta">
-                                                <span class="lcars-tile-meta-primary" id="settingsHomeCategoryName">CURRENT HOME CATEGORY</span>
+                                                <span class="lcars-tile-meta-primary js-settings-home-category-name">CURRENT HOME CATEGORY</span>
                                                 <span class="lcars-tile-meta-secondary">SET LANDING DESTINATION</span>
                                             </div>
                                         </button>
@@ -1986,7 +1994,7 @@
                                         <button class="lcars-tile lcars-tile--settings" data-settings-page="themes" style="--tile-color: var(--theme-main)">
                                             <span class="lcars-tile-label">Themes</span>
                                             <div class="lcars-tile-meta">
-                                                <span class="lcars-tile-meta-primary" id="settingsActiveTheme">LA'AN</span>
+                                                <span class="lcars-tile-meta-primary js-settings-active-theme">LA'AN</span>
                                                 <span class="lcars-tile-meta-secondary">CHANGE THE COLOR THEME</span>
                                             </div>
                                         </button>
@@ -2022,16 +2030,15 @@
                             </div>
 
                             <!-- Categories Sub-page -->
-                            <div id="settingsPageCategories" class="settings-subpage">
+                            <div class="settings-subpage js-settings-page-categories">
                                 <div class="settings-subpage-content">
                                     <h2>CATEGORY CONFIGURATION</h2>
-                                    <div id="settingsCategorySectionMain">
-                                        <div id="categoryConfigList" class="category-config-list">
+                                    <div class="js-settings-category-section-main">
+                                        <div class="category-config-list js-category-config-list">
                                             <!-- Rows injected via JS -->
                                         </div>
                                         <button
-                                            class="lcars-button lcars-pill lcars-focus-outline lcars-color-orange lcars-settings-action lcars-action-btn lcars-action-btn--small"
-                                            id="addCategoryBtnMain"
+                                            class="lcars-button lcars-pill lcars-focus-outline lcars-color-orange lcars-settings-action lcars-action-btn lcars-action-btn--small js-add-category-btn-main"
                                             style="width: calc(100% - 20px); margin: 0 10px 20px 10px"
                                         >
                                             ADD ROOT CATEGORY
@@ -2041,12 +2048,12 @@
                             </div>
 
                             <!-- Home Category Sub-page -->
-                            <div id="settingsPageHome" class="settings-subpage">
+                            <div class="settings-subpage js-settings-page-home">
                                 <div class="settings-subpage-content">
                                     <h2>HOME CATEGORY</h2>
                                     <div class="lcars-form-group">
                                         <label for="landingCategorySelect">LANDING CATEGORY</label>
-                                        <select id="landingCategorySelect" class="lcars-select" aria-label="Landing Category"></select>
+                                        <select id="landingCategorySelect" class="lcars-select js-landing-category-select" aria-label="Landing Category"></select>
                                         <p style="font-size: 0.8rem; opacity: 0.8; margin-top: 6px;">
                                             SELECT WHICH CATEGORY THE SYSTEM SHOULD LAND ON WHEN YOU PRESS HOME OR ACTIVATE THE ZANDER HEADER.
                                         </p>
@@ -2055,12 +2062,12 @@
                             </div>
 
                             <!-- Themes Sub-page -->
-                            <div id="settingsPageThemes" class="settings-subpage">
+                            <div class="settings-subpage js-settings-page-themes">
                                 <div class="settings-subpage-content">
                                     <h2>THEME SELECTION</h2>
                                     <div class="lcars-form-group">
-                                        <div id="themeControlsContainer" style="margin-bottom: 10px"></div>
-                                        <div id="themeStatusReadout" style="font-size: 0.85rem; opacity: 0.8; letter-spacing: 1px;">
+                                        <div class="js-theme-controls-container" style="margin-bottom: 10px"></div>
+                                        <div class="js-theme-status-readout" style="font-size: 0.85rem; opacity: 0.8; letter-spacing: 1px;">
                                             ACTIVE THEME: LA'AN
                                         </div>
                                     </div>
@@ -2068,27 +2075,25 @@
                             </div>
 
                             <!-- Data Management Sub-page -->
-                            <div id="settingsPageData" class="settings-subpage">
+                            <div class="settings-subpage js-settings-page-data">
                                 <div class="settings-subpage-content">
                                     <h2>IMPORT / EXPORT</h2>
                                     <div class="lcars-form-group">
                                         <button
-                                            class="lcars-button lcars-pill lcars-focus-outline lcars-color-orange lcars-settings-action lcars-action-btn lcars-action-btn--small"
-                                            id="exportBtnMain"
+                                            class="lcars-button lcars-pill lcars-focus-outline lcars-color-orange lcars-settings-action lcars-action-btn lcars-action-btn--small js-export-btn-main"
                                             style="width: 100%; margin-bottom: 10px;"
                                         >
                                             EXPORT DATABASE
                                         </button>
                                         <button
-                                            class="lcars-button lcars-pill lcars-focus-outline lcars-color-orange lcars-settings-action lcars-action-btn lcars-action-btn--small"
-                                            id="importBtnMain"
+                                            class="lcars-button lcars-pill lcars-focus-outline lcars-color-orange lcars-settings-action lcars-action-btn lcars-action-btn--small js-import-btn-main"
                                             style="width: 100%; margin-bottom: 10px;"
                                         >
                                             IMPORT DATABASE
                                         </button>
                                         <input
                                             type="file"
-                                            id="importInput"
+                                            class="js-import-input"
                                             accept=".json"
                                             style="display: none"
                                             aria-label="Import Bookmarks from JSON File"
@@ -2098,7 +2103,7 @@
                             </div>
 
                             <!-- System Reset Sub-page -->
-                            <div id="settingsPageReset" class="settings-subpage">
+                            <div class="settings-subpage js-settings-page-reset">
                                 <div class="settings-subpage-content">
                                     <h2>SYSTEM RESET</h2>
                                     <p style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 15px; line-height: 1.5;">
@@ -2106,8 +2111,7 @@
                                     </p>
                                     <div class="lcars-form-group">
                                         <button
-                                            class="lcars-button lcars-pill lcars-focus-outline lcars-color-danger lcars-settings-action reset"
-                                            id="resetBtnMain"
+                                            class="lcars-button lcars-pill lcars-focus-outline lcars-color-danger lcars-settings-action reset js-reset-btn-main"
                                             style="width: 100%"
                                         >
                                             INITIATE SYSTEM RESET
@@ -2118,7 +2122,7 @@
                         </div>
                     </div>
                 </div>
-                <div id="aboutView" class="main-view" style="padding: 20px" role="region" aria-label="About Zander">
+                <div class="main-view js-about-view" style="padding: 20px" role="region" aria-label="About Zander">
                     <div class="about-panel">
                         <h1>ABOUT ZANDER</h1>
                         <hr />
@@ -2147,57 +2151,57 @@
             </main>
 
             <div class="footer-bar lcars-frame-segment lcars-frame-segment--horizontal lcars-frame-segment--left-rounded">
-                <div id="systemStatus" class="lcars-status-display"></div>
+                <div class="lcars-status-display js-system-status"></div>
                 <div class="lcars-expandable">
-                    <button class="lcars-button lcars-focus-bar lcars-color-orange lcars-footer-bar-button" id="addBtn" aria-label="Add Entry (Alt+N)" aria-haspopup="menu" aria-expanded="false">ADD ENTRY</button>
-                    <div class="lcars-expandable-menu" role="menu" id="addMenu">
-                        <button class="lcars-expandable-item" id="addBookmarkBtn" role="menuitem">BOOKMARK</button>
-                        <button class="lcars-expandable-item" id="addCategoryBtn" role="menuitem">CATEGORY</button>
+                    <button class="lcars-button lcars-focus-bar lcars-color-orange lcars-footer-bar-button js-add-btn" aria-label="Add Entry (Alt+N)" aria-haspopup="menu" aria-expanded="false">ADD ENTRY</button>
+                    <div class="lcars-expandable-menu js-add-menu" role="menu">
+                        <button class="lcars-expandable-item js-add-bookmark-btn" role="menuitem">BOOKMARK</button>
+                        <button class="lcars-expandable-item js-add-category-btn" role="menuitem">CATEGORY</button>
                     </div>
                 </div>
                 <div class="lcars-settings-wrapper">
-                    <button class="lcars-button lcars-focus-bar lcars-color-orange lcars-footer-bar-button" id="settingsBtn" aria-label="Settings (Alt+S)">
+                    <button class="lcars-button lcars-focus-bar lcars-color-orange lcars-footer-bar-button js-settings-btn" aria-label="Settings (Alt+S)">
                         SETTINGS
                     </button>
                 </div>
-                <button class="lcars-button lcars-focus-bar lcars-color-orange lcars-footer-bar-button" id="aboutBtn" aria-label="About Zander">ABOUT</button>
+                <button class="lcars-button lcars-focus-bar lcars-color-orange lcars-footer-bar-button js-about-btn" aria-label="About Zander">ABOUT</button>
             </div>
         </div>
 
         <!-- Bookmark Dialog -->
-        <dialog id="bookmarkDialog" class="lcars-dialog-container" aria-labelledby="dialogTitle">
+        <dialog id="bookmarkDialog" class="lcars-dialog-container js-bookmark-dialog" aria-labelledby="dialogTitle">
             <div class="lcars-dialog">
                 <div class="lcars-dialog-header">
-                    <h2 class="lcars-dialog-title" id="dialogTitle">
+                    <h2 class="lcars-dialog-title js-dialog-title" id="dialogTitle">
                         NEW ENTRY
                     </h2>
-                    <span class="lcars-dialog-meta" id="bookmarkStardate">
+                    <span class="lcars-dialog-meta js-bookmark-stardate" id="bookmarkStardate">
                         STARDATE 0000000.0000
                     </span>
                 </div>
-                <form id="bookmarkForm">
+                <form class="js-bookmark-form">
                     <div class="lcars-dialog-body">
-                        <input type="hidden" id="bookmarkId" />
+                        <input type="hidden" class="js-bookmark-id" />
                         <div class="lcars-form-group">
                             <label for="titleInput">TITLE</label>
-                            <input type="text" id="titleInput" class="lcars-input" required aria-required="true" maxlength="64" />
+                            <input type="text" id="titleInput" class="lcars-input js-title-input" required aria-required="true" maxlength="64" />
                         </div>
                         <div class="lcars-form-group">
                             <label for="descriptionInput">DESCRIPTION</label>
-                            <textarea id="descriptionInput" class="lcars-textarea" rows="3" maxlength="512" placeholder="Optional description..." aria-label="Bookmark Description"></textarea>
+                            <textarea id="descriptionInput" class="lcars-textarea js-description-input" rows="3" maxlength="512" placeholder="Optional description..." aria-label="Bookmark Description"></textarea>
                         </div>
                         <div class="lcars-form-group">
                             <label for="urlInput">URL</label>
                             <div style="display: flex; gap: 10px">
                                 <label for="urlProtocol" style="display: none;">Protocol</label>
-                                <select id="urlProtocol" class="lcars-select" style="width: 120px" aria-label="URL Protocol">
+                                <select id="urlProtocol" class="lcars-select js-url-protocol" style="width: 120px" aria-label="URL Protocol">
                                     <option value="https://">HTTPS://</option>
                                     <option value="http://">HTTP://</option>
                                 </select>
                                 <input
                                     type="text"
                                     id="urlInput"
-                                    class="lcars-input"
+                                    class="lcars-input js-url-input"
                                     required
                                     placeholder="example.com"
                                     style="flex: 1"
@@ -2207,7 +2211,7 @@
                         </div>
                         <div class="lcars-form-group">
                             <label for="categoryInput">CATEGORY</label>
-                            <select id="categoryInput" class="lcars-select" aria-label="Bookmark Category">
+                            <select id="categoryInput" class="lcars-select js-category-input" aria-label="Bookmark Category">
                                 <!-- Options injected -->
                             </select>
                         </div>
@@ -2215,8 +2219,7 @@
                     <div class="lcars-dialog-footer">
                         <button
                             type="button"
-                            class="lcars-button lcars-pill lcars-focus-outline lcars-color-danger lcars-dialog-action delete"
-                            id="deleteBtn"
+                            class="lcars-button lcars-pill lcars-focus-outline lcars-color-danger lcars-dialog-action delete js-delete-btn"
                             style="display: none"
                             aria-label="Delete Bookmark"
                         >
@@ -2224,12 +2227,7 @@
                         </button>
                         <button
                             type="button"
-                            class="lcars-button lcars-pill lcars-focus-outline lcars-color-dark lcars-dialog-action"
-                            onclick="
-                                document
-                                    .getElementById('bookmarkDialog')
-                                    .close()
-                            "
+                            class="lcars-button lcars-pill lcars-focus-outline lcars-color-dark lcars-dialog-action js-bookmark-cancel-btn"
                             aria-label="Cancel"
                         >
                             CANCEL
@@ -2242,43 +2240,42 @@
             </div>
         </dialog>
 
-        <dialog id="categoryDialog" class="lcars-dialog-container" aria-labelledby="categoryDialogTitle">
+        <dialog id="categoryDialog" class="lcars-dialog-container js-category-dialog" aria-labelledby="categoryDialogTitle">
             <div class="lcars-dialog">
                 <div class="lcars-dialog-header">
-                    <h2 class="lcars-dialog-title" id="categoryDialogTitle">
+                    <h2 class="lcars-dialog-title js-category-dialog-title" id="categoryDialogTitle">
                         NEW CATEGORY
                     </h2>
-                    <span class="lcars-dialog-meta" id="categoryStardate">
+                    <span class="lcars-dialog-meta js-category-stardate" id="categoryStardate">
                         STARDATE 0000000.0000
                     </span>
                 </div>
-                <form id="categoryForm">
+                <form class="js-category-form">
                     <div class="lcars-dialog-body">
-                        <input type="hidden" id="categoryId" />
+                        <input type="hidden" class="js-category-id" />
                         <div class="lcars-form-group">
                             <label for="categoryNameInput">NAME</label>
-                            <input type="text" id="categoryNameInput" class="lcars-input" required aria-required="true" maxlength="32" style="text-transform: uppercase;" />
+                            <input type="text" id="categoryNameInput" class="lcars-input js-category-name-input" required aria-required="true" maxlength="32" style="text-transform: uppercase;" />
                         </div>
                         <div class="lcars-form-group">
                             <label for="categoryParentInput">PARENT CATEGORY</label>
-                            <select id="categoryParentInput" class="lcars-select" aria-label="Parent Category">
+                            <select id="categoryParentInput" class="lcars-select js-category-parent-input" aria-label="Parent Category">
                                 <option value="">(ROOT)</option>
                                 <!-- Options injected -->
                             </select>
                         </div>
-                        <div class="lcars-form-group" id="categoryColorFormGroup">
+                        <div class="lcars-form-group js-category-color-form-group" id="categoryColorFormGroup">
                             <label>COLOR</label>
-                            <div class="color-grid" id="categoryColorGrid" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px;">
+                            <div class="color-grid js-category-color-grid" id="categoryColorGrid" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px;">
                                 <!-- Colors injected via JS -->
                             </div>
-                            <input type="hidden" id="categoryColorInput" />
+                            <input type="hidden" class="js-category-color-input" />
                         </div>
                     </div>
                     <div class="lcars-dialog-footer">
                         <button
                             type="button"
-                            class="lcars-button lcars-pill lcars-focus-outline lcars-color-danger lcars-dialog-action delete"
-                            id="categoryDeleteBtn"
+                            class="lcars-button lcars-pill lcars-focus-outline lcars-color-danger lcars-dialog-action delete js-category-delete-btn"
                             style="display: none"
                             aria-label="Delete Category"
                         >
@@ -2286,8 +2283,7 @@
                         </button>
                         <button
                             type="button"
-                            class="lcars-button lcars-pill lcars-focus-outline lcars-color-dark lcars-dialog-action"
-                            onclick="document.getElementById('categoryDialog').close()"
+                            class="lcars-button lcars-pill lcars-focus-outline lcars-color-dark lcars-dialog-action js-category-cancel-btn"
                             aria-label="Cancel"
                         >
                             CANCEL
@@ -2302,16 +2298,16 @@
 
         <!-- Settings Dialog (no longer used for full settings UI, kept for potential small overlays if needed) -->
 
-        <dialog id="confirmDialog" class="lcars-dialog-container" aria-labelledby="confirmTitle">
+        <dialog id="confirmDialog" class="lcars-dialog-container js-confirm-dialog" aria-labelledby="confirmTitle">
             <div class="lcars-dialog">
                 <div class="lcars-dialog-header">
-                    <h2 class="lcars-dialog-title" id="confirmTitle">
+                    <h2 class="lcars-dialog-title js-confirm-title" id="confirmTitle">
                         CONFIRM
                     </h2>
                 </div>
                 <div class="lcars-dialog-body">
                     <div
-                        id="confirmMessage"
+                        class="js-confirm-message"
                         style="margin: 10px 0 0 0; font-size: 1.2rem"
                         role="alert"
                     >
@@ -2319,23 +2315,23 @@
                     </div>
                 </div>
                 <div class="lcars-dialog-footer">
-                    <button class="lcars-button lcars-pill lcars-focus-outline lcars-color-dark lcars-dialog-action" id="confirmCancelBtn" aria-label="Cancel">
+                    <button class="lcars-button lcars-pill lcars-focus-outline lcars-color-dark lcars-dialog-action js-confirm-cancel-btn" aria-label="Cancel">
                         CANCEL
                     </button>
-                    <button class="lcars-button lcars-pill lcars-focus-outline lcars-color-orange lcars-dialog-action" id="confirmOkBtn" aria-label="Proceed">
+                    <button class="lcars-button lcars-pill lcars-focus-outline lcars-color-orange lcars-dialog-action js-confirm-ok-btn" aria-label="Proceed">
                         PROCEED
                     </button>
                 </div>
             </div>
         </dialog>
 
-        <dialog id="colorPickerDialog" class="lcars-dialog-container" aria-labelledby="colorPickerDialogTitle">
+        <dialog id="colorPickerDialog" class="lcars-dialog-container js-color-picker-dialog" aria-labelledby="colorPickerDialogTitle">
             <div class="lcars-dialog">
                 <div class="lcars-dialog-header">
                     <h2 class="lcars-dialog-title" id="colorPickerDialogTitle">SELECT COLOR</h2>
                 </div>
                 <div class="lcars-dialog-body">
-                    <div id="colorGrid" class="color-grid" role="group" aria-label="Color Palette"></div>
+                    <div class="color-grid js-color-grid" role="group" aria-label="Color Palette"></div>
                 </div>
             </div>
         </dialog>
@@ -2531,61 +2527,79 @@
                 reset: "SYSTEM RESET",
             };
 
-            const grid = document.getElementById("bookmarkGrid");
-            const emptyState = document.getElementById("emptyState");
-            const homeBtn = document.getElementById("homeBtn");
-            const sidebar = document.getElementById("categorySidebar");
-            const bookmarksView = document.getElementById("bookmarksView");
-            const settingsView = document.getElementById("settingsView");
-            const aboutView = document.getElementById("aboutView");
-            const landingCategorySelect = document.getElementById("landingCategorySelect");
-            const aboutStardateEl = document.getElementById("aboutStardate");
-            const settingsStardateEl =
-                document.getElementById("settingsStardate");
-            const categoryInput = document.getElementById("categoryInput");
-            const bookmarkDialog = document.getElementById("bookmarkDialog");
-            const bookmarkForm = document.getElementById("bookmarkForm");
-            const dialogTitle = document.getElementById("dialogTitle");
-            const deleteBtn = document.getElementById("deleteBtn");
-            const bookmarkIdInput = document.getElementById("bookmarkId");
-            const titleInput = document.getElementById("titleInput");
-            const descriptionInput = document.getElementById("descriptionInput");
-            const urlProtocolSelect = document.getElementById("urlProtocol");
-            const urlInput = document.getElementById("urlInput");
-            const categoryConfigList =
-                document.getElementById("categoryConfigList");
-            const importInput = document.getElementById("importInput");
-            const confirmDialog = document.getElementById("confirmDialog");
-            const confirmTitle = document.getElementById("confirmTitle");
-            const confirmMessage = document.getElementById("confirmMessage");
-            const confirmOkBtn = document.getElementById("confirmOkBtn");
-            const confirmCancelBtn =
-                document.getElementById("confirmCancelBtn");
-            const colorPickerDialog =
-                document.getElementById("colorPickerDialog");
-            const colorGrid = document.getElementById("colorGrid");
+            // ==============================================
+            // ROOT CONTAINER PATTERN
+            // Query all elements relative to a root container
+            // to enable multiple instances on a single page.
+            // ==============================================
+
+            // Root container for the app (all non-dialog elements live here)
+            const appRoot = document.querySelector(".js-lcars-app");
+
+            // Helper to query within app root
+            const $ = (selector) => appRoot.querySelector(selector);
+            const $$ = (selector) => appRoot.querySelectorAll(selector);
+
+            // Helper to query dialogs (which render at document root level)
+            const $dialog = (selector) => document.querySelector(selector);
+
+            // Main app elements (queried from app root)
+            const grid = $(".js-bookmark-grid");
+            const emptyState = $(".js-empty-state");
+            const homeBtn = $(".js-home-btn");
+            const sidebar = $(".js-category-sidebar");
+            const bookmarksView = $(".js-bookmarks-view");
+            const settingsView = $(".js-settings-view");
+            const aboutView = $(".js-about-view");
+            const landingCategorySelect = $(".js-landing-category-select");
+            const settingsStardateEl = $(".js-settings-stardate");
 
             // Settings page elements
-            const settingsMainGrid = document.getElementById("settingsMainGrid");
-            const settingsBreadcrumbPath = document.getElementById("settingsBreadcrumbPath");
-            const settingsPageCategories = document.getElementById("settingsPageCategories");
-            const settingsPageHome = document.getElementById("settingsPageHome");
-            const settingsPageThemes = document.getElementById("settingsPageThemes");
-            const settingsPageData = document.getElementById("settingsPageData");
-            const settingsPageReset = document.getElementById("settingsPageReset");
+            const settingsMainGrid = $(".js-settings-main-grid");
+            const settingsBreadcrumbPath = $(".js-settings-breadcrumb-path");
+            const settingsPageCategories = $(".js-settings-page-categories");
+            const settingsPageHome = $(".js-settings-page-home");
+            const settingsPageThemes = $(".js-settings-page-themes");
+            const settingsPageData = $(".js-settings-page-data");
+            const settingsPageReset = $(".js-settings-page-reset");
+            const categoryConfigList = $(".js-category-config-list");
+            const importInput = $(".js-import-input");
 
-            // Category Dialog Elements
-            const categoryDialog = document.getElementById("categoryDialog");
-            const categoryForm = document.getElementById("categoryForm");
-            const categoryDialogTitle = document.getElementById("categoryDialogTitle");
-            const categoryStardateEl = document.getElementById("categoryStardate");
-            const categoryIdInput = document.getElementById("categoryId");
-            const categoryNameInput = document.getElementById("categoryNameInput");
-            const categoryParentInput = document.getElementById("categoryParentInput");
-            const categoryColorGrid = document.getElementById("categoryColorGrid");
-            const categoryColorInput = document.getElementById("categoryColorInput");
-            const categoryColorFormGroup = document.getElementById("categoryColorFormGroup");
-            const categoryDeleteBtn = document.getElementById("categoryDeleteBtn");
+            // Dialogs (query from document since they render at root level)
+            const bookmarkDialog = $dialog(".js-bookmark-dialog");
+            const bookmarkForm = bookmarkDialog?.querySelector(".js-bookmark-form");
+            const dialogTitle = bookmarkDialog?.querySelector(".js-dialog-title");
+            const deleteBtn = bookmarkDialog?.querySelector(".js-delete-btn");
+            const bookmarkIdInput = bookmarkDialog?.querySelector(".js-bookmark-id");
+            const titleInput = bookmarkDialog?.querySelector(".js-title-input");
+            const descriptionInput = bookmarkDialog?.querySelector(".js-description-input");
+            const urlProtocolSelect = bookmarkDialog?.querySelector(".js-url-protocol");
+            const urlInput = bookmarkDialog?.querySelector(".js-url-input");
+            const categoryInput = bookmarkDialog?.querySelector(".js-category-input");
+            const bookmarkStardateEl = bookmarkDialog?.querySelector(".js-bookmark-stardate");
+            const bookmarkCancelBtn = bookmarkDialog?.querySelector(".js-bookmark-cancel-btn");
+
+            const categoryDialog = $dialog(".js-category-dialog");
+            const categoryForm = categoryDialog?.querySelector(".js-category-form");
+            const categoryDialogTitle = categoryDialog?.querySelector(".js-category-dialog-title");
+            const categoryStardateEl = categoryDialog?.querySelector(".js-category-stardate");
+            const categoryIdInput = categoryDialog?.querySelector(".js-category-id");
+            const categoryNameInput = categoryDialog?.querySelector(".js-category-name-input");
+            const categoryParentInput = categoryDialog?.querySelector(".js-category-parent-input");
+            const categoryColorGrid = categoryDialog?.querySelector(".js-category-color-grid");
+            const categoryColorInput = categoryDialog?.querySelector(".js-category-color-input");
+            const categoryColorFormGroup = categoryDialog?.querySelector(".js-category-color-form-group");
+            const categoryDeleteBtn = categoryDialog?.querySelector(".js-category-delete-btn");
+            const categoryCancelBtn = categoryDialog?.querySelector(".js-category-cancel-btn");
+
+            const confirmDialog = $dialog(".js-confirm-dialog");
+            const confirmTitle = confirmDialog?.querySelector(".js-confirm-title");
+            const confirmMessage = confirmDialog?.querySelector(".js-confirm-message");
+            const confirmOkBtn = confirmDialog?.querySelector(".js-confirm-ok-btn");
+            const confirmCancelBtn = confirmDialog?.querySelector(".js-confirm-cancel-btn");
+
+            const colorPickerDialog = $dialog(".js-color-picker-dialog");
+            const colorGrid = colorPickerDialog?.querySelector(".js-color-grid");
 
             function showConfirm(title, message, onOk) {
                 confirmTitle.textContent = title;
@@ -2661,7 +2675,6 @@
                 renderGrid();
                 setupEventListeners();
                 renderThemeControls();
-                updateStardateDisplay(aboutStardateEl);
                 updateStardateDisplay(settingsStardateEl);
                 updateSettingsTileMeta();
                 renderSettingsBreadcrumb();
@@ -3123,7 +3136,7 @@
             }
 
             function updateSystemStatus() {
-                const statusEl = document.getElementById("systemStatus");
+                const statusEl = $(".js-system-status");
                 if (statusEl) {
                     let catCount = 0;
                     walkCategories(state.categories, () => {
@@ -3142,8 +3155,7 @@
             }
 
             function updateThemeStatus() {
-                const themeStatusEl =
-                    document.getElementById("themeStatusReadout");
+                const themeStatusEl = $(".js-theme-status-readout");
                 if (!themeStatusEl) return;
                 const current =
                     THEMES.find((t) => t.id === currentTheme) ||
@@ -3244,16 +3256,11 @@
             }
 
             function updateSettingsTileMeta() {
-                // Update category count
-                const categoryCountEl = document.getElementById("settingsCategoryCount");
-                if (categoryCountEl) {
-                    let catCount = 0;
-                    walkCategories(state.categories, () => { catCount++; });
-                    categoryCountEl.textContent = `${catCount} CATEGOR${catCount === 1 ? "Y" : "IES"}`;
-                }
+                // Update category count (element removed from settings tile)
+                // Keeping function structure for future use
 
                 // Update home category name
-                const homeCategoryNameEl = document.getElementById("settingsHomeCategoryName");
+                const homeCategoryNameEl = $(".js-settings-home-category-name");
                 if (homeCategoryNameEl) {
                     let landingCat = null;
                     if (state.landingCategoryId) {
@@ -3270,17 +3277,10 @@
                 }
 
                 // Update active theme
-                const activeThemeEl = document.getElementById("settingsActiveTheme");
+                const activeThemeEl = $(".js-settings-active-theme");
                 if (activeThemeEl) {
                     const current = THEMES.find((t) => t.id === currentTheme) || THEMES[0];
                     activeThemeEl.textContent = "CURRENT THEME: " + current.label;
-                }
-
-                // Update bookmark count
-                const bookmarkCountEl = document.getElementById("settingsBookmarkCount");
-                if (bookmarkCountEl) {
-                    const bmCount = state.bookmarks.length;
-                    bookmarkCountEl.textContent = `${bmCount} BOOKMARK${bmCount === 1 ? "" : "S"}`;
                 }
             }
 
@@ -3355,7 +3355,7 @@
             }
 
             function updateBookmarkLocation() {
-                const container = document.getElementById("bookmarkLocation");
+                const container = $(".js-bookmark-location");
                 if (!container) return;
 
                 const pathEl = container.querySelector(
@@ -3485,10 +3485,11 @@
             function openAddDialog() {
                 dialogTitle.textContent = "ADD ENTRY";
 
-                const stardateEl = document.getElementById("bookmarkStardate");
                 const info = formatCurrentStardateDisplay();
-                stardateEl.textContent = info.label;
-                stardateEl.title = info.tooltip;
+                if (bookmarkStardateEl) {
+                    bookmarkStardateEl.textContent = info.label;
+                    bookmarkStardateEl.title = info.tooltip;
+                }
 
                 bookmarkForm.reset();
                 bookmarkIdInput.value = "";
@@ -3501,14 +3502,15 @@
             function openEditDialog(bookmark) {
                 dialogTitle.textContent = "EDIT ENTRY";
 
-                const stardateEl = document.getElementById("bookmarkStardate");
-                if (bookmark.createdAt) {
-                    stardateEl.textContent = `STARDATE ${bookmark.createdAt}`;
-                    const date = parseStardate(bookmark.createdAt);
-                    stardateEl.title = date ? date.toLocaleString() : "";
-                } else {
-                    stardateEl.textContent = "";
-                    stardateEl.title = "";
+                if (bookmarkStardateEl) {
+                    if (bookmark.createdAt) {
+                        bookmarkStardateEl.textContent = `STARDATE ${bookmark.createdAt}`;
+                        const date = parseStardate(bookmark.createdAt);
+                        bookmarkStardateEl.title = date ? date.toLocaleString() : "";
+                    } else {
+                        bookmarkStardateEl.textContent = "";
+                        bookmarkStardateEl.title = "";
+                    }
                 }
 
                 bookmarkIdInput.value = bookmark.id;
@@ -4353,9 +4355,7 @@
             }
 
             function renderThemeControls() {
-                const container = document.getElementById(
-                    "themeControlsContainer",
-                );
+                const container = $(".js-theme-controls-container");
                 if (!container) return;
                 container.innerHTML = "";
 
@@ -4379,15 +4379,17 @@
                 updateThemeStatus();
             }
 
-            function onClick(id, handler) {
-                const el = document.getElementById(id);
+            // Helper to bind click handlers to elements by class selector
+            function onClick(selector, handler) {
+                const el = $(selector);
                 if (el) {
                     el.addEventListener("click", handler);
                 }
             }
 
-            function onChange(id, handler) {
-                const el = document.getElementById(id);
+            // Helper to bind change handlers to elements by class selector
+            function onChange(selector, handler) {
+                const el = $(selector);
                 if (el) {
                     el.addEventListener("change", handler);
                 }
@@ -4395,9 +4397,10 @@
 
             // --- Event Listeners ---
             // Sidebar scroll button functionality
-            const sidebarScrollUp = document.getElementById("sidebarScrollUp");
-            const sidebarScrollDown = document.getElementById("sidebarScrollDown");
-            const sidebarCategories = document.getElementById("categorySidebar");
+            // Sidebar scroll elements (queried from app root)
+            const sidebarScrollUp = $(".js-sidebar-scroll-up");
+            const sidebarScrollDown = $(".js-sidebar-scroll-down");
+            const sidebarCategories = $(".js-category-sidebar");
 
             function updateScrollButtons() {
                 if (!sidebarCategories) return;
@@ -4565,7 +4568,7 @@
                     });
                 }
 
-                onClick("settingsBtn", () => {
+                onClick(".js-settings-btn", () => {
                     // Switch to settings main view
                     bookmarksView.classList.remove("active");
                     aboutView.classList.remove("active");
@@ -4589,7 +4592,7 @@
 
 
 
-                onClick("addBookmarkBtn", () => {
+                onClick(".js-add-bookmark-btn", () => {
                     bookmarksView.classList.add("active");
                     settingsView.classList.remove("active");
                     aboutView.classList.remove("active");
@@ -4598,7 +4601,7 @@
                     openAddDialog();
                 });
 
-                onClick("addCategoryBtn", () => {
+                onClick(".js-add-category-btn", () => {
                     bookmarksView.classList.add("active");
                     settingsView.classList.remove("active");
                     aboutView.classList.remove("active");
@@ -4609,8 +4612,8 @@
 
                 // Add Entry button: toggle aria-expanded and manage focus
                 // Uses JS-controlled .is-open class for keyboard interaction (not CSS :focus-within)
-                const addBtn = document.getElementById("addBtn");
-                const addMenu = document.getElementById("addMenu");
+                const addBtn = $(".js-add-btn");
+                const addMenu = $(".js-add-menu");
                 if (addBtn && addMenu) {
                     const expandable = addBtn.closest(".lcars-expandable");
 
@@ -4651,7 +4654,7 @@
                     addBtn.addEventListener("click", (e) => {
                         e.preventDefault();
                         openMenu();
-                        const firstItem = document.getElementById("addBookmarkBtn");
+                        const firstItem = $(".js-add-bookmark-btn");
                         if (firstItem) firstItem.focus();
                     });
 
@@ -4660,7 +4663,7 @@
                         if (e.key === "Enter" || e.key === " ") {
                             e.preventDefault();
                             openMenu();
-                            const firstItem = document.getElementById("addBookmarkBtn");
+                            const firstItem = $(".js-add-bookmark-btn");
                             if (firstItem) firstItem.focus();
                         }
                     });
@@ -4688,7 +4691,7 @@
                     }
                 }
 
-                onClick("aboutBtn", () => {
+                onClick(".js-about-btn", () => {
                     bookmarksView.classList.remove("active");
                     settingsView.classList.remove("active");
                     aboutView.classList.add("active");
@@ -4700,6 +4703,14 @@
                 bookmarkForm.addEventListener("submit", saveBookmark);
                 categoryForm.addEventListener("submit", saveCategory);
 
+                // Cancel button event listeners for dialogs
+                if (bookmarkCancelBtn) {
+                    bookmarkCancelBtn.addEventListener("click", () => bookmarkDialog.close());
+                }
+                if (categoryCancelBtn) {
+                    categoryCancelBtn.addEventListener("click", () => categoryDialog.close());
+                }
+
                 // Keyboard Shortcuts
                 document.addEventListener("keydown", (e) => {
                     if (e.altKey) {
@@ -4707,7 +4718,7 @@
                             case "b":
                                 e.preventDefault();
                                 // Alt+B: add bookmark directly
-                                document.getElementById("addBookmarkBtn")?.click();
+                                $(".js-add-bookmark-btn")?.click();
                                 break;
                             case "s":
                                 e.preventDefault();
@@ -4735,13 +4746,13 @@
                 });
 
                 // Settings data actions
-                onClick("exportBtnMain", exportData);
-                onClick("importBtnMain", triggerImport);
-                onClick("resetBtnMain", resetSystem);
-                onClick("addCategoryBtnMain", () => {
+                onClick(".js-export-btn-main", exportData);
+                onClick(".js-import-btn-main", triggerImport);
+                onClick(".js-reset-btn-main", resetSystem);
+                onClick(".js-add-category-btn-main", () => {
                     addCategory(null);
                 });
-                onChange("importInput", handleImport);
+                onChange(".js-import-input", handleImport);
 
                 // Theme controls
                 renderThemeControls();

@@ -2,7 +2,7 @@
 
 **Date:** 2023-10-27
 **Target:** `index.html` Component
-**Status:** Needs Refactoring
+**Status:** Complete
 
 ## Executive Summary
 
@@ -36,10 +36,16 @@ While the visual design and basic structure of the Zander component are solid an
 
 ## 2. Design System Architecture
 
-### Hardcoded IDs
-*   **Issue:** The component relies heavily on global IDs (e.g., `#bookmarksView`, `#settingsView`, `#homeBtn`).
-*   **Impact:** You cannot have two instances of this component on the same page (e.g., a "User Bookmarks" and "System Bookmarks" widget side-by-side).
-*   **Fix:** Refactor to use classes (e.g., `.js-bookmarks-view`) or scoped data attributes, and query elements within the component's root.
+### Hardcoded IDs ✅ FIXED
+*   **Issue:** The component relied heavily on global IDs (e.g., `#bookmarksView`, `#settingsView`, `#homeBtn`).
+*   **Impact:** You could not have two instances of this component on the same page (e.g., a "User Bookmarks" and "System Bookmarks" widget side-by-side).
+*   **Fix:** ~~Refactor to use classes (e.g., `.js-bookmarks-view`) or scoped data attributes, and query elements within the component's root.~~
+*   **Resolution:** Refactored all element references to use `js-` prefixed classes:
+    - Created root container pattern with `appRoot = document.querySelector(".js-lcars-app")` and scoped `$()` helper
+    - Replaced all `getElementById()` calls with `$(".js-*")` queries
+    - Added `js-` prefixed classes to all elements needing JavaScript hooks (views, buttons, dialogs, form elements)
+    - Dialogs use `$dialog()` helper that queries from `document` (required for `<dialog>` elements)
+    - Updated `onClick()` and `onChange()` helpers to accept class selectors
 
 ### Inline SVGs ✅ FIXED
 *   **Issue:** SVGs are hardcoded directly in the HTML.
@@ -66,7 +72,7 @@ While the visual design and basic structure of the Zander component are solid an
 
 ## 4. Recommended Action Plan
 
-1.  **Refactor IDs to Classes:** Remove reliance on `document.getElementById` and use `container.querySelector` instead.
+1.  ~~**Refactor IDs to Classes:** Remove reliance on `document.getElementById` and use `container.querySelector` instead.~~ ✅ DONE
 2.  ~~**Fix ARIA States:** Implement a small JS utility to sync `aria-expanded` with the menu's visual state.~~ ✅ DONE
 3.  ~~**Extract Icons:** Move inline SVGs to a reusable definition.~~ ✅ DONE
 4.  ~~**Standardize Dialogs:** Update dialogs to use `aria-labelledby`.~~ ✅ DONE
