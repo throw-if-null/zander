@@ -117,9 +117,9 @@ When there is disagreement between documentation, this glossary, and the impleme
 - **Implementation**:
   - `.sidebar-container` (outer column).
   - `.sidebar-top-cap`, `.sidebar-track`, `.sidebar-bottom-cap`.
-  - `.cat-wrapper`, `.cat-btn`, `.cat-submenu` for categories and subcategories.
+  - `.lcars-sidebar-item`, `.lcars-sidebar-btn`, `.lcars-sidebar-submenu` for categories and subcategories.
 - **Behavior**:
-  - Clicking a `.cat-btn` sets `state.currentCategory`.
+  - Clicking a `.lcars-sidebar-btn` sets `state.currentCategory`.
   - The active category button has a distinct visual style (e.g., `.active` class).
 
 ---
@@ -185,7 +185,7 @@ When there is disagreement between documentation, this glossary, and the impleme
 - **Meaning**: The bottom LCARS band containing global actions (and sometimes status UI).
 - **Implementation**:
   - `.footer-bar`
-  - `.action-btn` elements for:
+  - `.lcars-action-btn` elements for:
     - `ADD ENTRY`
     - `SETTINGS`
     - `ABOUT`

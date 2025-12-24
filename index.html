@@ -735,8 +735,7 @@
             }
 
             .footer-bar > .lcars-footer-bar-button,
-            .footer-bar > .settings-wrapper > .lcars-footer-bar-button,
-            .footer-bar > .add-wrapper > .lcars-footer-bar-button,
+            .footer-bar > .lcars-settings-wrapper > .lcars-footer-bar-button,
             .footer-bar > .lcars-expandable > .lcars-footer-bar-button {
                 height: 100%;
                 border-radius: 0;
@@ -744,8 +743,7 @@
                 border-left: 5px solid var(--lcars-black);
             }
 
-            .footer-bar .settings-wrapper,
-            .footer-bar .add-wrapper,
+            .footer-bar .lcars-settings-wrapper,
             .footer-bar .lcars-expandable {
                 height: 100%;
                 display: flex;
@@ -849,7 +847,7 @@
             }
 
             /* Sidebar Buttons (LCARS category actions) */
-            .cat-btn {
+            .lcars-sidebar-btn {
                 /* Rely on lcars-button defaults for most behavior, but keep sidebar-specific layout */
                 --lcars-button-bg: var(--cat-color, var(--shape-color));
                 --lcars-button-fg: var(--lcars-black);
@@ -882,23 +880,23 @@
                 --lcars-focus-bar-height: 100%;
             }
 
-            .cat-btn:hover,
-            .cat-btn.active {
+            .lcars-sidebar-btn:hover,
+            .lcars-sidebar-btn.active {
                 background-color: var(--lcars-beige);
             }
 
-            .cat-btn:focus-visible {
+            .lcars-sidebar-btn:focus-visible {
                 outline: none;
             }
 
             /* Nested Categories */
-            .cat-wrapper {
+            .lcars-sidebar-item {
                 position: static; /* Allow submenu to escape scroll container */
                 width: 100%;
                 flex-shrink: 0;
             }
 
-            .cat-submenu {
+            .lcars-sidebar-submenu {
                 display: none;
                 position: fixed; /* Fixed position escapes overflow clipping */
                 width: 160px; /* Match sidebar width */
@@ -909,18 +907,18 @@
                 /* Position will be set via JS */
             }
 
-            .cat-wrapper:hover > .cat-submenu,
-            .cat-wrapper.submenu-open > .cat-submenu {
+            .lcars-sidebar-item:hover > .lcars-sidebar-submenu,
+            .lcars-sidebar-item.submenu-open > .lcars-sidebar-submenu {
                 display: flex;
             }
 
             /* Show submenu on keyboard focus of parent or child buttons */
-            .cat-wrapper:has(> .cat-btn:focus-visible) > .cat-submenu,
-            .cat-wrapper:has(.cat-submenu .cat-btn:focus-visible) > .cat-submenu {
+            .lcars-sidebar-item:has(> .lcars-sidebar-btn:focus-visible) > .lcars-sidebar-submenu,
+            .lcars-sidebar-item:has(.lcars-sidebar-submenu .lcars-sidebar-btn:focus-visible) > .lcars-sidebar-submenu {
                 display: flex;
             }
 
-            .cat-submenu .cat-btn {
+            .lcars-sidebar-submenu .lcars-sidebar-btn {
                 border-radius: 0;
             }
 
@@ -1437,7 +1435,7 @@
                 color: var(--lcars-orange);
             }
 
-            .settings-subpage .form-group {
+            .settings-subpage .lcars-form-group {
                 margin-bottom: 15px;
             }
 
@@ -1494,7 +1492,7 @@
                 background-color: var(--lcars-white);
             }
 
-            .action-btn--small {
+            .lcars-action-btn--small {
                 height: 32px;
                 font-size: 0.9rem;
                 padding: 0 10px;
@@ -1528,12 +1526,12 @@
             }
 
             /* Borg green footer buttons when SEVEN OF NINE theme is active */
-            body[data-theme="seven"] .action-btn {
+            body[data-theme="seven"] .lcars-action-btn {
                 background-color: var(--theme-secondary);
             }
 
             /* Settings Menu */
-            .settings-wrapper {
+            .lcars-settings-wrapper {
                 display: flex;
                 align-items: center;
                 height: 40px;
@@ -1620,13 +1618,13 @@
                 background-color: var(--lcars-black);
             }
 
-            .form-group {
+            .lcars-form-group {
                 margin-bottom: 15px;
                 padding-bottom: 8px;
                 border-bottom: 1px solid rgba(153, 153, 204, 0.3);
             }
 
-            .form-group:last-of-type {
+            .lcars-form-group:last-of-type {
                 border-bottom: none;
                 padding-bottom: 0;
             }
@@ -2015,7 +2013,7 @@
                                             <!-- Rows injected via JS -->
                                         </div>
                                         <button
-                                            class="lcars-button lcars-pill lcars-focus-outline lcars-color-orange lcars-settings-action action-btn action-btn--small"
+                                            class="lcars-button lcars-pill lcars-focus-outline lcars-color-orange lcars-settings-action lcars-action-btn lcars-action-btn--small"
                                             id="addCategoryBtnMain"
                                             style="width: calc(100% - 20px); margin: 0 10px 20px 10px"
                                         >
@@ -2029,7 +2027,7 @@
                             <div id="settingsPageHome" class="settings-subpage">
                                 <div class="settings-subpage-content">
                                     <h2>HOME CATEGORY</h2>
-                                    <div class="form-group">
+                                    <div class="lcars-form-group">
                                         <label for="landingCategorySelect">LANDING CATEGORY</label>
                                         <select id="landingCategorySelect" aria-label="Landing Category"></select>
                                         <p style="font-size: 0.8rem; opacity: 0.8; margin-top: 6px;">
@@ -2043,7 +2041,7 @@
                             <div id="settingsPageThemes" class="settings-subpage">
                                 <div class="settings-subpage-content">
                                     <h2>THEME SELECTION</h2>
-                                    <div class="form-group">
+                                    <div class="lcars-form-group">
                                         <div id="themeControlsContainer" style="margin-bottom: 10px"></div>
                                         <div id="themeStatusReadout" style="font-size: 0.85rem; opacity: 0.8; letter-spacing: 1px;">
                                             ACTIVE THEME: LA'AN
@@ -2056,16 +2054,16 @@
                             <div id="settingsPageData" class="settings-subpage">
                                 <div class="settings-subpage-content">
                                     <h2>IMPORT / EXPORT</h2>
-                                    <div class="form-group">
+                                    <div class="lcars-form-group">
                                         <button
-                                            class="lcars-button lcars-pill lcars-focus-outline lcars-color-orange lcars-settings-action action-btn action-btn--small"
+                                            class="lcars-button lcars-pill lcars-focus-outline lcars-color-orange lcars-settings-action lcars-action-btn lcars-action-btn--small"
                                             id="exportBtnMain"
                                             style="width: 100%; margin-bottom: 10px;"
                                         >
                                             EXPORT DATABASE
                                         </button>
                                         <button
-                                            class="lcars-button lcars-pill lcars-focus-outline lcars-color-orange lcars-settings-action action-btn action-btn--small"
+                                            class="lcars-button lcars-pill lcars-focus-outline lcars-color-orange lcars-settings-action lcars-action-btn lcars-action-btn--small"
                                             id="importBtnMain"
                                             style="width: 100%; margin-bottom: 10px;"
                                         >
@@ -2089,7 +2087,7 @@
                                     <p style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 15px; line-height: 1.5;">
                                         WARNING: THIS ACTION WILL PERMANENTLY DELETE ALL YOUR BOOKMARKS AND CATEGORIES AND RESTORE THE SYSTEM TO ITS DEFAULT STATE. THIS CANNOT BE UNDONE.
                                     </p>
-                                    <div class="form-group">
+                                    <div class="lcars-form-group">
                                         <button
                                             class="lcars-button lcars-pill lcars-focus-outline lcars-color-danger lcars-settings-action reset"
                                             id="resetBtnMain"
@@ -2140,7 +2138,7 @@
                         <button class="lcars-expandable-item" id="addCategoryBtn" role="menuitem">CATEGORY</button>
                     </div>
                 </div>
-                <div class="settings-wrapper">
+                <div class="lcars-settings-wrapper">
                     <button class="lcars-button lcars-focus-bar lcars-color-orange lcars-footer-bar-button" id="settingsBtn" aria-label="Settings (Alt+S)">
                         SETTINGS
                     </button>
@@ -2163,15 +2161,15 @@
                 <form id="bookmarkForm">
                     <div class="lcars-dialog-body">
                         <input type="hidden" id="bookmarkId" />
-                        <div class="form-group">
+                        <div class="lcars-form-group">
                             <label for="titleInput">TITLE</label>
                             <input type="text" id="titleInput" required aria-required="true" maxlength="64" />
                         </div>
-                        <div class="form-group">
+                        <div class="lcars-form-group">
                             <label for="descriptionInput">DESCRIPTION</label>
                             <textarea id="descriptionInput" rows="3" maxlength="512" placeholder="Optional description..." aria-label="Bookmark Description"></textarea>
                         </div>
-                        <div class="form-group">
+                        <div class="lcars-form-group">
                             <label for="urlInput">URL</label>
                             <div style="display: flex; gap: 10px">
                                 <label for="urlProtocol" style="display: none;">Protocol</label>
@@ -2189,7 +2187,7 @@
                                 />
                             </div>
                         </div>
-                        <div class="form-group">
+                        <div class="lcars-form-group">
                             <label for="categoryInput">CATEGORY</label>
                             <select id="categoryInput" aria-label="Bookmark Category">
                                 <!-- Options injected -->
@@ -2239,18 +2237,18 @@
                 <form id="categoryForm">
                     <div class="lcars-dialog-body">
                         <input type="hidden" id="categoryId" />
-                        <div class="form-group">
+                        <div class="lcars-form-group">
                             <label for="categoryNameInput">NAME</label>
                             <input type="text" id="categoryNameInput" required aria-required="true" maxlength="32" style="text-transform: uppercase;" />
                         </div>
-                        <div class="form-group">
+                        <div class="lcars-form-group">
                             <label for="categoryParentInput">PARENT CATEGORY</label>
                             <select id="categoryParentInput" aria-label="Parent Category">
                                 <option value="">(ROOT)</option>
                                 <!-- Options injected -->
                             </select>
                         </div>
-                        <div class="form-group" id="categoryColorFormGroup">
+                        <div class="lcars-form-group" id="categoryColorFormGroup">
                             <label>COLOR</label>
                             <div class="color-grid" id="categoryColorGrid" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px;">
                                 <!-- Colors injected via JS -->
@@ -2822,7 +2820,7 @@
                 state.categories.forEach((cat) => {
                     const btn = document.createElement("button");
                     btn.className =
-                        "lcars-button lcars-focus-bar cat-btn" +
+                        "lcars-button lcars-focus-bar lcars-sidebar-btn" +
                         (currentRootId === cat.id ? " active" : "");
                     btn.textContent = cat.name;
                     btn.style.setProperty("--cat-color", cat.color);
@@ -4425,12 +4423,12 @@
                     if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
 
                     const focusedBtn = document.activeElement;
-                    if (!focusedBtn || !focusedBtn.classList.contains("cat-btn")) return;
+                    if (!focusedBtn || !focusedBtn.classList.contains("lcars-sidebar-btn")) return;
 
                     e.preventDefault();
 
                     // Get all visible category buttons (flattened)
-                    const allButtons = Array.from(sidebarCategories.querySelectorAll(".cat-btn"));
+                    const allButtons = Array.from(sidebarCategories.querySelectorAll(".lcars-sidebar-btn"));
                     const currentIndex = allButtons.indexOf(focusedBtn);
 
                     let nextIndex;
@@ -4457,7 +4455,7 @@
                 // Category Sidebar Delegation
                 if (sidebar) {
                     sidebar.addEventListener("click", (e) => {
-                        const btn = e.target.closest(".cat-btn");
+                        const btn = e.target.closest(".lcars-sidebar-btn");
                         if (btn && btn.dataset.id) {
                             // Ensure main view is bookmarks when switching category
                             bookmarksView.classList.add("active");

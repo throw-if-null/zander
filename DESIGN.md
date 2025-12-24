@@ -279,7 +279,7 @@ Implementation notes:
 
 - Themes are applied via a `data-theme` attribute on `<body>` and theme-specific CSS variable overrides.
 - The theme system does **not** affect layout or data; it only swaps colors and minor stylistic details.
-- Controls that use `.action-btn` and category configuration buttons that reference `--theme-secondary` will update automatically when the theme changes, keeping **footer buttons**, **add/export/import** controls, and certain **category-config buttons** visually consistent with the active theme.
+- Controls that use `.lcars-action-btn` and category configuration buttons that reference `--theme-secondary` will update automatically when the theme changes, keeping **footer buttons**, **add/export/import** controls, and certain **category-config buttons** visually consistent with the active theme.
 
 ---
 
@@ -294,7 +294,7 @@ The sidebar is embedded in the right-hand frame and divided into:
 ### 3.1 Visual Design
 
 - The sidebar track is a continuous orange band.
-- Category buttons (`.cat-btn`) sit inside the track as half-pill overlays:
+- Category buttons (`.lcars-sidebar-btn`) sit inside the track as half-pill overlays:
   - Left side of the button is rounded.
   - Right side aligns with the frame edge.
   - The background color is driven by a CSS custom property (e.g. `--cat-color`) derived from the category’s `color` field.
@@ -308,14 +308,14 @@ Example structure:
 <aside class="sidebar-container">
   <div class="sidebar-top-cap"></div>
   <div class="sidebar-track">
-    <div class="cat-wrapper">
-      <button class="cat-btn active">DATABANKS</button>
-      <div class="cat-submenu">
+    <div class="lcars-sidebar-item">
+      <button class="lcars-sidebar-btn active">DATABANKS</button>
+      <div class="lcars-sidebar-submenu">
         <!-- optional child categories -->
       </div>
     </div>
 
-    <!-- More .cat-wrapper entries -->
+    <!-- More .lcars-sidebar-item entries -->
 
     <div class="sidebar-filler"></div>
   </div>
@@ -343,14 +343,14 @@ Category buttons and nested submenus are placed within the `.sidebar-track` and 
   - Text: beige or light foreground.
 - **Hover**:
   - Brightened background, increased opacity.
-- **Active** (`.cat-btn.active`):
+- **Active** (`.lcars-sidebar-btn.active`):
   - Stronger fill using the category color, with clear separation from inactive buttons.
 - **Focus-visible**:
   - LCARS-style white focus bar rendered via `:focus-visible::after`:
     - For sidebar category buttons, a vertical white bar is drawn along the left edge of the button.
     - This keeps keyboard focus clearly visible without relying on the browser’s default outline.
 
-Category buttons can have nested submenus (`.cat-submenu`) for child categories. Submenus are implemented as additional stacks of `.cat-btn` inside `.cat-wrapper` elements, shown on hover or inline depending on viewport and depth.
+Category buttons can have nested submenus (`.lcars-sidebar-submenu`) for child categories. Submenus are implemented as additional stacks of `.lcars-sidebar-btn` inside `.lcars-sidebar-item` elements, shown on hover or inline depending on viewport and depth.
 
 ---
 
@@ -840,6 +840,56 @@ Menu items use the same white focus bar style as footer buttons, rendered on the
    - The main content scrolls independently inside the fixed shell for smaller viewports.
 
 This document describes the intended appearance and interaction patterns. For implementation details (DOM structure, JavaScript behavior, and state model), see `ARCHITECTURE.md` and `index.html`.
+
+---
+
+## 10.5 CSS Naming Convention
+
+All CSS class names in ZANDER follow a **BEM-like naming convention** with the `lcars-` prefix to ensure consistency, avoid conflicts, and prepare the CSS for extraction into a standalone LCARS design system.
+
+### Pattern
+
+| Type | Pattern | Example |
+|------|---------|---------|
+| **Base primitive** | `lcars-{component}` | `lcars-tile`, `lcars-button`, `lcars-pin` |
+| **Modifier** | `lcars-{component}--{variant}` | `lcars-tile--bookmark`, `lcars-pin--sm` |
+| **Child element** | `lcars-{component}-{element}` | `lcars-header-bar-home`, `lcars-dialog-body` |
+| **Child modifier** | `lcars-{component}-{element}--{variant}` | `lcars-expandable-item--active` |
+
+### Rules
+
+1. **Always use the `lcars-` prefix** for all custom classes.
+2. **Use double hyphens (`--`)** to separate modifiers from base class names.
+3. **Use single hyphens (`-`)** to separate words within a component name or to denote child elements.
+4. **Keep component names short but descriptive**: prefer `lcars-sidebar-btn` over `lcars-sidebar-category-button`.
+5. **Modifiers describe variants**, not states. Use pseudo-classes (`:hover`, `:focus-visible`, `.active`) for states.
+
+### Examples
+
+| Class | Type | Description |
+|-------|------|-------------|
+| `lcars-tile` | Base | Generic LCARS content tile |
+| `lcars-tile--bookmark` | Modifier | Bookmark-specific tile variant |
+| `lcars-sidebar-btn` | Base | Sidebar category button |
+| `lcars-sidebar-submenu` | Child | Submenu container within sidebar |
+| `lcars-form-group` | Base | Form field grouping container |
+| `lcars-action-btn--small` | Modifier | Compact action button variant |
+| `lcars-footer-bar-button` | Child | Button element within footer bar |
+
+### Canonical Class List
+
+The following classes are the canonical LCARS primitives:
+
+- **Frame:** `lcars-app`, `lcars-frame-segment`, `lcars-elbow`
+- **Bars:** `lcars-header-bar`, `lcars-footer-bar`, `lcars-sidebar-bar`
+- **Buttons:** `lcars-button`, `lcars-pill`, `lcars-sidebar-btn`, `lcars-footer-bar-button`, `lcars-action-btn`
+- **Tiles:** `lcars-tile`, `lcars-tile--bookmark`, `lcars-tile--category`, `lcars-tile--settings`
+- **Pins:** `lcars-pin`, `lcars-pin--sm`, `lcars-pin--lg`, `lcars-pin--bordered`
+- **Menus:** `lcars-expandable`, `lcars-expandable-menu`, `lcars-expandable-item`
+- **Sidebar:** `lcars-sidebar-item`, `lcars-sidebar-submenu`
+- **Forms:** `lcars-form-group`
+- **Dialogs:** `lcars-dialog-header`, `lcars-dialog-body`, `lcars-dialog-footer`
+- **Utilities:** `lcars-focus-bar`, `lcars-focus-outline`, `lcars-breadcrumb`, `lcars-status-display`
 
 ---
 

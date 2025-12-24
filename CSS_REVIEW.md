@@ -81,9 +81,9 @@ The following primitives are properly componentized with CSS variable configurat
 - ✅ Added `--lcars-z-index-dropdown`, `--lcars-z-index-dialog`, `--lcars-z-index-tooltip`
 - ✅ Added `--lcars-transition-fast`, `--lcars-transition-normal`
 - ✅ Added `--lcars-spacing-xs` through `--lcars-spacing-xl`
-- ✅ Replaced `z-index: 1000` with `var(--lcars-z-index-dropdown)` in `.lcars-expandable-menu`, `.add-menu`, `.cat-submenu`
+- ✅ Replaced `z-index: 1000` with `var(--lcars-z-index-dropdown)` in `.lcars-expandable-menu`, `.add-menu`, `.lcars-sidebar-submenu`
 - ✅ Replaced all hardcoded `0.1s ease-out` transitions with `var(--lcars-transition-fast)` in `.lcars-tile`, `.settings-tile`, `.lcars-category-tile`, `.bookmark-tile`
-- ✅ Replaced all hardcoded `0.2s` transitions with `var(--lcars-transition-normal)` in `.lcars-arrow-btn`, `.cat-btn`, `.lcars-tile-pin`, `.lcars-pin`
+- ✅ Replaced all hardcoded `0.2s` transitions with `var(--lcars-transition-normal)` in `.lcars-arrow-btn`, `.lcars-sidebar-btn`, `.lcars-tile-pin`, `.lcars-pin`
 
 **Note:** Spacing tokens (`--lcars-spacing-*`) are defined but not yet applied throughout the CSS. This is deferred for future refactoring as it requires broader changes.
 
@@ -104,24 +104,31 @@ A documentation comment was added to the `body` block in `index.html` explaining
 
 ---
 
-### 4. Inconsistent Naming Patterns
+### 4. ~~Inconsistent Naming Patterns~~ ✅ RESOLVED
 
-Primitives mix naming conventions:
+~~Primitives mix naming conventions:~~
 
 | Pattern | Examples |
 |---------|----------|
 | BEM-like (correct) | `lcars-tile--bookmark`, `lcars-pin--sm` |
 | Multi-hyphen compound | `lcars-header-bar-home`, `lcars-footer-bar-button` |
-| Legacy non-prefixed | `action-btn--small`, `cat-btn`, `form-group` |
+| ~~Legacy non-prefixed~~ | ~~`action-btn--small`, `cat-btn`, `form-group`~~ |
 
-**Recommended naming convention:**
+**Resolution:** All legacy non-prefixed classes have been renamed to follow the BEM-like naming convention with the `lcars-` prefix:
 
-- `lcars-{component}` — base primitive
-- `lcars-{component}--{variant}` — modifier
-- `lcars-{component}-{element}` — child element
-- `lcars-{component}-{element}--{variant}` — child element modifier
+| Old Name | New Name | Status |
+|----------|----------|--------|
+| `action-btn` | `lcars-action-btn` | ✅ Renamed |
+| `action-btn--small` | `lcars-action-btn--small` | ✅ Renamed |
+| `cat-btn` | `lcars-sidebar-btn` | ✅ Renamed |
+| `cat-wrapper` | `lcars-sidebar-item` | ✅ Renamed |
+| `cat-submenu` | `lcars-sidebar-submenu` | ✅ Renamed |
+| `form-group` | `lcars-form-group` | ✅ Renamed |
+| `settings-wrapper` | `lcars-settings-wrapper` | ✅ Renamed |
 
-**Action:** Document naming convention in DESIGN.md and refactor inconsistent names.
+**Note:** The multi-hyphen compound names (`lcars-header-bar-home`, `lcars-footer-bar-button`) follow the correct BEM-like pattern for child elements (`lcars-{component}-{element}`) and were not changed.
+
+**Documentation:** Added section 10.5 "CSS Naming Convention" to `DESIGN.md` documenting the canonical naming pattern.
 
 ---
 
@@ -175,7 +182,7 @@ textarea {
 }
 ```
 
-The same duplication exists for `.app-title`, `.lcars-header-bar-home`, `.cat-btn`, etc.
+The same duplication exists for `.app-title`, `.lcars-header-bar-home`, `.lcars-sidebar-btn`, etc.
 
 **Action:** Either:
 - Apply `lcars-focus-bar` class in HTML and remove duplicate CSS, or
@@ -212,7 +219,7 @@ vs
 | Theme system | 🟢 Complete | ✅ Documented `--shape-color` purpose |
 | Primitives | 🟢 Good | Well-defined core set |
 | Legacy cleanup | 🟢 Complete | ✅ Removed ~470 lines of duplicates |
-| Naming convention | 🟡 Partial | Document and enforce BEM-like pattern |
+| Naming convention | 🟢 Complete | ✅ Documented in DESIGN.md, legacy classes renamed |
 | Form primitives | 🔴 Blocking | Namespace as `lcars-input`, etc. |
 | Focus system | 🟡 Partial | Consolidate to use helper class consistently |
 | Extension points | 🟢 Complete | ✅ Removed unused class, documented pattern |
@@ -228,8 +235,8 @@ vs
    - ✅ `--lcars-transition-*` timing (`--lcars-transition-fast`, `--lcars-transition-normal`)
    - ✅ `--lcars-spacing-*` scale (`--lcars-spacing-xs` through `--lcars-spacing-xl`)
 2. ✅ Replace hardcoded values with tokens throughout CSS:
-   - ✅ Replaced `z-index: 1000` with `var(--lcars-z-index-dropdown)` in `.lcars-expandable-menu`, `.add-menu`, `.cat-submenu`
-   - ✅ Replaced `transition: ... 0.2s` with `var(--lcars-transition-normal)` in `.lcars-arrow-btn`, `.lcars-arrow-btn svg`, `.cat-btn`, `.lcars-tile-pin`, `.lcars-pin`
+   - ✅ Replaced `z-index: 1000` with `var(--lcars-z-index-dropdown)` in `.lcars-expandable-menu`, `.add-menu`, `.lcars-sidebar-submenu`
+   - ✅ Replaced `transition: ... 0.2s` with `var(--lcars-transition-normal)` in `.lcars-arrow-btn`, `.lcars-arrow-btn svg`, `.lcars-sidebar-btn`, `.lcars-tile-pin`, `.lcars-pin`
    - ✅ Replaced `transition: ... 0.1s ease-out` with `var(--lcars-transition-fast)` in `.lcars-tile`, `.settings-tile`, `.lcars-category-tile`, `.bookmark-tile`
 3. ✅ Documented `--shape-color` purpose in CSS comment (intentional indirection for frame customization)
 
@@ -258,11 +265,11 @@ vs
 2. Consolidate duplicate focus bar implementations
 3. Test keyboard navigation across all components
 
-### Phase 5: Documentation
+### Phase 5: Documentation ✅ COMPLETE
 
-1. Document naming convention in DESIGN.md
-2. Update LCARS Primitive Catalog with any changes
-3. Remove or populate empty extension point classes
+1. ✅ Documented naming convention in DESIGN.md (section 10.5)
+2. ✅ Updated LCARS Primitive Catalog with canonical class list
+3. ✅ Removed unused extension point class, documented pattern for remaining classes
 
 ---
 

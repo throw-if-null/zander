@@ -37,7 +37,7 @@ The app is visually presented as a **LCARS-style console** built from a continuo
 - **Sidebar (Right Frame Column)** (primitive: `lcars-sidebar-bar`)  
   - Vertical track containing:
     - Decorative caps (`lcars-sidebar-bar-top-cap`, `lcars-sidebar-bar-bottom-cap`) forming LCARS "elbows".
-    - A continuous track (`lcars-sidebar-bar-track`) with category buttons rendered as `.cat-btn` elements.
+    - A continuous track (`lcars-sidebar-bar-track`) with category buttons rendered as `.lcars-sidebar-btn` elements.
   - The sidebar bar primitive supports variants:
     - `lcars-sidebar-bar--decorative` – purely visual, no interactive content.
     - `lcars-sidebar-bar--with-toggle` – includes a hamburger/menu toggle button.
@@ -161,7 +161,7 @@ Rules:
 - `children`:
   - Arbitrary depth supported.
   - Used for nested category rendering in:
-    - Sidebar category hierarchy (via `.cat-wrapper` + `.cat-submenu`).
+    - Sidebar category hierarchy (via `.lcars-sidebar-item` + `.lcars-sidebar-submenu`).
     - Settings category configuration list.
 
 #### 2.1.3 App State
@@ -453,7 +453,7 @@ Semantics:
   - Status display (`.status-display`)
 - `.footer-bar`  
   Bottom LCARS band with:
-  - Global action buttons (`.action-btn`)
+  - Global action buttons (`.lcars-action-btn`)
   - Status / meta display.
 
 ### 6.2 Views & Rendering Responsibilities
@@ -549,9 +549,9 @@ Visibility of each view is controlled by logic that adds/removes `.active` on `.
 - `renderCategories()`  
   - Rebuilds the sidebar from `state.categories` (tree).
   - Uses helper `createCategoryButton(cat, level)` to:
-    - Create `.cat-wrapper` with:
-      - `.cat-btn` for each category.
-      - Optional `.cat-submenu` for children (up to a configured depth).
+    - Create `.lcars-sidebar-item` with:
+      - `.lcars-sidebar-btn` for each category.
+      - Optional `.lcars-sidebar-submenu` for children (up to a configured depth).
     - Wire category selection events:
       - Selecting a category forces the Bookmarks view active.
       - Updates `state.currentCategory`, then re-renders categories and grid.

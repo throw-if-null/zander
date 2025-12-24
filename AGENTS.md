@@ -249,5 +249,5 @@ Inside `index.html`:
   4. `<script>` (Logic)
 - **Naming:**
   - Use descriptive IDs (e.g., `#addEntryBtn`, `#settingsView`, `#aboutView`, `#bookmarkDialog`, `#colorPickerDialog`, `#confirmDialog`).
-  - Use descriptive classes (e.g., `.lcars-app`, `.header-bar`, `.sidebar-container`, `.cat-btn`, `.bookmark-tile`, `.status-display`).
+  - Use descriptive classes (e.g., `.lcars-app`, `.header-bar`, `.sidebar-container`, `.lcars-sidebar-btn`, `.lcars-tile--bookmark`, `.lcars-status-display`).
   - Maintain stable hooks for JavaScript and tests; avoid gratuitous renaming without updating documentation.
