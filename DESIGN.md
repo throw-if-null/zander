@@ -131,7 +131,7 @@ The main content sits *inside* the frame, with internal padding and margins to v
 
 ### 1.3 LCARS Frame Segment Primitives
 
-The continuous LCARS frame (header bar, sidebar track, footer bar) is built from a small set of reusable “frame segment” primitives. These primitives define the LCARS chrome, while structural shells like `.header-bar` and `.footer-bar` handle layout and semantics, and can themselves act as frame segments when combined with the `lcars-frame-segment` modifiers.
+The continuous LCARS frame (header bar, sidebar track, footer bar) is built from a small set of reusable “frame segment” primitives. These primitives define the LCARS chrome, while LCARS shell bars like `.lcars-header-bar`, `.lcars-sidebar-bar`, and `.lcars-footer-bar` handle layout and semantics, and can themselves act as frame segments when combined with the `lcars-frame-segment` modifiers.
 
 - `.lcars-frame-segment`  
   - Base visual primitive for any LCARS frame piece.
