@@ -16,7 +16,8 @@ types:
         type: string
         description: User-visible title, trimmed, max 64 chars.
       description:
-        type: string | null
+        type: string
+        nullable: true
         description: Optional longer description, max 512 chars.
       url:
         type: string
@@ -64,7 +65,8 @@ types:
         type: Category[]
         description: Root-level categories; each may have nested children.
       currentCategoryId:
-        type: string | null
+        type: string
+        nullable: true
         description: >
           Currently selected Category.id, or null for 'All' categories.
     invariants:
@@ -116,7 +118,8 @@ ports:
         description: Load the latest persisted State, if any.
         input: null
         output:
-          type: State | null
+          type: State
+          nullable: true
         errors:
           - PersistenceError
       saveState:

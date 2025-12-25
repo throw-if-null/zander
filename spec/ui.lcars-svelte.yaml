@@ -6,6 +6,55 @@ meta:
     Contracts for the reusable LCARS Svelte component library used by the Zander app.
 
 components:
+  LcarsApp:
+    description: >
+      Root LCARS application frame that arranges header, sidebar, main content,
+      and footer into the canonical LCARS grid layout. Wraps `.lcars-app`.
+
+    props:
+      ariaLabel:
+        type: string
+        required: false
+        description: >
+          Optional aria-label for the overall application container if a label
+          beyond visible headings is needed.
+
+    slots:
+      header:
+        required: false
+        description: >
+          Content for the header region (typically a LcarsHeaderBar).
+      sidebar:
+        required: false
+        description: >
+          Content for the sidebar frame column (typically a LcarsSidebarBar).
+      main:
+        required: true
+        description: >
+          Primary application content region (views, dialogs, etc.).
+      footer:
+        required: false
+        description: >
+          Content for the footer region (typically a LcarsFooterBar).
+
+    accessibility:
+      semantics:
+        element: div
+        role: application
+        description: >
+          Renders as a div that encloses the full console. Landmark semantics
+          are provided by child components (header/main/aside/footer).
+      keyboard:
+        - "Must not trap focus; focus moves freely into children."
+      relationships:
+        - "Contains at most one header, one main, one aside, and one footer landmark via child components."
+
+    styling:
+      classes:
+        - "lcars-app"
+      contract:
+        - "Root element MUST apply lcars-app."
+
   LcarsHeaderBar:
     description: >
       LCARS header bar providing the top frame of the console, including a home/title control
@@ -18,7 +67,8 @@ components:
         description: >
           Visible title text rendered in the primary header area (e.g. 'ZANDER').
       homeHref:
-        type: string | null
+        type: string
+        nullable: true
         required: false
         default: null
         description: >
@@ -79,13 +129,135 @@ components:
         - "Any deviation from DESIGN.md section for header bars MUST be documented."
 
   LcarsSidebarBar:
-    status: todo
-    description: "Vertical LCARS sidebar column; wraps lcars-sidebar-bar primitives."
+    description: >
+      Vertical LCARS sidebar column forming the right frame, with optional
+      interactive content. Wraps `.lcars-sidebar-bar` and related classes.
+
+    props:
+      ariaLabel:
+        type: string
+        required: false
+        description: >
+          Optional aria-label if the sidebar is used as a navigation landmark.
+
+    slots:
+      default:
+        description: >
+          Content inside the sidebar track, such as navigation or category lists.
+
+    events: {}
+
+    accessibility:
+      semantics:
+        element: aside
+        role: complementary
+        description: >
+          Renders as <aside>. If used for navigation, consumers may wrap
+          navigation lists with <nav> or set appropriate aria roles.
+      keyboard:
+        - "Component itself does not add keyboard behavior beyond its children."
+      labels:
+        - "If ariaLabel is set, it labels the aside region."
+
+    styling:
+      classes:
+        - "lcars-sidebar-bar"
+        - "lcars-sidebar-bar-top-cap"
+        - "lcars-sidebar-bar-track"
+        - "lcars-sidebar-bar-bottom-cap"
+      contract:
+        - "Root MUST apply lcars-sidebar-bar."
+        - "Internal structure MUST follow DESIGN.md for sidebar bars."
 
   LcarsFooterBar:
-    status: todo
-    description: "Bottom LCARS footer bar with action buttons and optional status area."
+    description: >
+      Bottom LCARS footer bar containing primary action buttons and an optional
+      status block. Wraps `.lcars-footer-bar`.
+
+    props:
+      ariaLabel:
+        type: string
+        required: false
+        description: >
+          Optional aria-label for the footer landmark if needed.
+
+    slots:
+      primaryActions:
+        description: >
+          Slot for primary footer actions (e.g. Add Entry, Settings, About).
+      status:
+        required: false
+        description: >
+          Slot for status/meta content (often a LcarsStatusDisplay).
+      default:
+        required: false
+        description: >
+          Any additional footer content not covered by named slots.
+
+    events: {}
+
+    accessibility:
+      semantics:
+        element: footer
+        role: contentinfo
+        description: >
+          Renders as <footer> with role='contentinfo', representing global
+          application footer content.
+      keyboard:
+        - "All interactive children must follow standard focus ordering."
+      labels:
+        - "If ariaLabel is set, it is exposed as the footer’s accessible name."
+
+    styling:
+      classes:
+        - "lcars-footer-bar"
+        - "lcars-footer-bar-button"
+        - "lcars-footer-bar-status"
+      contract:
+        - "Root MUST apply lcars-footer-bar."
+        - "Consumers SHOULD apply lcars-footer-bar-button to action buttons."
 
   LcarsStatusDisplay:
-    status: todo
-    description: "Status display panel for counts, stardates, or other system metrics."
+    description: >
+      LCARS-styled status panel for displaying short pieces of system or
+      application status. Wraps `.lcars-status-display`.
+
+    props:
+      ariaLabel:
+        type: string
+        required: false
+        description: >
+          Optional aria-label when the status content is not self-describing.
+      liveMode:
+        type: string
+        enum: ["off", "polite", "assertive"]
+        required: false
+        default: "off"
+        description: >
+          Optional aria-live mode to announce status changes to screen readers.
+
+    slots:
+      default:
+        description: >
+          Free-form status content (text, spans, lightweight markup). Consumers
+          SHOULD keep content concise.
+
+    events: {}
+
+    accessibility:
+      semantics:
+        element: div
+        role: status
+        description: >
+          Renders as a div with role='status' when liveMode != 'off'; otherwise
+          a plain div. Used to announce dynamic status updates.
+      keyboard:
+        - "Component itself is not focusable by default."
+      labels:
+        - "If ariaLabel is provided, it is used as an accessible label."
+
+    styling:
+      classes:
+        - "lcars-status-display"
+      contract:
+        - "Root MUST apply lcars-status-display."

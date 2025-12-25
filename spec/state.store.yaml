@@ -1,0 +1,291 @@
+meta:
+  id: state.store
+  version: 0.1.0
+  status: draft
+  description: >
+    Domain-level state store contract for the Svelte 5 Zander app.
+    Describes operations on the in-memory State (bookmarks, categories,
+    view state) and how they interact with the PersistenceBackend.
+
+# NOTE:
+# - Core domain types (Bookmark, Category, State, ExportBundle, PersistenceError)
+#   are defined in `spec/persistence.backend.yaml` and referenced here by name.
+
+ports:
+  StateStore:
+    description: >
+      Abstract interface for the domain-level state store used by the Svelte
+      app. Implemented on top of a Svelte store and a configured
+      PersistenceBackend, but the contract is agnostic to Svelte specifics.
+
+    operations:
+      loadInitialState:
+        description: >
+          Load initial State from the configured PersistenceBackend. If no
+          persisted data exists, initialize with built-in defaults. Ensures
+          basic invariants (valid category references, sane view state).
+        input: null
+        output:
+          type: State
+        errors:
+          - PersistenceError
+        notes:
+          - "Calls PersistenceBackend.loadState()."
+          - "If null is returned, constructs a default State in memory."
+          - "Ensures currentCategoryId, currentView, and currentSettingsPage are valid."
+
+      setCurrentCategory:
+        description: >
+          Change the currently selected category. Updates State.currentCategoryId
+          and persists the new view state.
+        input:
+          type: object
+          fields:
+            categoryId:
+              type: string
+              nullable: true
+              description: >
+                Desired category id, or null for 'All' categories.
+        output:
+          type: State
+        errors:
+          - PersistenceError
+        notes:
+          - "If categoryId is non-null but not found, falls back to the first root category id or null."
+          - "Calls PersistenceBackend.saveState() after updating state."
+
+      addCategory:
+        description: >
+          Create a new Category under the specified parent (or as a root
+          category when parentId is null). Assigns id and createdAt, and
+          chooses an initial color.
+        input:
+          type: object
+          fields:
+            parentId:
+              type: string
+              nullable: true
+              description: >
+                Parent category id, or null to add a root category.
+            name:
+              type: string
+              nullable: true
+              description: >
+                Optional display name. If null, a default template name is used.
+        output:
+          type: State
+        errors:
+          - PersistenceError
+        notes:
+          - "If parentId is null, appends to State.categories."
+          - "If parentId is non-null but not found, treats it as null (root insert)."
+          - "Uses generateUUID() for id and calculateStardate() for createdAt."
+          - "Color may default to a theme-appropriate value or inherit from parent."
+
+      moveCategory:
+        description: >
+          Reorder a category among its siblings. Moving 'up' swaps with the
+          previous sibling; moving 'down' swaps with the next sibling.
+        input:
+          type: object
+          fields:
+            categoryId:
+              type: string
+            direction:
+              type: string
+              enum: ["up", "down"]
+        output:
+          type: State
+        errors:
+          - PersistenceError
+        notes:
+          - "If categoryId is not found, State is unchanged."
+          - "If already at the first/last position, State is unchanged."
+          - "Movement never changes parent; only sibling order."
+
+      deleteCategory:
+        description: >
+          Delete a category and its entire subtree. All bookmarks whose
+          categoryId lies in that subtree are also deleted. View state is
+          adjusted if it pointed into the removed subtree.
+        input:
+          type: object
+          fields:
+            categoryId:
+              type: string
+        output:
+          type: State
+        errors:
+          - PersistenceError
+        notes:
+          - "If categoryId is not found, State is unchanged."
+          - "All descendant categories are removed from the tree."
+          - "All bookmarks referencing any removed category are deleted."
+          - "If currentCategoryId pointed into the subtree, it is reset to a safe default (first root or null)."
+
+      addBookmark:
+        description: >
+          Create a new Bookmark assigned to the given category (or current
+          category by default). Assigns id and createdAt, and normalizes the URL.
+        input:
+          type: object
+          fields:
+            title:
+              type: string
+            url:
+              type: string
+            categoryId:
+              type: string
+              nullable: true
+              description: >
+                Target category id. If null, falls back to currentCategoryId or
+                a default root category.
+            description:
+              type: string | null
+              required: false
+        output:
+          type: State
+        errors:
+          - PersistenceError
+        notes:
+          - "Uses generateUUID() for id and calculateStardate() for createdAt."
+          - "Normalizes url using normalizeUrl()."
+          - "If effective category id is not found, falls back to a default root category or creates one as needed."
+
+      updateBookmark:
+        description: >
+          Update an existing Bookmark's fields (title, url, description,
+          categoryId). Does not change createdAt.
+        input:
+          type: object
+          fields:
+            id:
+              type: string
+            title:
+              type: string
+              nullable: true
+              description: >
+                Optional new title. If null, title is left unchanged.
+            url:
+              type: string
+              nullable: true
+              description: >
+                Optional new URL. If non-null, it is normalized.
+            description:
+              type: string
+              nullable: true
+              description: >
+                Optional new description. Null means clear; undefined means unchanged.
+            categoryId:
+              type: string
+              nullable: true
+              description: >
+                Optional new category id. If non-null but invalid, falls back to currentCategoryId or a default.
+        output:
+          type: State
+        errors:
+          - PersistenceError
+        notes:
+          - "If id is not found, State is unchanged."
+          - "createdAt remains the original creation stardate."
+
+      deleteBookmark:
+        description: >
+          Delete a single Bookmark by id.
+        input:
+          type: object
+          fields:
+            id:
+              type: string
+        output:
+          type: State
+        errors:
+          - PersistenceError
+        notes:
+          - "If id is not found, State is unchanged."
+
+      resetSystem:
+        description: >
+          Reset the app to its default data bundle. Clears any persisted data
+          from the active PersistenceBackend and reinitializes State with
+          defaults (bookmarks, categories, and view state).
+        input: null
+        output:
+          type: State
+        errors:
+          - PersistenceError
+        notes:
+          - "Equivalent to clearing storage keys for the active backend and loading defaults."
+          - "After reset, currentCategoryId, currentView, and currentSettingsPage are set to their initial values."
+
+      applyExportBundle:
+        description: >
+          Replace the current State with the contents of an imported ExportBundle
+          (e.g., from PersistenceBackend.importData or a user-chosen file).
+          Performs validation and normalization similar to the legacy app.
+        input:
+          type: ExportBundle
+        output:
+          type: State
+        errors:
+          - PersistenceError
+        notes:
+          - "Valid bookmarks are kept; invalid ones are discarded."
+          - "Structurally valid categories are kept; invalid ones are discarded."
+          - "Category colors outside the LCARS palette may be normalized rather than rejected."
+          - "Import is treated as a full overwrite of bookmarks and categories."
+
+scenarios:
+  delete_category_cascades_bookmarks:
+    description: >
+      Deleting a category removes its subtree and all bookmarks in that
+      subtree, and keeps State invariants intact.
+    given:
+      - "State S with categories [root, child] where child is nested under root."
+      - "Bookmarks b1 in root, b2 in child, and b3 in an unrelated category."
+    when:
+      - "S2 = deleteCategory({ categoryId: child.id })"
+    then:
+      - "S2.categories no longer contains child or any of its descendants."
+      - "S2.bookmarks does not contain b2, but still contains b1 and b3."
+      - "If S.currentCategoryId pointed into the deleted subtree, S2.currentCategoryId is reset to a safe value."
+
+  move_category_only_reorders_siblings:
+    description: >
+      Moving a category up or down only changes its position among siblings,
+      not its parent or subtree.
+    given:
+      - "State S with root categories [A, B, C] and B having a child D."
+    when:
+      - "S2 = moveCategory({ categoryId: B.id, direction: 'up' })"
+    then:
+      - "Root order is [B, A, C] in S2."
+      - "B's parent is still root in S2."
+      - "B's child D remains attached to B in S2."
+
+  reset_system_restores_defaults:
+    description: >
+      resetSystem clears persisted data and restores default bookmarks,
+      categories, and view state.
+    given:
+      - "State S with user-modified bookmarks and categories already saved."
+    when:
+      - "S2 = resetSystem()"
+    then:
+      - "S2.bookmarks and S2.categories match the default bundle (up to allowed variations like createdAt)."
+      - "S2.currentCategoryId, S2.currentView, and S2.currentSettingsPage are the initial defaults."
+      - "Subsequent loadInitialState() observes the reset state, not S."
+
+  apply_export_bundle_overwrites_state:
+    description: >
+      Applying an ExportBundle overwrites existing bookmarks and categories,
+      subject to validation and normalization rules.
+    given:
+      - "An initial State S1 with some bookmarks and categories."
+      - "An ExportBundle B produced from a different valid State S2."
+    when:
+      - "S_after = applyExportBundle(B)"
+    then:
+      - "S_after.bookmarks and S_after.categories match those of S2 (subject to normalization)."
+      - "No bookmarks or categories from S1 remain unless they are also present in S2."
+      - "State invariants (valid category references, etc.) are preserved."
