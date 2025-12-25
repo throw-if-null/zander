@@ -54,6 +54,46 @@ ports:
           - "If categoryId is non-null but not found, falls back to the first root category id or null."
           - "Calls PersistenceBackend.saveState() after updating state."
 
+      setCurrentView:
+        description: >
+          Change the currently active top-level view (bookmarks, settings,
+          about). Updates State.currentView and persists the new view state.
+        input:
+          type: object
+          fields:
+            viewId:
+              type: string
+              enum: ["bookmarks", "settings", "about"]
+        output:
+          type: State
+        errors:
+          - PersistenceError
+        notes:
+          - "If viewId is not one of the allowed values, State is unchanged."
+          - "Calls PersistenceBackend.saveState() after updating state."
+
+      setCurrentSettingsPage:
+        description: >
+          Change the active Settings sub-page. Only meaningful when
+          State.currentView is 'settings'.
+        input:
+          type: object
+          fields:
+            pageId:
+              type: string
+              nullable: true
+              description: >
+                Desired settings page id (e.g. 'categories', 'themes'), or null
+                to clear. Invalid ids fall back to a default.
+        output:
+          type: State
+        errors:
+          - PersistenceError
+        notes:
+          - "If State.currentView is not 'settings', pageId changes are allowed but may be ignored by the UI layer."
+          - "If pageId is non-null but not recognized, falls back to a safe default (e.g. 'home' or null)."
+          - "Calls PersistenceBackend.saveState() after updating state."
+
       addCategory:
         description: >
           Create a new Category under the specified parent (or as a root
@@ -318,3 +358,30 @@ scenarios:
     then:
       - "In all states S1, S2, S3, both b1 and b2 still exist in State.bookmarks."
       - "S1.currentCategoryId = Cat1.id, S2.currentCategoryId = Cat2.id, and S3.currentCategoryId = null."
+
+  set_current_view_switches_views_but_preserves_data:
+    description: >
+      setCurrentView only changes the active view and persists that choice; it
+      does not modify bookmarks or categories.
+    given:
+      - "State S with some bookmarks and categories."
+      - "S.currentView = 'bookmarks'."
+    when:
+      - "S1 = setCurrentView({ viewId: 'settings' })"
+      - "S2 = setCurrentView({ viewId: 'about' })"
+    then:
+      - "In all states S, S1, and S2, the bookmarks and categories collections are identical."
+      - "S1.currentView = 'settings' and S2.currentView = 'about'."
+
+  set_current_settings_page_updates_view_state_only:
+    description: >
+      setCurrentSettingsPage adjusts the settings sub-page selection while
+      leaving core data untouched.
+    given:
+      - "State S with S.currentView = 'settings' and some bookmarks and categories."
+    when:
+      - "S1 = setCurrentSettingsPage({ pageId: 'themes' })"
+      - "S2 = setCurrentSettingsPage({ pageId: null })"
+    then:
+      - "In all states S, S1, and S2, the bookmarks and categories collections are identical."
+      - "S1.currentSettingsPage = 'themes' and S2.currentSettingsPage = null."

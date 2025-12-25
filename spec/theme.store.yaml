@@ -45,8 +45,9 @@ ports:
         output:
           type: ThemeState
         notes:
-          - "Reads from localStorage using the Svelte-specific theme key (see ARCHITECTURE.md)."
-          - "If no stored theme id exists or is invalid, falls back to the primary theme."
+          - "Reads from localStorage using the Svelte-specific theme key ZANDER_SVELTE_THEME_STORAGE_KEY = 'zander-svelte-theme:v1'."
+          - "If no stored theme id exists or is invalid, falls back to the primary theme (the first Theme in ThemeState.themes)."
+          - "Applies the effective theme id via a data-theme attribute on document.documentElement."
 
       setTheme:
         description: >
@@ -62,7 +63,7 @@ ports:
           type: ThemeState
         notes:
           - "If themeId is not found, ThemeState is unchanged and the DOM theme is not modified."
-          - "On success, persists themeId under the Svelte theme storage key."
+          - "On success, persists themeId under ZANDER_SVELTE_THEME_STORAGE_KEY and updates the data-theme attribute on document.documentElement."
 
 scenarios:
   load_initial_theme_with_valid_storage:
