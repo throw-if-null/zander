@@ -1,253 +1,462 @@
-# AGENTS
+# AGENTS (Svelte 5 App)
 
-This document describes the agents involved in the Zander LCARS Bookmark System, how they collaborate, and the boundaries of what they are allowed to use.
+This document describes how agents should work on the **Svelte 5–based Zander LCARS Bookmark System**.
 
-The app is intentionally **dead simple** but **visually authentic**:
+- The existing single‑file implementation in `index.html` and its docs (`ARCHITECTURE.md`, `DESIGN.md`, `ACCESSIBILITY.md`, `README.md`, `GLOSSARY.md`) are the **behavioral and UX blueprint**, especially for LCARS styling, flows, and accessibility.
+- The Svelte 5 app is a **new implementation**:
+  - It defines its own data model, storage keys, and import/export format.
+  - It runs as a built SPA (Svelte 5 + Vite) deployed to **Cloudflare Pages**.
+  - It does **not** need to work via `file://`.
 
-- A single HTML file (`index.html`) you can open directly in a browser.
-- **No build step** and no backend.
-- **Data is stored in `localStorage`** in the user’s browser.
-- **Import and export** features let you back up and restore your bookmarks via JSON files.
-- A custom, high-fidelity LCARS UI defined in `DESIGN.md`.
-
----
-
-## Related Documents
-
-These documents are the technical and visual source of truth:
-
-- `ARCHITECTURE.md` – System design, data model, storage, import/export behavior, and JS responsibilities.
-- `DESIGN.md` – LCARS UI layout, component appearance, and visual interaction patterns.
-- `ACCESSIBILITY.md` – WCAG 2.1 Level AA standards, a11y requirements, and Frontend Agent testing checklist.
-- `README.md` – How to open and use the app.
-- `GLOSSARY.md` – Ubiquitous language and canonical term definitions.
-
-Agents should defer to these documents for implementation details. For terminology, `GLOSSARY.md` is the source of truth; if a term in any doc is ambiguous, `GLOSSARY.md` defines the intended meaning.
-Agents should defer to these documents for implementation details. If there is a mismatch between documentation and `index.html`, `index.html` is the ground truth, and the docs should be updated to match it.
+`AGENTS.single-file.md` remains the canonical description for the legacy single‑file app.
 
 ---
 
-## 1. Agent Overview
+## 1. Scope & Goals (Svelte 5)
 
-### 1.1 System Agent
+- Deliver a **Svelte 5 LCARS bookmark app** that:
+  - Preserves the recognizable LCARS look‑and‑feel.
+  - Preserves the **core user flows**:
+    - Add/edit/delete bookmarks.
+    - Manage nested categories.
+    - Themes.
+    - Import/export.
+    - System reset.
+  - Preserves the **keyboard shortcuts** and dialog behavior (as reasonable within Svelte 5).
+  - Meets or exceeds the **WCAG 2.1 AA** accessibility target.
 
-**Name:** `system-agent`  
-**Role:** Guardian of constraints, architecture, and data model.
+- Introduce a modern architecture:
+  - **Svelte 5 idioms** (runes‑based reactivity, Svelte 5 store patterns, component composition).
+  - Typed domain model and explicit **ports** for persistence and auth.
+  - Clear support for:
+    - **v1**: guest‑only, localStorage‑backed SPA.
+    - **v2**: guest + signed‑in mode with Firebase Auth and Firestore.
+    - **v3+**: room for future offline‑first/sync behavior.
+
+- Treat the Svelte app’s own **data contracts** and storage schema as canonical for the Svelte version:
+  - Legacy `index.html` is a **reference for UX**, not a hard data‑format contract.
+  - Breaking changes in the Svelte data model must be versioned and documented.
+
+---
+
+## 2. Agent Overview (Svelte 5 Context)
+
+### 2.1 System Agent (`system-agent`)
+
+**Role:** Own the Svelte 5 technical architecture, data contracts, and quality bar.
+
+**Svelte 5 requirement:**
+
+- Always design for and use **Svelte 5** and its idioms.
+  - Prefer Svelte 5 concepts (runes‑based reactivity, current store patterns, recommended component structure).
+  - Do **not** introduce patterns that are specific to older Svelte versions (3/4) when they conflict with Svelte 5 best practices.
+  - When in doubt, follow the **current Svelte 5 documentation and recommendations**.
 
 **Responsibilities:**
 
-- Enforce global constraints:
-  - Only HTML, CSS, and JavaScript are allowed.
-  - All assets must work when opened via `file://` (no dev server required).
-  - No external dependencies (fonts, scripts, styles) that break offline usage.
-  - No Node/npm, bundlers, or transpilers.
-  - No backend or database; data lives only in browser `localStorage`.
-- Own the **data model** for bookmarks and categories:
-  - Canonical shapes and rules are defined in `ARCHITECTURE.md`.
-  - Ensure `createdAt` timestamps (stardates) are maintained.
-  - Define rules for validating and normalizing URLs.
-- Define and stabilize the **import/export contract**:
-  - Import/export JSON format and behavior are specified in `ARCHITECTURE.md`.
-  - Ensure the format remains as stable as possible.
-- Keep structure and naming consistent:
-  - Single entry point: `index.html` in the project root.
-  - Keep inline `<script>` and `<style>` blocks organized.
-  - Maintain clear IDs and classes for JS hooks and styling.
-- Maintain meta documentation:
-  - Keep this `AGENTS.md` aligned with reality.
-  - Ensure `ARCHITECTURE.md`, `DESIGN.md`, `README.md`, and `GLOSSARY.md` match the actual implementation and constraints.
-  - When the runtime behavior in `index.html` changes (layout, dialogs, data shape, keyboard shortcuts), drive corresponding documentation updates, including term definitions in `GLOSSARY.md` where needed.
+- **Project structure & runtime model**
+  - Define the Svelte project layout:
+    - `src/App.svelte` as the root LCARS shell and view switcher.
+    - `src/lib/components/lcars/` for LCARS primitives.
+    - `src/lib/components/views/` for Bookmarks/Settings/About.
+    - `src/lib/components/dialogs/` for Bookmark/ColorPicker/Confirm dialogs.
+    - `src/lib/stores/` for state and theme stores.
+    - `spec/` (once introduced) for OpenSpec/contract files.
+  - Choose and maintain tooling:
+    - Svelte 5 + Vite.
+    - TypeScript.
+    - Vitest + Svelte Testing Library.
+    - Playwright for E2E.
+  - Define deployment:
+    - Built SPA deployed on **Cloudflare Pages**.
+    - No `file://` support is required; static hosting over HTTP is assumed.
+
+- **Versioned behavior roadmap**
+  - Define and maintain the versioned behavior model:
+    - **v1 (Svelte initial release)**
+      - Guest‑only mode.
+      - Persistence via `LocalStorageBackend` using Svelte‑defined schemas and keys.
+      - LCARS shell, flows, keyboard shortcuts, and import/export implemented in Svelte.
+    - **v2 (Cloud sync + auth)**
+      - Add **Firebase Auth** (e.g. email/password + providers like Google/Facebook).
+      - Add **Firestore** as a second persistence backend:
+        - Per‑user collections (e.g. `users/{userId}/categories/*`, `users/{userId}/bookmarks/*`).
+      - Support:
+        - Guest mode (unchanged localStorage backend).
+        - Signed‑in mode (Firestore backend).
+      - On login:
+        - If cloud data exists, treat Firestore as source of truth.
+        - Do **not** silently merge local guest data; instead, rely on explicit import/export if needed.
+    - **v3+ (future)**
+      - Reserve space for offline‑first sync, conflict resolution, etc. (not defined yet).
+
+- **Ports & abstractions**
+  - Define clear **persistence ports** (interfaces), e.g. `PersistenceBackend`:
+    - `loadState(): Promise<State | null>`
+    - `saveState(state: State): Promise<void>`
+    - `exportData(): Promise<ExportBundle>`
+    - `importData(bundle: ExportBundle): Promise<void>`
+    - Optional:
+      - `subscribe(onChange)` for real‑time updates (Firestore).
+  - Define an **auth port** (e.g. `AuthProvider`):
+    - Methods like `signIn`, `signOut`, `onAuthStateChanged`, `getCurrentUser`.
+    - V2 default implementation: wraps **Firebase Auth**.
+    - CI and test usage:
+      - Use configured **test users** in Firebase Auth (no separate machine‑to‑machine OAuth).
+  - Define an **observability port** (optional name, e.g. `TelemetryClient`):
+    - Methods like `trackEvent`, `trackError`, `trackTiming`.
+    - Base implementation: OpenTelemetry‑style tracer/span interface with a no‑op default.
+
+- **Data contracts (Svelte app)**
+  - Specify Svelte‑specific types in `ARCHITECTURE.md`, including:
+    - `Bookmark`, `Category`, `State`, `ExportBundle`, and any auth/user types.
+  - Make it explicit that:
+    - These shapes **may differ** from the legacy single‑file version.
+    - Once released, changing them in a breaking way requires:
+      - Versioned storage keys (e.g. `zander-svelte:v2`).
+      - Forward migration or reset strategy.
+      - Tests validating migration/compat behavior.
+  - Ensure import/export formats are:
+    - Minimal but sufficient to reconstruct user data.
+    - Stable within a major version; breaking changes require a new version and migration notes.
+
+- **Quality, testing, and CI/CD**
+  - Define the **minimum test bar**:
+    - Vitest unit tests for stores, utilities, and ports.
+    - Svelte Testing Library for LCARS shell and critical components (views, dialogs).
+    - Playwright for:
+      - Core flows (bookmark CRUD, category tree operations, themes, import/export, reset).
+      - Keyboard shortcuts.
+      - Basic a11y checks (e.g. axe).
+  - Define the **CI/CD pipeline**:
+    - Lint (if configured).
+    - Run Vitest.
+    - Build Svelte app.
+    - Run Playwright E2E against a preview build.
+    - Deploy to Cloudflare Pages.
+    - Optionally run a post‑deploy smoke test against production (Playwright).
+    - Fail CI on any test or a11y failure.
+
+- **Observability**
+  - Specify where and how to use **OpenTelemetry** (or equivalent):
+    - Instrument key flows:
+      - App startup and data load.
+      - Save operations.
+      - Import/export.
+      - Reset.
+      - Login/logout and auth errors.
+    - Default exporter:
+      - No‑op in development unless configured.
+      - Optional OTLP exporter for tools like **Honeycomb**, controlled via environment variables.
+
+- **Documentation**
+  - Keep **Svelte architecture docs in sync**:
+    - Add and maintain a “Svelte 5 Architecture” section in `ARCHITECTURE.md`.
+    - Keep this `AGENTS.md` aligned with reality.
+    - Ensure `ROADMAP.md` reflects the current phases, v1/v2 scope, and backend/auth plans.
+  - Clearly document any divergence from the legacy single‑file behavior.
 
 **Inputs:**
 
-- Requirements and priorities from the Product Agent.
-- Implementation options and tradeoffs from the Frontend Agent.
-- Observed behavior and structure of `index.html`.
+- Legacy behavior and UX from `index.html`, `ARCHITECTURE.md`, `DESIGN.md`, `ACCESSIBILITY.md`, `README.md`.
+- Product constraints and priorities.
+- Current Svelte 5 documentation and best practices.
 
 **Outputs:**
 
-- Documented constraints and architectural decisions in `ARCHITECTURE.md`.
-- Data model and `localStorage` schema details.
-- Clarifications about import/export compatibility and migration behavior.
+- Updated `AGENTS.md` and Svelte‑specific sections in `ARCHITECTURE.md`.
+- A versioned technical roadmap (`ROADMAP.md`) aligned with v1/v2/v3.
+- Port/interface definitions and testing/observability strategy.
 
 ---
 
-### 1.2 Product Agent
+### 2.2 Product Agent (`product-agent`)
 
-**Name:** `product-agent`  
-**Role:** Describe what the bookmark gallery should do for the user and what a convincing “LCARS experience” means.
+**Role:** Define what must stay the same for users, where the Svelte app can improve, and how v1/v2/v3 evolve behavior.
 
 **Responsibilities:**
 
-- Define the **core purpose**:
-  - Provide a highly thematic, Star Trek-inspired interface for managing bookmarks.
-  - Make it fast to **add**, **open**, **edit**, **delete**, **import**, and **export** bookmarks.
-- Specify **LCARS UX**:
-  - **Visuals**: Authentic colors, rounded "pill" buttons, elbow connectors, and blocky layouts that match the continuous LCARS frame implemented in `index.html`.
-  - **Interaction**: Soundless but responsive; focus rings should use a "neon glow" style.
-  - **Data**: Display dates as Stardates (TNG era).
-  - **Status**: Show a decorative system status readout that reflects live data (category count, bookmark count, current stardate).
-- Define **Features**:
-  - **Category Management**: Users can add, rename, reorder, delete, and color-code categories (including nested categories, where supported by the current data model).
-  - **Keyboard Shortcuts**: `Alt+N` (New), `Alt+S` (Settings), `Alt+C` (New Category while in Settings).
-  - **About Panel/Dialog**: Credits and system info, including stardate readout.
-  - **Import/Export**: Full JSON dump and restore, overwriting current data.
-  - **System Reset**: Restore defaults and clear `localStorage` for this app.
-- Keep scope minimal:
-  - No tags or arbitrary free-form labels beyond categories.
-  - No search box.
-  - No user accounts or authentication.
-  - No multi-file or server dependency; the UX must remain compatible with a single `index.html`.
+- **Non‑negotiable behavior & UX**
+  - Preserve core flows:
+    - Add/edit/delete bookmarks.
+    - Nested category management (including cascading deletes).
+    - Theme selection and status readouts.
+    - Import/export as a user‑visible backup mechanism.
+    - System reset.
+  - Preserve keyboard shortcuts (subject to Svelte/SPA constraints):
+    - `Alt+H`, `Alt+B`, `Alt+S`, `Alt+C`, `Esc`, `Enter`.
+  - Preserve overall LCARS feeling:
+    - Header/footer bars.
+    - Sidebar categories.
+    - Bookmark tiles.
+    - Status/stardate displays.
+
+- **Versioned behavior definition**
+  - **v1 (Svelte guest mode)**:
+    - No authentication; all users are guests.
+    - Data lives entirely in the browser (localStorage backend).
+    - Import/export:
+      - Designed primarily for guest local data.
+      - Defined by Svelte’s own `ExportBundle` type.
+      - Does *not* have to match the legacy single‑file export format, but:
+        - It should remain stable within v1.
+        - Any breaking change must be clearly documented.
+    - Goal: replicate legacy flows with Svelte 5 UX, allowing modest UX improvements.
+
+  - **v2 (guest + signed‑in modes)**:
+    - Add **sign‑in** flows (Firebase Auth).
+      - Define supported auth methods (e.g. email+password, Google, Facebook).
+      - Design a simple LCARS‑styled login/logout experience.
+    - Define **mode semantics**:
+      - Guest mode:
+        - Behaves like v1; localStorage‑backed.
+      - Signed‑in mode:
+        - Uses Firestore‑backed persistence.
+        - Data is scoped per user.
+      - On login:
+        - Firestore data takes precedence for signed‑in mode.
+        - Guest local data is not automatically merged; Product Agent may define an explicit “Import local guest data” flow if desired.
+    - Define **import/export semantics**:
+      - Guest:
+        - Export/import guest local data.
+      - Signed‑in:
+        - Export/import cloud data for the current user (for data portability).
+      - Ensure this is clearly explained in `README.md`.
+
+  - **v3+ (future options)**:
+    - Offline‑first behavior or Firestore offline caching.
+    - Optional “workspace” or advanced filtering features (if ever in scope).
+    - Only to be defined once v1 and v2 are stable.
+
+- **Scope boundaries**
+  - Out‑of‑scope for the initial Svelte migration:
+    - Full‑text search, tag systems, or complex filtering.
+    - Multi‑user sharing, collaboration, or server‑side APIs.
+    - Non‑LCARS visual themes that fundamentally change the aesthetic.
+  - Any new feature must:
+    - Preserve the simplicity of baseline flows.
+    - Respect a11y and LCARS visual constraints.
+
+- **Acceptance criteria**
+  - Define acceptance for each phase in `ROADMAP.md` in terms of **user‑perceived behavior**:
+    - Phase 1: LCARS shell in Svelte, visually aligned with legacy app.
+    - Phase 2: Core state and persistence behaving as defined for v1.
+    - Phase 3: Dialogs and flows (CRUD, import/export, reset) working end‑to‑end.
+    - Phase 4: Keyboard shortcuts and accessibility parity.
+    - v2 phases: clear, testable scenarios for login/logout, guest vs signed‑in distinction, and cloud persistence semantics.
 
 **Inputs:**
 
-- Constraints from the System Agent.
-- Feedback and feasibility notes from the Frontend Agent.
-- Reality checks from how users interact with the current `index.html` UI.
+- Legacy behavior from `index.html` and `README.md`.
+- Visual system and UX intent from `DESIGN.md` and `ACCESSIBILITY.md`.
+- Constraints and opportunities from System Agent (e.g. Cloudflare, Firebase).
 
 **Outputs:**
 
-- Feature descriptions and acceptance criteria (e.g., "Category buttons must reflect their assigned color and selection state").
-- Explicit statements of what will **not** be added (to maintain simplicity and keep the single-file constraint).
-- Prioritized wishlist items that can be implemented without violating constraints.
+- A prioritized, versioned migration backlog (`ROADMAP.md`).
+- Narrative documentation of behavior for v1 and v2 in `README.md`.
+- Clear acceptance criteria for each phase, expressed in user language.
 
 ---
 
-### 1.3 Frontend Agent
+### 2.3 Frontend Agent (`frontend-agent`)
 
-**Name:** `frontend-agent`  
-**Role:** Implement the bookmark gallery in a single HTML file with inline CSS/JS, using `localStorage` for persistence and JSON import/export.
+**Role:** Implement the Svelte 5 app, respecting LCARS design, data contracts, accessibility, and the ports defined by the System Agent.
 
 **Responsibilities:**
 
-- HTML structure:
-  - Follow the LCARS layout defined in `DESIGN.md` and realized in `index.html`:
-    - Header bar with elbow connector.
-    - Sidebar container with top cap, track, filler, bottom cap, and dynamic category buttons (including nested category support via submenus).
-    - Main content area with:
-      - Bookmark grid.
-      - Current bookmark location path readout.
-      - System status display.
-      - Switchable views (Bookmarks, Settings, About) as panels.
-    - Footer bar with global actions.
-  - Use semantic elements (`<main>`, `<aside>`, `<button>`, `<dialog>`, etc.) where appropriate.
-  - Use `<dialog>` for modal interactions:
-    - Add/Edit Bookmark
-    - Confirm destructive actions
-    - Color Picker
-    - (Any additional overlays that need focus trapping)
-- CSS and layout:
-  - Implement the LCARS look using CSS variables (palette, radii, spacing).
-  - Use Flexbox and CSS Grid for layout.
-  - Implement the continuous LCARS frame (header → top elbow → sidebar track → bottom elbow → footer) as described in `DESIGN.md` and `LCARS_UPDATE.md`.
-  - Ensure accessibility (focus states, semantic HTML, keyboard navigation).
-- JavaScript behavior:
-  - **State & storage:**
-    - Maintain `state` (bookmarks, categories, currentCategory).
-    - Support nested categories where present in the `categories` tree.
-    - Persist to `localStorage` on every change under the configured storage key.
-  - **Rendering:**
-    - Dynamic rendering of sidebar category tree and bookmark grid.
-    - Display the current category path in the "bookmark location" readout.
-    - Update system status numbers based on data counts.
-    - Calculate and display Stardates in About/Settings/system status.
-  - **Category Management:**
-    - Implement logic to add, move, delete, and color categories.
-    - Honor parent/child relationships when moving or deleting categories.
-    - Ensure deleting a category handles all bookmarks under that category subtree (cascading delete).
-  - **Color Picker:**
-    - Implement a grid-based picker using the LCARS palette.
-    - Wire color picker to category configuration controls in Settings.
-  - **Keyboard Shortcuts:**
-    - Listen for `Alt+Key` combinations to trigger actions (`Alt+N`, `Alt+S`, `Alt+C`).
-    - Respect focus and not interfere with text input fields.
-  - **Import/Export:**
-    - Handle JSON file reading and writing.
-    - Validate import structure before overwriting existing data.
-    - On successful import, re-render categories, grid, and status.
-  - **System Reset:**
-    - Clear app data from `localStorage`.
-    - Restore default categories and bookmarks.
-    - Refresh all derived UI (status, counts, views).
-- Documentation alignment:
-  - When implementation changes behavior or structure, communicate updates back to the System Agent so `ARCHITECTURE.md`, `DESIGN.md`, and `README.md` stay accurate.
+- **Svelte 5 component architecture**
+  - Implement:
+    - Root app:
+      - `App.svelte` for LCARS shell and high‑level view switching.
+    - LCARS primitives (under `src/lib/components/lcars/`), mapping directly to documented CSS classes:
+      - `LcarsApp.svelte`, `LcarsHeaderBar.svelte`, `LcarsFooterBar.svelte`, `LcarsSidebarBar.svelte`, `LcarsStatusDisplay.svelte`, etc.
+    - Views (under `src/lib/components/views/`):
+      - `BookmarksView.svelte`, `SettingsView.svelte`, `AboutView.svelte`.
+    - Dialogs (under `src/lib/components/dialogs/`):
+      - `BookmarkDialog.svelte`, `ColorPickerDialog.svelte`, `ConfirmDialog.svelte`.
+  - Use **Svelte 5 idioms** consistently:
+    - Modern reactivity patterns.
+    - Svelte 5 store APIs.
+    - Avoid legacy anti‑patterns from earlier Svelte versions.
+
+- **State management and stores**
+  - Implement Svelte stores (e.g. `stateStore.ts`, `themeStore.ts`, `authStore.ts`) that:
+    - Encapsulate domain entities (`Bookmark`, `Category`, `State`).
+    - Implement operations equivalent to legacy functionality:
+      - `loadState`, `saveState`.
+      - `addCategory`, `moveCategory`, `deleteCategory`.
+      - `addBookmark`, `updateBookmark`, `deleteBookmark`.
+      - `getCategoryPath`, etc.
+    - Delegate all persistence to the **persistence port** (`PersistenceBackend`) so the UI is agnostic to localStorage vs Firestore.
+  - Implement a theme store that:
+    - Manages theme IDs and labels.
+    - Applies themes via attributes/classes on `<body>`.
+    - Persists via localStorage.
+
+- **Behavior parity & flows**
+  - Re‑create core behaviors in Svelte:
+    - Category selection, nested category rendering, and breadcrumb/location path.
+    - Bookmark filtering by selected category subtree.
+    - Stardate calculation and display (using equivalents of `calculateStardate` / `parseStardate`).
+    - Import/export/reset semantics as defined by Product and System Agents for Svelte v1.
+  - Implement keyboard shortcuts:
+    - `Alt+H`, `Alt+B`, `Alt+S`, `Alt+C`, `Esc`, `Enter`.
+    - Ensure they do not interfere with text input fields.
+
+- **Auth & persistence wiring (v2)**
+  - Wire the Svelte app to:
+    - `LocalStorageBackend` for guest mode.
+    - `FirestoreBackend` + `AuthProvider` for signed‑in mode.
+  - Ensure:
+    - Mode switching (guest ↔ signed‑in) is explicit and predictable.
+    - Import/export operate on the correct backend depending on mode.
+
+- **Accessibility**
+  - Implement semantic markup equivalent to or better than the legacy app:
+    - Proper landmarks (`<header>`, `<main>`, `<aside>`, `<footer>`).
+    - Headings and labels.
+    - ARIA attributes where needed (e.g. for dialogs, live regions).
+  - Ensure dialog behavior:
+    - Focus trapping.
+    - Focus restoration to triggering control.
+    - Keyboard handling (`Esc` closes, `Enter` submits when appropriate).
+  - Maintain or improve LCARS focus styles and keyboard navigation patterns documented in `ACCESSIBILITY.md`.
+
+- **Testing & observability integration**
+  - Implement tests as specified by System Agent:
+    - Vitest tests for stores and utilities.
+    - Svelte Testing Library tests for components and views.
+    - Playwright E2E tests that match Product Agent’s acceptance criteria.
+  - Add telemetry hooks where specified:
+    - Wrap persistence operations and critical flows with telemetry events/spans.
+    - Guard telemetry calls behind the configured observability port so they are no‑ops when disabled.
 
 **Inputs:**
 
-- Requirements from the Product Agent.
-- Constraints and data model definitions from the System Agent.
-- LCARS visual rules from `DESIGN.md`.
+- Legacy DOM structure and behavior (from `index.html`, `ARCHITECTURE.md`, `DESIGN.md`, `ACCESSIBILITY.md`).
+- System Agent’s architecture, ports, and data contracts.
+- Product Agent’s behavior definitions and acceptance criteria.
 
 **Outputs:**
 
-- `index.html` containing:
-  - HTML structure (LCARS shell, main views, dialogs).
-  - Inline `<style>` for custom LCARS styles.
-  - Inline `<script>` implementing all behavior (state, rendering, event handling, import/export, reset, keyboard shortcuts).
+- Svelte 5 component tree and store implementation.
+- Tests for critical flows and a11y behaviors.
+- Integrated telemetry hooks using the observability port.
 
 ---
 
-## 2. Collaboration Rules
+## 3. Collaboration Rules (Svelte 5 Migration)
 
-1. **Keep it single‑file and offline‑friendly**
-   - System Agent ensures the app remains usable as a standalone `index.html`.
-   - Frontend Agent must not introduce dependencies that require a server or build step.
-   - Product Agent should avoid feature requests that conflict with this constraint.
+1. **Legacy app is the UX blueprint, not the data contract**  
+   - When in doubt, match the legacy app’s **user‑visible behavior** and LCARS styling.
+   - Data shapes, storage keys, and import/export formats for the Svelte app are defined in this repo’s Svelte architecture docs, not by the original `index.html` storage.
 
-2. **Specs before complexity**
-   - Product Agent describes features in terms of user goals and LCARS authenticity.
-   - System Agent verifies fit with the single-file model and current data model.
-   - Frontend Agent proposes implementation details that honor both.
+2. **Data contract evolution**  
+   - Svelte‑specific `Bookmark`, `Category`, `State`, and `ExportBundle` types live in `ARCHITECTURE.md`.
+   - Within a major Svelte version (e.g. v1), keep contracts stable whenever possible.
+   - Any breaking change:
+     - Requires a new versioned storage key or schema.
+     - Must include a clear migration or reset story.
+     - Must be covered by tests and documented in `ARCHITECTURE.md` and `README.md`.
 
-3. **Data model is stable**
-   - Changes to `bookmarks` or `categories` shape (including nested categories, new fields, or storage key changes) must be documented in `ARCHITECTURE.md`.
-   - Import/export compatibility must be considered before altering the data shape.
+3. **Design primitives stay canonical**  
+   - CSS classes and LCARS primitives in `DESIGN.md` are the public LCARS UI API.
+   - Svelte LCARS components **wrap** those primitives:
+     - They must not silently diverge from documented classes or semantics.
+     - Any intentional divergence must be documented.
 
-4. **Import/export is a contract**
-   - The JSON format for import/export is a public contract.
-   - Breaking changes require:
-     - Explicit documentation in `ARCHITECTURE.md` and `README.md`.
-     - Clear runtime messaging to users (if applicable).
-   - Where possible, migrations or backward-compatible reads should be considered.
+4. **Accessibility is non‑negotiable**  
+   - The Svelte app must meet the **same or better** a11y bar as the legacy app.
+   - Keyboard flows, focus handling, and screen reader support are first‑class, not afterthoughts.
+   - Automated a11y checks (axe, etc.) are part of the test suite; failures block release.
 
-5. **`index.html` is the source of truth**
-   - If there is divergence between docs and implementation, implementation wins.
-   - Agents are responsible for bringing documentation back into sync rather than altering behavior to match outdated text.
+5. **Spec‑ and test‑driven changes**  
+   - Before making significant behavioral changes:
+     - Update or add specs (OpenSpec and/or `ARCHITECTURE.md`).
+     - Add or update tests (Vitest, Svelte Testing Library, Playwright).
+   - No major behavior changes should land without at least one corresponding test.
+
+6. **Incremental evolution**  
+   - Prefer small, reversible steps:
+     - Introduce new ports and backends in parallel where feasible.
+     - Migrate flows incrementally rather than big‑bang rewrites.
+   - Keep legacy `index.html` and its docs as a stable historical reference.
+
+7. **Observability & error handling**  
+   - Avoid silent failures:
+     - Surface user‑relevant errors via LCARS‑styled dialogs/toasts.
+     - Log internal errors via the observability port when enabled.
+   - Ensure that telemetry instrumentation does not break functionality if disabled.
 
 ---
 
-## 3. Allowed Technologies
+## 4. Allowed Technologies (Svelte Implementation)
 
-### 3.1 Core stack
+- **Core stack**
+  - Svelte 5 + Vite.
+  - TypeScript for stores, ports, and complex logic (encouraged across the codebase).
+  - Svelte Testing Library + Vitest.
+  - Playwright for E2E.
 
-- **HTML5**: Semantic markup, `<dialog>`, logical document structure.
-- **CSS3**: Flexbox, Grid, Variables. No external frameworks (e.g., Bootstrap, Tailwind).
-- **JavaScript (ES6+)**: Vanilla JS only. No component frameworks (React, Vue, etc.).
+- **Persistence & auth**
+  - v1:
+    - Browser `localStorage` behind a `LocalStorageBackend`.
+  - v2:
+    - `LocalStorageBackend` (guest mode) + `FirestoreBackend` (signed‑in mode).
+    - Firebase Auth for authentication, configured via environment variables for different environments (dev, test, prod).
 
-### 3.2 External Assets
+- **Hosting & runtime**
+  - Static SPA built artifacts (HTML + JS + CSS).
+  - Hosted on **Cloudflare Pages** or equivalent static hosting.
+  - No requirement to run from `file://`.
 
-- **Fonts**: Local system fonts or embedded base64 if absolutely necessary (currently using system sans-serifs like Antonio/Arial/Helvetica).
-- **Libraries**: None. All logic is hand-written to ensure zero dependencies and offline operation.
+- **Observability**
+  - OpenTelemetry‑compatible instrumentation for key flows.
+  - Configurable exporters (e.g. OTLP for Honeycomb) via environment variables.
+  - No hard dependency on any particular APM vendor.
+
+- **External libraries**
+  - Keep dependencies minimal.
+  - Do not replace core domain logic (bookmarks/categories, import/export, stardates) with heavy third‑party packages.
+  - Use libraries where they clearly improve:
+    - Testing.
+    - A11y tooling.
+    - Telemetry integration.
+    - Firebase integration.
 
 ---
 
-## 4. File & Structure Conventions
+## 5. File & Structure Conventions (Svelte App)
 
-- `index.html` — The entire app (UI shell, styles, and behavior).
-- `AGENTS.md` — Roles and responsibilities of the agents.
-- `ARCHITECTURE.md` — System design, data model, storage, import/export behavior.
-- `DESIGN.md` — UI/UX guidelines and LCARS visual rules.
-- `ACCESSIBILITY.md` — A11y standards, requirements, and testing guidelines.
-- `README.md` — User manual and quickstart guide.
+- `index.html` (legacy)  
+  - Remains as the canonical **single‑file reference implementation**.
+  - Not modified by the Svelte build.
+  - Used as a behavioral and UX reference only.
 
-Inside `index.html`:
+- `src/` (Svelte app)  
+  - `src/App.svelte` – Root LCARS shell and view switching.  
+  - `src/main.ts` – Svelte bootstrap entry point.  
+  - `src/lib/components/lcars/` – LCARS primitive components (`LcarsApp.svelte`, `LcarsHeaderBar.svelte`, etc.).  
+  - `src/lib/components/views/` – `BookmarksView.svelte`, `SettingsView.svelte`, `AboutView.svelte`.  
+  - `src/lib/components/dialogs/` – `BookmarkDialog.svelte`, `ColorPickerDialog.svelte`, `ConfirmDialog.svelte`.  
+  - `src/lib/stores/` – State, theme, and auth stores (`stateStore.ts`, `themeStore.ts`, `authStore.ts`).  
+  - `src/lib/persistence/` – Persistence ports and backends (`PersistenceBackend.ts`, `LocalStorageBackend.ts`, `FirestoreBackend.ts`).  
+  - `src/lib/auth/` – Auth ports and Firebase Auth implementation (`AuthProvider.ts`, `FirebaseAuthProvider.ts`).  
+  - `src/lib/telemetry/` – Observability ports and implementations.  
 
-- **Order:**
-  1. `<head>`
-  2. `<style>` (LCARS CSS)
-  3. `<body>` (Shell, Views, Dialogs)
-  4. `<script>` (Logic)
-- **Naming:**
-  - Use descriptive IDs (e.g., `#addEntryBtn`, `#settingsView`, `#aboutView`, `#bookmarkDialog`, `#colorPickerDialog`, `#confirmDialog`).
-  - Use descriptive classes (e.g., `.lcars-app`, `.lcars-header-bar`, `.lcars-sidebar-bar`, `.lcars-sidebar-btn`, `.lcars-tile--bookmark`, `.lcars-status-display`).
-  - Maintain stable hooks for JavaScript and tests; avoid gratuitous renaming without updating documentation.
+- `spec/` (once introduced)  
+  - OpenSpec/contract files describing:
+    - Ports (`PersistenceBackend`, `AuthProvider`, etc.).
+    - Core store behaviors.
+    - Key user flows (add bookmark, import/export, reset, login/logout).
+
+- Documentation  
+  - `AGENTS.md` – This file (Svelte 5 agents & rules).  
+  - `AGENTS.single-file.md` – Legacy single‑file agent description (historical reference).  
+  - `ARCHITECTURE.md` – Includes both legacy and Svelte 5 architecture sections.  
+  - `DESIGN.md` – Canonical LCARS visual and component mapping reference.  
+  - `ACCESSIBILITY.md` – Accessibility requirements (apply to both legacy and Svelte app).  
+  - `ROADMAP.md` – Migration and evolution roadmap (v1, v2, v3).  
+
+If there is a mismatch between documentation and the Svelte implementation, the **Svelte app’s behavior** is the ground truth for the Svelte version. Agents must update docs promptly to match.

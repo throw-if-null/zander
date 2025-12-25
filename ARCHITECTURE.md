@@ -894,3 +894,301 @@ The footer `ADD ENTRY` button has a popup menu (BOOKMARK, CATEGORY) with full ke
     - Backwards-compatible changes require care; breaking changes must be documented and versioned.
 
 This document should be kept in sync with `index.html` whenever the data model, import/export behavior, or fundamental UI structure changes.
+
+## 10. Svelte 5 Architecture (Planned)
+
+This section describes the planned architecture for the Svelte 5 implementation of Zander. Sections 1–9 document the existing single-file (`index.html`) app; this section documents the Svelte SPA that will coexist with, and eventually become primary over, the legacy implementation.
+
+### 10.1 Runtime Model (Svelte SPA)
+
+- **Built SPA**
+  - Implemented with Svelte 5 + Vite.
+  - Compiled to static assets: one or more HTML files, JavaScript bundles, and CSS.
+- **Execution environment**
+  - Hosted on a static host such as **Cloudflare Pages**.
+  - Accessed over HTTP/S; there is **no requirement** to run via `file://`.
+  - No dedicated backend service is required; all persistence is via browser APIs (v1) or Firebase (v2+).
+- **Persistence**
+  - **v1 (guest-only):**
+    - All domain data is stored in browser `localStorage` behind a `LocalStorageBackend`.
+  - **v2 (guest + signed-in):**
+    - Guest mode: same `LocalStorageBackend` as v1.
+    - Signed-in mode: `FirestoreBackend` backed by Firebase Firestore.
+- **Import/Export**
+  - Svelte defines its own `ExportBundle` format for v1 and v2.
+  - The shape may resemble the legacy `{ bookmarks, categories }` bundle but is not required to be identical.
+  - Within a Svelte major version (e.g. v1), breaking changes require a new versioned storage key and migration story.
+
+### 10.2 Project Structure
+
+The Svelte app lives under `src/` and follows these conventions:
+
+- `src/main.ts`
+  - Svelte bootstrap entry point; mounts the root `App.svelte` into the DOM.
+- `src/App.svelte`
+  - Root LCARS shell and top-level view switching.
+  - Owns layout primitives (header, sidebar, footer, main content) by composing LCARS components.
+- `src/lib/components/lcars/`
+  - LCARS primitive components that wrap the CSS primitives defined in `DESIGN.md`:
+    - `LcarsApp.svelte` – wraps `.lcars-app` root grid.
+    - `LcarsHeaderBar.svelte` – wraps `.lcars-header-bar` and associated elements.
+    - `LcarsSidebarBar.svelte` – wraps `.lcars-sidebar-bar` and sidebar track.
+    - `LcarsFooterBar.svelte` – wraps `.lcars-footer-bar`.
+    - `LcarsStatusDisplay.svelte` – wraps `.lcars-status-display`.
+  - These components expose props/slots but **do not** redefine LCARS CSS contracts.
+- `src/lib/components/views/`
+  - High-level view components:
+    - `BookmarksView.svelte`
+    - `SettingsView.svelte`
+    - `AboutView.svelte`
+  - Responsible for rendering view-specific UI, wired to Svelte stores.
+- `src/lib/components/dialogs/`
+  - Dialog components:
+    - `BookmarkDialog.svelte`
+    - `ColorPickerDialog.svelte`
+    - `ConfirmDialog.svelte`
+  - Implement focus management and keyboard handling consistent with `ACCESSIBILITY.md`.
+- `src/lib/stores/`
+  - Application state stores and helpers:
+    - `stateStore.ts` – core domain state (bookmarks, categories, current selection, view state).
+    - `themeStore.ts` – theme selection and application.
+    - `authStore.ts` – authentication state and current mode (guest vs signed-in).
+- `src/lib/persistence/`
+  - Persistence ports and backends:
+    - `PersistenceBackend.ts`
+    - `LocalStorageBackend.ts`
+    - `FirestoreBackend.ts` (v2+)
+- `src/lib/auth/`
+  - Auth abstraction and Firebase-based implementation:
+    - `AuthProvider.ts`
+    - `FirebaseAuthProvider.ts`
+- `src/lib/telemetry/`
+  - Observability ports and implementations (OpenTelemetry-compatible, with a no-op default).
+
+### 10.3 Svelte v1 Data Model
+
+Svelte v1 defines its own data contracts. Initially these closely mirror the legacy single-file types, but they may evolve independently over time.
+
+#### 10.3.1 Bookmark (Svelte v1)
+
+```ts
+type Bookmark = {
+  id: string;           // UUID
+  title: string;        // User-visible title
+  description?: string; // Optional, user-visible description
+  url: string;          // Fully normalized URL, including protocol
+  categoryId: string;   // Reference to a Category.id
+  createdAt: string;    // Stardate string at creation time
+};
+```
+
+Notes:
+
+- Semantics are the same as the legacy app:
+  - `id` is unique.
+  - `createdAt` is immutable and used for stardate/Earth date display.
+- Future Svelte-specific fields (e.g. per-bookmark metadata) must be:
+  - Versioned and documented.
+  - Migrated or safely ignored by import/export.
+
+#### 10.3.2 Category (Svelte v1)
+
+```ts
+type Category = {
+  id: string;         // UUID
+  name: string;       // Display name
+  color: string;      // Hex color from LCARS palette
+  createdAt: string;  // Stardate at creation time
+  children: Category[];
+};
+```
+
+Notes:
+
+- Nested tree semantics match the legacy app (arbitrary depth, cascading deletes).
+- Color values are LCARS palette entries; invalid or unknown colors may be normalized during import.
+
+#### 10.3.3 App State (Svelte v1)
+
+```ts
+type State = {
+  bookmarks: Bookmark[];
+  categories: Category[]; // Root categories; each may contain children
+  currentCategoryId: string | null; // Selected category, or null for “All”
+  currentView: "bookmarks" | "settings" | "about";
+  currentSettingsPage:
+    | "categories"
+    | "home"
+    | "themes"
+    | "data"
+    | "reset"
+    | null;
+  landingCategoryId: string | null;
+};
+```
+
+Notes:
+
+- `currentView`, `currentSettingsPage`, and `landingCategoryId` allow Svelte to preserve navigation state across reloads, similar to the legacy app but under Svelte-defined keys.
+- The exact persisted shape is part of the Svelte v1 storage contract and must be kept stable within v1.
+
+#### 10.3.4 ExportBundle (Svelte v1)
+
+```ts
+type ExportBundle = {
+  bookmarks: Bookmark[];
+  categories: Category[];
+};
+```
+
+Notes:
+
+- The Svelte v1 `ExportBundle` is the canonical import/export shape for the Svelte app:
+  - It may be compatible with legacy exports but is not required to be.
+- Any breaking change to this type:
+  - Requires a new bundle version and/or storage key.
+  - Must be clearly documented in this section and `README.md`.
+
+### 10.4 Persistence Ports & Backends
+
+#### 10.4.1 `PersistenceBackend` Interface
+
+Svelte code interacts with persistence exclusively through a port:
+
+```ts
+interface PersistenceBackend {
+  loadState(): Promise<State | null>;
+  saveState(state: State): Promise<void>;
+  exportData(): Promise<ExportBundle>;
+  importData(bundle: ExportBundle): Promise<void>;
+
+  // Optional extension for realtime backends (e.g. Firestore)
+  subscribe?(
+    onChange: (state: State) => void
+  ): () => void; // returns unsubscribe
+}
+```
+
+- The UI and stores **do not** talk to `localStorage` or Firestore directly.
+- Implementations:
+  - `LocalStorageBackend` (v1, guest mode).
+  - `FirestoreBackend` (v2, signed-in mode).
+
+#### 10.4.2 LocalStorageBackend (v1, guest-only)
+
+- Uses browser `localStorage` as the persistence mechanism.
+- Proposed keys (subject to final naming in Phase 2):
+
+```text
+ZANDER_SVELTE_STORAGE_KEY       = "zander-svelte:v1"
+ZANDER_SVELTE_THEME_STORAGE_KEY = "zander-svelte-theme:v1"
+```
+
+- Persisted payload under `ZANDER_SVELTE_STORAGE_KEY`:
+
+```ts
+{
+  bookmarks: Bookmark[];
+  categories: Category[];
+  currentCategoryId: string | null;
+  currentView: "bookmarks" | "settings" | "about";
+  currentSettingsPage:
+    | "categories"
+    | "home"
+    | "themes"
+    | "data"
+    | "reset"
+    | null;
+  landingCategoryId: string | null;
+}
+```
+
+- Theme selection is stored separately under `ZANDER_SVELTE_THEME_STORAGE_KEY`.
+
+#### 10.4.3 FirestoreBackend (v2, signed-in mode)
+
+- Implements `PersistenceBackend` by reading/writing from Firestore collections, scoped per user:
+
+```text
+users/{userId}/categories/{categoryId}
+users/{userId}/bookmarks/{bookmarkId}
+```
+
+- Each Firestore document stores a single `Category` or `Bookmark` object, using the Svelte-defined types.
+- `loadState`/`saveState` aggregate or fan out to these documents.
+- Additional considerations (to be detailed when implementing v2):
+  - Batched writes where possible.
+  - Handling partial failures.
+  - Basic resilience to network disruptions.
+
+### 10.5 Authentication & Modes (v2+)
+
+#### 10.5.1 `AuthProvider` Interface
+
+```ts
+interface AuthProvider {
+  signInWithEmailPassword(email: string, password: string): Promise<User>;
+  signInWithProvider(providerId: "google" | "facebook" | string): Promise<User>;
+  signOut(): Promise<void>;
+  onAuthStateChanged(
+    callback: (user: User | null) => void
+  ): () => void; // returns unsubscribe
+  getCurrentUser(): User | null;
+}
+
+type User = {
+  id: string;
+  displayName: string | null;
+  email: string | null;
+  photoUrl?: string | null;
+};
+```
+
+- Default implementation: `FirebaseAuthProvider` using Firebase Auth.
+- Tests use dedicated test users/accounts configured in Auth, not a separate machine-to-machine OAuth flow.
+
+#### 10.5.2 Mode Semantics
+
+- **Guest mode (v1 & v2):**
+  - Uses `LocalStorageBackend`.
+  - Behaves like the current legacy app, with Svelte-defined storage keys and bundle format.
+- **Signed-in mode (v2):**
+  - Uses `FirestoreBackend`.
+  - Data is scoped per authenticated user.
+  - On login:
+    - If Firestore already contains data for the user, that data becomes the source of truth.
+    - Guest local data is not silently merged; users can explicitly import/export if a merge is desired.
+
+### 10.6 Import/Export Semantics (Svelte)
+
+- **Guest mode:**
+  - `exportData()` and `importData()` operate on the `LocalStorageBackend` data.
+  - Supports full backup/restore of guest data.
+- **Signed-in mode:**
+  - `exportData()` and `importData()` operate on the current user’s Firestore-backed data.
+  - Supports data portability for the signed-in user.
+- Behavior:
+  - Import is a full overwrite of bookmarks and categories for the active mode/backend, with validation and normalization similar to the legacy app.
+  - Theme selection is not included in the export bundle.
+
+### 10.7 Testing & Observability
+
+- **Testing**
+  - Unit tests:
+    - Types and helpers related to `State` and `ExportBundle`.
+    - `PersistenceBackend` implementations (`LocalStorageBackend`, `FirestoreBackend` where feasible).
+  - Component tests:
+    - LCARS shell, views, and dialogs using Svelte Testing Library.
+  - E2E tests:
+    - Core flows described for v1 and v2 in `ROADMAP.md`, executed via Playwright.
+- **Observability**
+  - Svelte app integrates with an abstract `TelemetryClient` that wraps OpenTelemetry-style tracing:
+    - `trackEvent`, `trackError`, `trackTiming`.
+  - Default implementation is no-op.
+  - Optional OTLP exporter can be enabled via environment variables (e.g. to send traces to Honeycomb).
+  - Key spans:
+    - App startup and initial load.
+    - Save operations.
+    - Import/export.
+    - Reset.
+    - Login/logout and auth errors.
