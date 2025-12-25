@@ -1,0 +1,162 @@
+meta:
+  id: ui.dialogs
+  version: 0.1.0
+  status: draft
+  description: >
+    Dialog contracts for the Svelte 5 Zander app, covering BookmarkDialog,
+    ColorPickerDialog, and ConfirmDialog. These dialogs must meet the
+    accessibility and behavior requirements described in ACCESSIBILITY.md.
+
+components:
+  BookmarkDialog:
+    description: >
+      Dialog for adding or editing a bookmark. Wraps title, URL, category,
+      and metadata fields.
+
+    props:
+      open:
+        type: boolean
+        required: true
+        description: "Whether the dialog is currently open."
+      mode:
+        type: string
+        enum: ["create", "edit"]
+        required: true
+        description: "Whether the dialog is creating a new bookmark or editing an existing one."
+      bookmark:
+        type: Bookmark
+        nullable: true
+        required: false
+        description: >
+          Bookmark being edited. Must be non-null when mode = 'edit'; ignored
+          when mode = 'create'.
+      categories:
+        type: Category[]
+        required: true
+        description: "Available categories for selection, rendered as a nested tree."
+
+    events:
+      submit:
+        description: >
+          Fired when the user confirms the dialog (e.g. Save button, Enter key).
+        detail:
+          type: object
+          fields:
+            title:
+              type: string
+            url:
+              type: string
+            categoryId:
+              type: string
+              nullable: true
+            description:
+              type: string
+              nullable: true
+      cancel:
+        description: >
+          Fired when the user cancels or closes the dialog without saving.
+        detail:
+          type: object
+          fields: {}
+      delete:
+        description: >
+          Fired when the user requests deletion of the current bookmark in edit mode.
+        detail:
+          type: object
+          fields:
+            id:
+              type: string
+
+    accessibility:
+      semantics:
+        element: dialog
+        role: dialog
+        description: >
+          Renders as a modal dialog with proper aria-modal semantics.
+      keyboard:
+        - "Esc closes the dialog and triggers cancel."
+        - "Enter submits the form when appropriate."
+      relationships:
+        - "Focus is trapped within the dialog while open and restored to the triggering control on close."
+
+  ColorPickerDialog:
+    description: >
+      Dialog for choosing a category color from the LCARS palette.
+
+    props:
+      open:
+        type: boolean
+        required: true
+      currentColor:
+        type: string
+        required: true
+        description: "Currently selected color value (e.g. hex string)."
+
+    events:
+      select:
+        description: "Fired when the user selects a color."
+        detail:
+          type: object
+          fields:
+            color:
+              type: string
+      cancel:
+        description: "Fired when the user closes the dialog without making a selection."
+        detail:
+          type: object
+          fields: {}
+
+    accessibility:
+      semantics:
+        element: dialog
+        role: dialog
+      keyboard:
+        - "Arrow keys move focus between color options when implemented as a grid."
+        - "Enter/Space selects the focused color."
+
+  ConfirmDialog:
+    description: >
+      Generic confirmation dialog for destructive actions such as delete
+      category, reset system, or import overwrite.
+
+    props:
+      open:
+        type: boolean
+        required: true
+      title:
+        type: string
+        required: true
+      message:
+        type: string
+        required: true
+      confirmLabel:
+        type: string
+        required: false
+        description: "Label for the confirm/OK button (e.g. 'RESET', 'DELETE')."
+      cancelLabel:
+        type: string
+        required: false
+        description: "Label for the cancel button (e.g. 'CANCEL')."
+
+    events:
+      confirm:
+        description: "Fired when the user confirms the action."
+        detail:
+          type: object
+          fields: {}
+      cancel:
+        description: "Fired when the user cancels or closes the dialog."
+        detail:
+          type: object
+          fields: {}
+
+    accessibility:
+      semantics:
+        element: dialog
+        role: alertdialog
+        description: >
+          Uses role='alertdialog' for destructive or high-impact actions, with
+          focus placed on the primary action or the dialog content.
+      keyboard:
+        - "Esc triggers cancel."
+        - "Enter activates the default (confirm) action when focus is on buttons."

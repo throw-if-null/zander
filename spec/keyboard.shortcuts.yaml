@@ -1,0 +1,62 @@
+meta:
+  id: keyboard.shortcuts
+  version: 0.1.0
+  status: draft
+  description: >
+    Keyboard shortcut behavior for the Svelte 5 Zander app. Derived from the
+    legacy single-file implementation but adapted for SPA context.
+
+shortcuts:
+  alt_h_home:
+    combo: "Alt+H"
+    description: "Go Home (Bookmarks view)."
+    when:
+      - "No text input, textarea, or select element has focus."
+    effect:
+      - "Switches to the Bookmarks view."
+      - "Closes any open dialog if appropriate."
+
+  alt_b_add_bookmark:
+    combo: "Alt+B"
+    description: "Open Add Bookmark dialog."
+    when:
+      - "No text input, textarea, or select element has focus."
+    effect:
+      - "Opens BookmarkDialog in create mode."
+
+  alt_s_settings:
+    combo: "Alt+S"
+    description: "Switch to Settings view."
+    when:
+      - "No text input, textarea, or select element has focus."
+    effect:
+      - "Switches to Settings view."
+      - "Optionally restores the last active settings sub-page."
+
+  alt_c_add_category:
+    combo: "Alt+C"
+    description: "Open Add Category flow."
+    when:
+      - "No text input, textarea, or select element has focus."
+    effect:
+      - "Triggers the add-category action (e.g. opens a category creation UI)."
+
+  esc_close_dialogs:
+    combo: "Esc"
+    description: "Close open dialogs or revert to primary view."
+    effect:
+      - "If any modal dialog is open, closes the top-most dialog."
+      - "If no dialogs are open, may be ignored or used to revert to primary view depending on context."
+
+  enter_submit_dialog:
+    combo: "Enter"
+    description: "Submit the active dialog form."
+    when:
+      - "Focus is inside a dialog form and not on a multi-line input control."
+    effect:
+      - "Triggers the dialog's submit/confirm action."
+
+notes:
+  - "Shortcuts are implemented via a single keydown listener at the App or document level."
+  - "Handlers must check focus context to avoid interfering with text entry."
+  - "Dialog-specific keyboard handling (Esc/Enter) is wired within dialog components as well, consistent with ACCESSIBILITY.md."

@@ -1,0 +1,105 @@
+meta:
+  id: theme.store
+  version: 0.1.0
+  status: draft
+  description: >
+    Theme store contract for the Svelte 5 Zander app. Describes how theme
+    selection is represented, persisted, and applied at runtime.
+
+types:
+  Theme:
+    description: "Single theme option (id + label)."
+    fields:
+      id:
+        type: string
+      label:
+        type: string
+
+  ThemeState:
+    description: "Current theme store state."
+    fields:
+      themes:
+        type: Theme[]
+        description: "All available themes in display order."
+      currentThemeId:
+        type: string
+        nullable: true
+        description: >
+          Id of the currently active theme. Null means fallback/default theme
+          decided by the implementation.
+
+ports:
+  ThemeStore:
+    description: >
+      Abstract interface for managing themes: available theme metadata,
+      currently active theme, and persistence. Implemented as a Svelte store
+      plus side-effects on the DOM (e.g. data-theme on <body>), but this
+      contract stays UI-agnostic.
+
+    operations:
+      loadInitialTheme:
+        description: >
+          Load the initial theme from storage (if present) or fall back to a
+          default theme. Applies the theme to the DOM.
+        input: null
+        output:
+          type: ThemeState
+        notes:
+          - "Reads from localStorage using the Svelte-specific theme key (see ARCHITECTURE.md)."
+          - "If no stored theme id exists or is invalid, falls back to the primary theme."
+
+      setTheme:
+        description: >
+          Change the active theme by id. Updates ThemeState, applies the theme
+          to the DOM, and persists the choice.
+        input:
+          type: object
+          fields:
+            themeId:
+              type: string
+              description: "Requested theme id. Must match one of Theme.id values."
+        output:
+          type: ThemeState
+        notes:
+          - "If themeId is not found, ThemeState is unchanged and the DOM theme is not modified."
+          - "On success, persists themeId under the Svelte theme storage key."
+
+scenarios:
+  load_initial_theme_with_valid_storage:
+    description: >
+      When a valid theme id is present in storage, loadInitialTheme restores
+      that selection and applies it.
+    given:
+      - "Storage contains themeId 'data' under the Svelte theme key."
+      - "Theme list includes themes with ids ['laan', 'data', 'doctor', ...]."
+    when:
+      - "state = loadInitialTheme()"
+    then:
+      - "state.currentThemeId is 'data'."
+      - "The DOM reflects the 'data' theme (e.g. via data-theme attribute)."
+
+  load_initial_theme_with_missing_or_invalid_storage:
+    description: >
+      When storage is empty or invalid, loadInitialTheme falls back to the
+      primary default theme.
+    given:
+      - "Storage has no entry for the Svelte theme key, or contains an unknown id."
+      - "Theme list includes at least one theme, with the first treated as primary."
+    when:
+      - "state = loadInitialTheme()"
+    then:
+      - "state.currentThemeId is the primary theme id."
+      - "The DOM reflects the primary theme."
+
+  set_theme_persists_and_applies:
+    description: >
+      setTheme changes the active theme, persists it, and updates the DOM.
+    given:
+      - "Current ThemeState has currentThemeId = 'laan'."
+      - "Theme list includes a theme with id 'doctor'."
+    when:
+      - "state2 = setTheme({ themeId: 'doctor' })"
+    then:
+      - "state2.currentThemeId is 'doctor'."
+      - "Subsequent loadInitialTheme() restores 'doctor'."
+      - "The DOM reflects the 'doctor' theme."

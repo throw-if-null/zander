@@ -1,0 +1,117 @@
+meta:
+  id: ui.views
+  version: 0.1.0
+  status: draft
+  description: >
+    Contracts for the main view components (BookmarksView, SettingsView,
+    AboutView) used by the Svelte 5 Zander app. These views sit inside the
+    LCARS shell provided by LcarsApp and related components.
+
+components:
+  BookmarksView:
+    description: >
+      Main bookmarks view showing the bookmark grid, location/breadcrumb, and
+      status display. Backed by the domain State and StateStore.
+
+    props:
+      state:
+        type: State
+        required: true
+        description: "Current domain State (bookmarks, categories, view state)."
+      onAddBookmark:
+        type: function
+        required: true
+        description: "Callback to open the Add Bookmark flow."
+      onEditBookmark:
+        type: function
+        required: true
+        description: "Callback to open the Edit Bookmark flow for a given bookmark id."
+      onSelectCategory:
+        type: function
+        required: true
+        description: "Callback invoked when a category tile is selected in the sidebar or location."
+
+    slots:
+      default:
+        description: >
+          Optional extra content region below or beside the grid, such as debug
+          status or experimental UI.
+
+    accessibility:
+      semantics:
+        element: main
+        role: main
+        description: >
+          Renders as the primary <main> content region when active.
+      keyboard:
+        - "Bookmark tiles are reachable via Tab and activate on Enter/Space."
+      relationships:
+        - "Integrates with global keyboard shortcuts (Alt+H, Alt+B, etc.) defined at App level."
+
+  SettingsView:
+    description: >
+      Consolidated settings panel for categories, themes, data management, and
+      reset flows. Mirrors the sections described in the legacy app
+      (category config, themes, data management, danger zone).
+
+    props:
+      state:
+        type: State
+        required: true
+      themeState:
+        type: ThemeState
+        required: true
+      onChangeCategoryTree:
+        type: function
+        required: true
+        description: "Callback for category CRUD operations initiated from settings."
+      onChangeTheme:
+        type: function
+        required: true
+        description: "Callback to change the active theme."
+      onExportData:
+        type: function
+        required: true
+        description: "Callback to trigger export flow."
+      onImportData:
+        type: function
+        required: true
+        description: "Callback to trigger import flow (e.g. open file picker)."
+      onResetSystem:
+        type: function
+        required: true
+        description: "Callback for system reset action."
+
+    accessibility:
+      semantics:
+        element: main
+        role: main
+        description: >
+          Renders as <main> when the Settings view is active.
+      keyboard:
+        - "All controls are reachable via Tab in a logical order."
+        - "Destructive actions (reset, delete) require explicit confirmation."
+
+  AboutView:
+    description: >
+      Read-only panel describing the system, code name, and credits, plus a
+      stardate/Earth date display. Mirrors the legacy About panel.
+
+    props:
+      stardateLabel:
+        type: string
+        required: true
+        description: "Formatted stardate label text."
+      earthDateLabel:
+        type: string
+        required: true
+        description: "Formatted Earth date label or tooltip."
+
+    accessibility:
+      semantics:
+        element: main
+        role: main
+        description: >
+          Renders as <main> when the About view is active.
+      keyboard:
+        - "Static content; focusable elements are links or interactive references only."
