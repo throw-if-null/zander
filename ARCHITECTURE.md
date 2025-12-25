@@ -1228,13 +1228,29 @@ type User = {
   - `exportData()` and `importData()` operate on the `LocalStorageBackend` data.
   - Supports full backup/restore of guest data.
 - **Signed-in mode:**
-  - `exportData()` and `importData()` operate on the current user’s Firestore-backed data.
+  - `exportData()` and `importData()` operate on the current user's Firestore-backed data.
   - Supports data portability for the signed-in user.
 - Behavior:
   - Import is a full overwrite of bookmarks and categories for the active mode/backend, with validation and normalization similar to the legacy app.
   - Theme selection is not included in the export bundle.
 
-### 10.8 Testing & Observability
+### 10.8 Spec & OpenSpec Conventions (Svelte)
+
+- **Nullable fields**
+  - Represented as `type: X` plus `nullable: true` in YAML specs (no `X | null` unions).
+- **Enums**
+  - Represented as `type: string` (or number) plus an explicit `enum: [...]` list.
+- **Ports and operations**
+  - Live under `spec/**.yaml` files with `ports:` and `operations:` blocks.
+  - `output` types describe the successful return shape; `errors:` list domain error types (e.g. `PersistenceError`).
+- **Synchronization**
+  - Any breaking change to Svelte data or port contracts must:
+    - Update the relevant `spec/*.yaml` file(s).
+    - Update this section and any affected type definitions (Bookmark, Category, State, ExportBundle, PersistenceBackend, AuthProvider).
+    - Be accompanied by tests that assert the new behavior.
+
+### 10.9 Testing & Observability
+
 
 - **Testing**
   - Unit tests:

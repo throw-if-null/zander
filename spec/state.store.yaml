@@ -289,3 +289,32 @@ scenarios:
       - "S_after.bookmarks and S_after.categories match those of S2 (subject to normalization)."
       - "No bookmarks or categories from S1 remain unless they are also present in S2."
       - "State invariants (valid category references, etc.) are preserved."
+
+  add_bookmark_respects_current_category_and_fallbacks:
+    description: >
+      addBookmark chooses a category in this order: explicit categoryId,
+      then currentCategoryId, then a default root category created as needed.
+    given:
+      - "State S with root categories [Root] and S.currentCategoryId = Root.id."
+      - "No other categories exist."
+    when:
+      - "S1 = addBookmark({ title: 'A', url: 'https://a.example', categoryId: null })"
+      - "S2 = addBookmark({ title: 'B', url: 'https://b.example', categoryId: 'non-existent' })"
+    then:
+      - "Bookmark A is created in category Root.id."
+      - "Bookmark B is created in a safe default root category (either Root or a new default), never with an invalid categoryId."
+
+  set_current_category_filters_bookmarks_but_preserves_data:
+    description: >
+      setCurrentCategory only affects view state and persistence; it does not
+      delete or mutate bookmarks.
+    given:
+      - "State S with two categories [Cat1, Cat2]."
+      - "Bookmarks b1 in Cat1 and b2 in Cat2."
+    when:
+      - "S1 = setCurrentCategory({ categoryId: Cat1.id })"
+      - "S2 = setCurrentCategory({ categoryId: Cat2.id })"
+      - "S3 = setCurrentCategory({ categoryId: null })"
+    then:
+      - "In all states S1, S2, S3, both b1 and b2 still exist in State.bookmarks."
+      - "S1.currentCategoryId = Cat1.id, S2.currentCategoryId = Cat2.id, and S3.currentCategoryId = null."
