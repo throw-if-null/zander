@@ -269,7 +269,7 @@ This document describes how agents should work on the **Svelte 5–based Zander 
   - Implement:
     - Root app:
       - `App.svelte` for LCARS shell and high‑level view switching.
-    - LCARS primitives (under `src/lib/components/lcars/`), mapping directly to documented CSS classes:
+    - LCARS primitives (under `src/lib/components/lcars/`), mapping directly to documented CSS classes and forming a reusable **LCARS Svelte design system** that can be used beyond Zander:
       - `LcarsApp.svelte`, `LcarsHeaderBar.svelte`, `LcarsFooterBar.svelte`, `LcarsSidebarBar.svelte`, `LcarsStatusDisplay.svelte`, etc.
     - Views (under `src/lib/components/views/`):
       - `BookmarksView.svelte`, `SettingsView.svelte`, `AboutView.svelte`.

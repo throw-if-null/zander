@@ -1,0 +1,173 @@
+meta:
+  id: persistence.backend
+  version: 0.1.0
+  status: draft
+  description: >
+    Persistence port and core data contracts for the Svelte 5 Zander app (v1, guest-only, localStorage-backed).
+
+types:
+  Bookmark:
+    description: A single bookmark entry.
+    fields:
+      id:
+        type: string
+        description: Globally unique identifier (UUID).
+      title:
+        type: string
+        description: User-visible title, trimmed, max 64 chars.
+      description:
+        type: string | null
+        description: Optional longer description, max 512 chars.
+      url:
+        type: string
+        description: Fully normalized URL including protocol.
+      categoryId:
+        type: string
+        description: References a Category.id.
+      createdAt:
+        type: string
+        description: Stardate string at creation time (e.g. "2025352.1200").
+    invariants:
+      - "title is non-empty after trimming."
+      - "description, if present, length <= 512."
+      - "url is normalized by normalizeUrl() before save."
+      - "categoryId refers to an existing Category in State.categories."
+
+  Category:
+    description: Node in the nested category tree.
+    fields:
+      id:
+        type: string
+        description: Globally unique identifier (UUID).
+      name:
+        type: string
+        description: Display name (generally uppercase).
+      color:
+        type: string
+        description: Hex color from the LCARS palette (e.g. '#ff9966'). 
+      createdAt:
+        type: string
+        description: Stardate string at creation time.
+      children:
+        type: Category[]
+        description: Nested child categories.
+    invariants:
+      - "id is unique across the entire category tree."
+      - "color is either a valid LCARS palette color or normalized to one on load."
+
+  State:
+    description: In-memory application state for bookmarks and categories.
+    fields:
+      bookmarks:
+        type: Bookmark[]
+      categories:
+        type: Category[]
+        description: Root-level categories; each may have nested children.
+      currentCategoryId:
+        type: string | null
+        description: >
+          Currently selected Category.id, or null for 'All' categories.
+    invariants:
+      - "Every bookmark.categoryId appears in the category tree."
+
+  ExportBundle:
+    description: Exported data snapshot for backup/import.
+    fields:
+      version:
+        type: string
+        description: >
+          Data format version. For Svelte v1 exports this MUST be 'svelte-v1'.
+      state:
+        type: State
+        description: Complete application state at time of export.
+      meta:
+        type: object
+        description: Metadata about the export operation.
+        fields:
+          exportedAtStardate:
+            type: string
+            description: Stardate when the export was created.
+          sourceBackend:
+            type: string
+            description: >
+              Identifier of the backend that produced this bundle.
+              For v1 this is always 'localStorage'.
+    invariants:
+      - "version == 'svelte-v1' for all v1 exports."
+      - "Theme selection is NOT included in ExportBundle."
+
+  PersistenceError:
+    description: Recoverable error encountered during persistence operations.
+    fields:
+      code:
+        type: string
+        description: Short machine-readable code (e.g. 'invalid-json', 'schema-mismatch').
+      message:
+        type: string
+        description: Human-readable description suitable for logs and debug UI.
+
+ports:
+  PersistenceBackend:
+    description: >
+      Abstract interface for loading, saving, exporting, and importing Svelte app state.
+      v1 implementations include LocalStorageBackend; v2 adds FirestoreBackend.
+    operations:
+      loadState:
+        description: Load the latest persisted State, if any.
+        input: null
+        output:
+          type: State | null
+        errors:
+          - PersistenceError
+      saveState:
+        description: Persist the given State as the new source of truth.
+        input:
+          type: State
+        output:
+          type: void
+        errors:
+          - PersistenceError
+      exportData:
+        description: Produce an ExportBundle suitable for user download and later import.
+        input: null
+        output:
+          type: ExportBundle
+        errors:
+          - PersistenceError
+      importData:
+        description: >
+          Replace current data with the contents of the given ExportBundle.
+          Implementations MAY normalize fields (e.g. colors) but MUST preserve
+          logical relationships (categories, bookmarks).
+        input:
+          type: ExportBundle
+        output:
+          type: void
+        errors:
+          - PersistenceError
+
+scenarios:
+  round_trip_export_import:
+    description: State survives export & import round-trip.
+    given:
+      - "A valid State instance S with at least one bookmark and one category."
+    when:
+      - "saveState(S)"
+      - "bundle = exportData()"
+      - "Reset backend storage to an empty state (implementation-specific)."
+      - "importData(bundle)"
+      - "S2 = loadState()"
+    then:
+      - "S2 is semantically equal to S (ignoring allowed normalization like color canonicalization)."
+
+  import_replaces_existing_data:
+    description: Import fully replaces previously persisted data.
+    given:
+      - "A valid State instance S1 already persisted via saveState(S1)."
+      - "A different valid State instance S2 exported as bundle2."
+    when:
+      - "importData(bundle2)"
+      - "S_after = loadState()"
+    then:
+      - "S_after matches S2 (subject to normalization)."
+      - "No bookmarks or categories from S1 remain unless they are also present in S2."

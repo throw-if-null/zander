@@ -1,0 +1,91 @@
+meta:
+  id: ui.lcars-svelte
+  version: 0.1.0
+  status: draft
+  description: >
+    Contracts for the reusable LCARS Svelte component library used by the Zander app.
+
+components:
+  LcarsHeaderBar:
+    description: >
+      LCARS header bar providing the top frame of the console, including a home/title control
+      and optional right-side content area. Wraps the header primitives described in DESIGN.md.
+
+    props:
+      title:
+        type: string
+        required: true
+        description: >
+          Visible title text rendered in the primary header area (e.g. 'ZANDER').
+      homeHref:
+        type: string | null
+        required: false
+        default: null
+        description: >
+          Optional href for the home control. If non-null, the home control renders as an
+          <a> element. If null, it renders as a <button>.
+      ariaLabel:
+        type: string
+        required: false
+        description: >
+          Optional aria-label for the header landmark. If omitted, screen readers use the title.
+
+    slots:
+      default:
+        description: >
+          Optional right-side content area inside the header bar (e.g. status text or controls).
+          Content is aligned according to the LCARS layout defined in DESIGN.md.
+      prefix:
+        required: false
+        description: >
+          Optional decorative or contextual content before the title (e.g. a small label).
+
+    events:
+      homeClick:
+        description: >
+          Fired when the user activates the home control via mouse, touch, or keyboard.
+        detail:
+          type: object
+          fields: {}
+        guarantees:
+          - "Emitted exactly once per user activation."
+          - "Not fired when activation is prevented via default browser navigation (e.g. Cmd+Click on link)."
+
+    accessibility:
+      semantics:
+        element: header
+        role: banner
+        description: >
+          Component renders as a <header> element with role='banner', representing the page
+          or application header landmark.
+      keyboard:
+        - "Home control is focusable via Tab."
+        - "Enter and Space activate the home control and fire homeClick."
+      labels:
+        - "If ariaLabel is set, it is used as the header's accessible name."
+        - "Otherwise, the visible title prop is used as the accessible name."
+      relationships:
+        - "Header landmark is unique at the top app level."
+
+    styling:
+      classes:
+        - "lcars-header-bar"
+        - "lcars-header-bar-home"
+        - "lcars-header-bar-fill"
+        - "lcars-header-bar-endcap"
+      contract:
+        - "Component MUST apply lcars-header-bar as the root structural class."
+        - "Home control MUST apply lcars-header-bar-home (or documented derivative)."
+        - "Any deviation from DESIGN.md section for header bars MUST be documented."
+
+  LcarsSidebarBar:
+    status: todo
+    description: "Vertical LCARS sidebar column; wraps lcars-sidebar-bar primitives."
+
+  LcarsFooterBar:
+    status: todo
+    description: "Bottom LCARS footer bar with action buttons and optional status area."
+
+  LcarsStatusDisplay:
+    status: todo
+    description: "Status display panel for counts, stardates, or other system metrics."

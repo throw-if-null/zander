@@ -965,7 +965,70 @@ The Svelte app lives under `src/` and follows these conventions:
 - `src/lib/telemetry/`
   - Observability ports and implementations (OpenTelemetry-compatible, with a no-op default).
 
-### 10.3 Svelte v1 Data Model
+### 10.3 LCARS Svelte Design System
+
+The Svelte implementation introduces a reusable **LCARS Svelte design system** under `src/lib/components/lcars/`. These components wrap the CSS primitives defined in `DESIGN.md` and are intentionally **Zander-agnostic**, so they can be extracted into a standalone package in the future (e.g. `@zander/lcars-svelte`).
+
+#### 10.3.1 Scope and Goals
+
+- Provide a reusable set of LCARS layout and chrome components for Svelte 5.
+- Preserve the visual contract defined by `DESIGN.md`:
+  - Components apply the documented LCARS classes and structure.
+  - Any divergence from the documented CSS primitives must be intentional and documented.
+- Keep component APIs free of bookmark- or category-specific domain concepts.
+- Support WCAG 2.1 AA accessibility:
+  - Semantic landmarks (`<header>`, `<aside>`, `<main>`, `<footer>`).
+  - Keyboard and screen reader behavior equivalent to or better than the legacy app.
+
+#### 10.3.2 Public Components (Initial Set)
+
+The following components form the initial public surface of the design system. They live in `src/lib/components/lcars/`:
+
+- `LcarsApp.svelte`
+  - Wraps the overall LCARS application frame (`.lcars-app` grid).
+  - Provides slots for header, sidebar, main content, and footer regions.
+- `LcarsHeaderBar.svelte`
+  - Wraps the LCARS header bar primitives (`lcars-header-bar`, `lcars-header-bar-home`, etc.).
+  - Provides a home/title area and optional right-side content slot.
+- `LcarsSidebarBar.svelte`
+  - Wraps the LCARS sidebar column (`lcars-sidebar-bar` and variants).
+  - Provides a slot for navigation/content inside the track area.
+- `LcarsFooterBar.svelte`
+  - Wraps the LCARS footer bar (`lcars-footer-bar`).
+  - Provides slots for primary action buttons and an optional status block.
+- `LcarsStatusDisplay.svelte`
+  - Wraps the status block (`lcars-status-display` and related classes).
+  - Displays structured status text (e.g. stardate, counts) in a LCARS-styled panel.
+
+Additional LCARS primitives (e.g. generic LCARS buttons, section headers, panels) may be added over time. New components should follow the same principles as the initial set.
+
+#### 10.3.3 API and Accessibility Requirements
+
+All LCARS Svelte components MUST:
+
+- Expose a **stable, documented API**:
+  - Explicit props for configuration (e.g. `title`, `homeHref`, `ariaLabel`).
+  - Named or default slots for consumer content.
+  - Events only for generic UI interactions (e.g. `homeClick`), not domain actions.
+- Wrap, not redefine, the CSS primitives:
+  - Use the classes and structure from `DESIGN.md` for LCARS shapes.
+  - Do not silently rename or repurpose classes; describe any necessary deviations here and in `DESIGN.md`.
+- Provide clear accessibility semantics:
+  - Use appropriate landmark elements (`<header>`, `<nav>`, `<main>`, `<footer>`, `<section>`).
+  - Ensure keyboard focus order and visible focus indicators are preserved.
+  - Provide ARIA attributes when needed (e.g. `aria-label` where text is not self-describing).
+
+#### 10.3.4 Extraction Intent
+
+The LCARS Svelte design system is designed to be extractable into its own package:
+
+- External consumers should be able to use these components without depending on Zander-specific domain types.
+- Any breaking change to a component’s props/slots/events or semantics MUST:
+  - Be treated as a versioned change in the design system.
+  - Be reflected in the corresponding OpenSpec contract in `spec/ui.lcars-svelte.yaml`.
+  - Be covered by updated tests in this repo before release.
+
+### 10.4 Svelte v1 Data Model
 
 Svelte v1 defines its own data contracts. Initially these closely mirror the legacy single-file types, but they may evolve independently over time.
 
@@ -1049,7 +1112,7 @@ Notes:
   - Requires a new bundle version and/or storage key.
   - Must be clearly documented in this section and `README.md`.
 
-### 10.4 Persistence Ports & Backends
+### 10.5 Persistence Ports & Backends
 
 #### 10.4.1 `PersistenceBackend` Interface
 
@@ -1121,7 +1184,7 @@ users/{userId}/bookmarks/{bookmarkId}
   - Handling partial failures.
   - Basic resilience to network disruptions.
 
-### 10.5 Authentication & Modes (v2+)
+### 10.6 Authentication & Modes (v2+)
 
 #### 10.5.1 `AuthProvider` Interface
 
@@ -1159,7 +1222,7 @@ type User = {
     - If Firestore already contains data for the user, that data becomes the source of truth.
     - Guest local data is not silently merged; users can explicitly import/export if a merge is desired.
 
-### 10.6 Import/Export Semantics (Svelte)
+### 10.7 Import/Export Semantics (Svelte)
 
 - **Guest mode:**
   - `exportData()` and `importData()` operate on the `LocalStorageBackend` data.
@@ -1171,7 +1234,7 @@ type User = {
   - Import is a full overwrite of bookmarks and categories for the active mode/backend, with validation and normalization similar to the legacy app.
   - Theme selection is not included in the export bundle.
 
-### 10.7 Testing & Observability
+### 10.8 Testing & Observability
 
 - **Testing**
   - Unit tests:
