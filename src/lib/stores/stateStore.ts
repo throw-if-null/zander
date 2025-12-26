@@ -1,5 +1,5 @@
 import { writable, type Writable, get } from "svelte/store";
-import type { State, Category } from "./stateTypes";
+import type { State, Category, ExportBundle } from "./stateTypes";
 import type { PersistenceBackend } from "../persistence/PersistenceBackend";
 import { createDefaultState } from "./stateDefaults";
 import {
@@ -25,6 +25,8 @@ export type StateStore = Writable<State | null> & {
   addCategory: (params: { parentId: string | null; name?: string | null }) => Promise<State>;
   moveCategory: (params: { categoryId: string; direction: "up" | "down" }) => Promise<State>;
   deleteCategory: (params: { categoryId: string }) => Promise<State>;
+  resetSystem: () => Promise<State>;
+  applyExportBundle: (bundle: ExportBundle) => Promise<State>;
   addBookmark: (params: {
     title: string;
     url: string;
@@ -53,7 +55,24 @@ function createTimestamp(): string {
   return new Date().toISOString();
 }
 
+function collectCategoryIds(categories: Category[]): Set<string> {
+  const result = new Set<string>();
+
+  const walk = (nodes: Category[]): void => {
+    for (const node of nodes) {
+      result.add(node.id);
+      if (node.children.length > 0) {
+        walk(node.children);
+      }
+    }
+  };
+
+  walk(categories);
+  return result;
+}
+
 export function createStateStore(backend: PersistenceBackend): StateStore {
+
   const store = writable<State | null>(null);
 
   const persistAndSet = async (updater: (current: State) => State): Promise<State> => {
@@ -321,7 +340,39 @@ export function createStateStore(backend: PersistenceBackend): StateStore {
     });
   };
 
+  const resetSystem = async (): Promise<State> => {
+    const defaultState = createDefaultState();
+
+    store.set(defaultState);
+    await backend.saveState(defaultState);
+    return defaultState;
+  };
+
+  const applyExportBundle = async (bundle: ExportBundle): Promise<State> => {
+    return persistAndSet((current) => {
+      const allowedCategoryIds = collectCategoryIds(bundle.categories);
+
+      const filteredBookmarks = bundle.bookmarks.filter((bookmark) =>
+        allowedCategoryIds.has(bookmark.categoryId),
+      );
+
+      let nextCurrentCategoryId = current.currentCategoryId;
+      if (nextCurrentCategoryId && !allowedCategoryIds.has(nextCurrentCategoryId)) {
+        const firstRoot = bundle.categories[0];
+        nextCurrentCategoryId = firstRoot ? firstRoot.id : null;
+      }
+
+      return {
+        ...current,
+        bookmarks: filteredBookmarks,
+        categories: bundle.categories,
+        currentCategoryId: nextCurrentCategoryId,
+      };
+    });
+  };
+
   const addBookmark = async (params: {
+
     title: string;
     url: string;
     categoryId: string | null;
@@ -455,6 +506,8 @@ export function createStateStore(backend: PersistenceBackend): StateStore {
     addCategory,
     moveCategory,
     deleteCategory,
+    resetSystem,
+    applyExportBundle,
     addBookmark,
     updateBookmark,
     deleteBookmark,

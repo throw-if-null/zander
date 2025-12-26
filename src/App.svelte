@@ -146,7 +146,7 @@
   };
 
   const handleResetSystem = () => {
-    // Placeholder for reset flow
+    void stateStore.resetSystem();
   };
 
   const handleGoToSettings = () => {

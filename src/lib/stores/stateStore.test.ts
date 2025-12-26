@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { createStateStore } from "./stateStore";
 import type { PersistenceBackend } from "../persistence/PersistenceBackend";
-import type { State } from "./stateTypes";
+import type { State, ExportBundle } from "./stateTypes";
 
 function createBackendMock(initialState: State | null) {
   let savedState: State | null = initialState;
@@ -653,6 +653,125 @@ describe("stateStore", () => {
  
     const saved = getSavedState();
     expect(saved).toEqual(afterNoOp);
+  });
+
+  it("resetSystem restores default state and persists it", async () => {
+    const initial: State = {
+      bookmarks: [
+        {
+          id: "b1",
+          title: "One",
+          url: "https://one.example",
+          description: "",
+          categoryId: "root",
+          createdAt: "sd1",
+        },
+      ],
+      categories: [
+        {
+          id: "root",
+          name: "Root",
+          color: "#fff",
+          createdAt: "stardate",
+          children: [],
+        },
+      ],
+      currentCategoryId: "root",
+      currentView: "settings",
+      currentSettingsPage: "themes",
+      landingCategoryId: "root",
+    };
+
+    const { backend, getSavedState } = createBackendMock(initial);
+    const store = createStateStore(backend);
+
+    await store.loadInitialState();
+
+    const resetState = await store.resetSystem();
+
+    expect(resetState.bookmarks).toEqual([]);
+    expect(resetState.categories).toEqual([]);
+    expect(resetState.currentCategoryId).toBeNull();
+    expect(resetState.currentView).toBe("bookmarks");
+    expect(resetState.currentSettingsPage).toBeNull();
+
+    const saved = getSavedState();
+    expect(saved).toEqual(resetState);
+  });
+
+  it("applyExportBundle overwrites bookmarks and categories and normalizes currentCategoryId", async () => {
+    const initial: State = {
+      bookmarks: [
+        {
+          id: "b-initial",
+          title: "Old",
+          url: "https://old.example",
+          description: "",
+          categoryId: "old-cat",
+          createdAt: "sd-old",
+        },
+      ],
+      categories: [
+        {
+          id: "old-cat",
+          name: "Old Cat",
+          color: "#fff",
+          createdAt: "stardate",
+          children: [],
+        },
+      ],
+      currentCategoryId: "old-cat",
+      currentView: "bookmarks",
+      currentSettingsPage: null,
+      landingCategoryId: null,
+    };
+
+    const { backend, getSavedState } = createBackendMock(initial);
+    const store = createStateStore(backend);
+
+    await store.loadInitialState();
+
+    const bundle: ExportBundle = {
+      bookmarks: [
+        {
+          id: "b1",
+          title: "New 1",
+          url: "https://one.example",
+          description: "",
+          categoryId: "cat1",
+          createdAt: "sd1",
+        },
+        {
+          id: "b2",
+          title: "Dangling",
+          url: "https://dangling.example",
+          description: "",
+          categoryId: "missing",
+          createdAt: "sd2",
+        },
+      ],
+      categories: [
+        {
+          id: "cat1",
+          name: "Cat 1",
+          color: "#fff",
+          createdAt: "stardate",
+          children: [],
+        },
+      ],
+    };
+
+    const afterApply = await store.applyExportBundle(bundle);
+
+    expect(afterApply.categories).toEqual(bundle.categories);
+    expect(afterApply.bookmarks).toHaveLength(1);
+    expect(afterApply.bookmarks[0].id).toBe("b1");
+    expect(afterApply.bookmarks[0].categoryId).toBe("cat1");
+
+    expect(afterApply.currentCategoryId).toBe("cat1");
+
+    const saved = getSavedState();
+    expect(saved).toEqual(afterApply);
   });
 });
 
