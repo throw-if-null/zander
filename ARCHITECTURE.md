@@ -1242,7 +1242,7 @@ type User = {
   - Represented as `type: string` (or number) plus an explicit `enum: [...]` list.
 - **Ports and operations**
   - Live under `spec/**.yaml` files with `ports:` and `operations:` blocks.
-  - `output` types describe the successful return shape; `errors:` list domain error types (e.g. `PersistenceError`).
+  - `output` types describe the successful return shape; `errors:` list domain error types (e.g. `StorageError`).
 - **Synchronization**
   - Any breaking change to Svelte data or port contracts must:
     - Update the relevant `spec/*.yaml` file(s).

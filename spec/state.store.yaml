@@ -8,7 +8,7 @@ meta:
     view state) and how they interact with the PersistenceBackend.
 
 # NOTE:
-# - Core domain types (Bookmark, Category, State, ExportBundle, PersistenceError)
+# - Core domain types (Bookmark, Category, State, ExportBundle, StorageError)
 #   are defined in `spec/persistence.backend.yaml` and referenced here by name.
 
 ports:
@@ -28,7 +28,7 @@ ports:
         output:
           type: State
         errors:
-          - PersistenceError
+          - StorageError
         notes:
           - "Calls PersistenceBackend.loadState()."
           - "If null is returned, constructs a default State in memory."
@@ -49,7 +49,7 @@ ports:
         output:
           type: State
         errors:
-          - PersistenceError
+          - StorageError
         notes:
           - "If categoryId is non-null but not found, falls back to the first root category id or null."
           - "Calls PersistenceBackend.saveState() after updating state."
@@ -67,7 +67,7 @@ ports:
         output:
           type: State
         errors:
-          - PersistenceError
+          - StorageError
         notes:
           - "If viewId is not one of the allowed values, State is unchanged."
           - "Calls PersistenceBackend.saveState() after updating state."
@@ -88,7 +88,7 @@ ports:
         output:
           type: State
         errors:
-          - PersistenceError
+          - StorageError
         notes:
           - "If State.currentView is not 'settings', pageId changes are allowed but may be ignored by the UI layer."
           - "If pageId is non-null but not recognized, falls back to a safe default (e.g. 'home' or null)."
@@ -115,7 +115,7 @@ ports:
         output:
           type: State
         errors:
-          - PersistenceError
+          - StorageError
         notes:
           - "If parentId is null, appends to State.categories."
           - "If parentId is non-null but not found, treats it as null (root insert)."
@@ -137,7 +137,7 @@ ports:
         output:
           type: State
         errors:
-          - PersistenceError
+          - StorageError
         notes:
           - "If categoryId is not found, State is unchanged."
           - "If already at the first/last position, State is unchanged."
@@ -156,7 +156,7 @@ ports:
         output:
           type: State
         errors:
-          - PersistenceError
+          - StorageError
         notes:
           - "If categoryId is not found, State is unchanged."
           - "All descendant categories are removed from the tree."
@@ -186,7 +186,7 @@ ports:
         output:
           type: State
         errors:
-          - PersistenceError
+          - StorageError
         notes:
           - "Uses generateUUID() for id and calculateStardate() for createdAt."
           - "Normalizes url using normalizeUrl()."
@@ -224,7 +224,7 @@ ports:
         output:
           type: State
         errors:
-          - PersistenceError
+          - StorageError
         notes:
           - "If id is not found, State is unchanged."
           - "createdAt remains the original creation stardate."
@@ -240,7 +240,7 @@ ports:
         output:
           type: State
         errors:
-          - PersistenceError
+          - StorageError
         notes:
           - "If id is not found, State is unchanged."
 
@@ -253,7 +253,7 @@ ports:
         output:
           type: State
         errors:
-          - PersistenceError
+          - StorageError
         notes:
           - "Equivalent to clearing storage keys for the active backend and loading defaults."
           - "After reset, currentCategoryId, currentView, and currentSettingsPage are set to their initial values."
@@ -268,7 +268,7 @@ ports:
         output:
           type: State
         errors:
-          - PersistenceError
+          - StorageError
         notes:
           - "Valid bookmarks are kept; invalid ones are discarded."
           - "Structurally valid categories are kept; invalid ones are discarded."

@@ -193,7 +193,7 @@ These tasks are not required for the initial migration but can further improve m
 
 ## Phase 7 – v2 Auth & Cloud Persistence
 
-**Goal:** Introduce authentication and Firestore-backed persistence, while preserving guest mode semantics.
+**Goal:** Introduce authentication and Firestore-backed persistence, while preserving guest mode semantics, and add user-controlled storage error handling and diagnostics flows.
 
 - `[ ]` P7.1 Define v2 mode semantics
   - Document in `ARCHITECTURE.md` and `README.md`:
@@ -214,7 +214,7 @@ These tasks are not required for the initial migration but can further improve m
     - One federated provider (e.g. Google).
   - Configure separate Firebase projects or environments for dev/test/prod as needed.
 
-- `[ ]` P7.4 Implement `FirestoreBackend`
+- `[ ]` P7.4 Implement `FirestoreBackend` (aka storage backend for signed-in mode)
   - Implement `PersistenceBackend` backed by Firestore collections:
     - e.g. `users/{userId}/categories/*`, `users/{userId}/bookmarks/*`.
   - Ensure it respects the Svelte v1 data contracts (or explicitly documented v2 contracts).
@@ -227,12 +227,18 @@ These tasks are not required for the initial migration but can further improve m
     - Load data from the active backend according to v2 semantics.
   - Ensure UI clearly indicates current mode and active backend.
 
-- `[ ]` P7.6 v2 import/export behavior
+- `[ ]` P7.6 v2 import/export and storage error UX
   - Implement import/export so that:
     - In guest mode, operations target localStorage data.
     - In signed-in mode, operations target the current user’s Firestore data.
-  - Update `README.md` with clear explanations and warnings.
-  - Add Playwright tests covering import/export in both modes.
+  - Add typed `StorageError` handling across backends:
+    - Backends (local + remote) must reject with `StorageError` for real failures (e.g. `invalid-json`, `version-unsupported`, `storage-unavailable`, `write-failed`).
+    - Store methods should propagate `StorageError` to the UI by default.
+  - UI policy: do not auto-recover; present a storage error dialog that lets users choose:
+    - `Use Default State` (calls `resetSystem()`)
+    - `Import Backup` (open file picker and call `applyExportBundle(bundle)`)
+    - `Contact Support` (prepare diagnostics payload for copy / upload)
+  - Add tests and Playwright scenarios to validate error flows (import parse errors, version mismatch, storage unavailable), including user choices.
 
 - `[ ]` P7.7 Auth & cloud E2E tests
   - Add Playwright scenarios for:
@@ -240,6 +246,7 @@ These tasks are not required for the initial migration but can further improve m
     - Bookmark/category CRUD in signed-in mode.
     - Data persistence across reloads in Firestore-backed mode.
     - Switching between guest and signed-in without losing data unintentionally.
+    - Storage error scenarios and user remediation flows.
 
 ---
 
