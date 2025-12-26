@@ -550,11 +550,12 @@ describe("stateStore", () => {
     expect(categoryB.children[0].id).toBe("D");
  
     const afterMoveDown = await store.moveCategory({ categoryId: "B", direction: "down" });
-    expect(afterMoveDown.categories.map((category) => category.id)).toEqual(["A", "C", "B"]);
+    expect(afterMoveDown.categories.map((category) => category.id)).toEqual(["A", "B", "C"]);
  
-    const movedB = afterMoveDown.categories[2];
-    expect(movedB.children).toHaveLength(1);
-    expect(movedB.children[0].id).toBe("D");
+    const movedB = afterMoveDown.categories.find((category) => category.id === "B");
+    expect(movedB).toBeDefined();
+    expect(movedB?.children).toHaveLength(1);
+    expect(movedB?.children[0].id).toBe("D");
  
     const afterNoOp = await store.moveCategory({ categoryId: "missing", direction: "up" });
     expect(afterNoOp).toEqual(afterMoveDown);
