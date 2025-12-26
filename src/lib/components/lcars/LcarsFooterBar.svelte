@@ -1,6 +1,11 @@
 <script lang="ts">
-  const { ariaLabel } = $props<{
+  import type { Snippet } from "svelte";
+
+  const { ariaLabel, primaryActions, status, children } = $props<{
     ariaLabel?: string;
+    primaryActions?: Snippet;
+    status?: Snippet;
+    children?: Snippet;
   }>();
 </script>
 
@@ -10,10 +15,10 @@
   aria-label={ariaLabel}
 >
   <div class="lcars-footer-bar-primary-actions">
-    <slot name="primaryActions" />
+    {@render primaryActions?.()}
   </div>
   <div class="lcars-footer-bar-status">
-    <slot name="status" />
+    {@render status?.()}
   </div>
-  <slot />
+  {@render children?.()}
 </footer>

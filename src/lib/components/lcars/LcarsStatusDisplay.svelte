@@ -1,9 +1,12 @@
 <script lang="ts">
+  import type { Snippet } from "svelte";
+
   type LiveMode = "off" | "polite" | "assertive";
 
-  const { ariaLabel, liveMode = "off" } = $props<{
+  const { ariaLabel, liveMode = "off", children } = $props<{
     ariaLabel?: string;
     liveMode?: LiveMode;
+    children?: Snippet;
   }>();
 
   const isLive = $derived(liveMode !== "off");
@@ -17,5 +20,5 @@
   aria-label={ariaLabel}
   {...liveAttributes}
 >
-  <slot />
+  {@render children?.()}
 </div>

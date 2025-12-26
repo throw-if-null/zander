@@ -1,27 +1,29 @@
 <script lang="ts">
-  const { ariaLabel } = $props<{
+  import type { Snippet } from "svelte";
+
+  const { ariaLabel, header, sidebar, main, footer } = $props<{
     ariaLabel?: string;
+    header?: Snippet;
+    sidebar?: Snippet;
+    main?: Snippet;
+    footer?: Snippet;
   }>();
 </script>
 
-<div
-  class="lcars-app"
-  role="application"
-  aria-label={ariaLabel}
->
+<div class="lcars-app" role="application" aria-label={ariaLabel}>
   <header>
-    <slot name="header" />
+    {@render header?.()}
   </header>
 
   <aside>
-    <slot name="sidebar" />
+    {@render sidebar?.()}
   </aside>
 
   <section>
-    <slot name="main" />
+    {@render main?.()}
   </section>
 
   <footer>
-    <slot name="footer" />
+    {@render footer?.()}
   </footer>
 </div>

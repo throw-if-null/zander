@@ -8,9 +8,11 @@
   import BookmarksView from "./lib/components/views/BookmarksView.svelte";
   import SettingsView from "./lib/components/views/SettingsView.svelte";
   import AboutView from "./lib/components/views/AboutView.svelte";
+  import BookmarkDialog from "./lib/components/dialogs/BookmarkDialog.svelte";
   import { createStateStore } from "./lib/stores/stateStore";
   import { LocalStorageBackend } from "./lib/persistence/LocalStorageBackend";
   import { createThemeStore } from "./lib/stores/themeStore";
+  import type { Bookmark } from "./lib/stores/stateTypes";
 
   const title = "ZANDER";
 
@@ -18,7 +20,11 @@
   const stateStore = createStateStore(backend);
   const themeStore = createThemeStore();
 
-  let isReady = false;
+  let isReady = $state(false);
+
+  let isBookmarkDialogOpen = $state(false);
+  let bookmarkDialogMode = $state<"create" | "edit">("create");
+  let bookmarkDialogBookmark = $state<Bookmark | null>(null);
 
   onMount(async () => {
     await stateStore.loadInitialState();
@@ -31,18 +37,77 @@
     void stateStore.setCurrentSettingsPage(null);
   };
 
+  const openCreateBookmarkDialog = () => {
+    bookmarkDialogMode = "create";
+    bookmarkDialogBookmark = null;
+    isBookmarkDialogOpen = true;
+  };
+
+  const openEditBookmarkDialog = (id: string) => {
+    const currentState = $stateStore;
+    if (!currentState) return;
+    const existing = currentState.bookmarks.find((b) => b.id === id) ?? null;
+    if (!existing) return;
+
+    bookmarkDialogMode = "edit";
+    bookmarkDialogBookmark = existing;
+    isBookmarkDialogOpen = true;
+  };
+
+  const closeBookmarkDialog = () => {
+    isBookmarkDialogOpen = false;
+    bookmarkDialogBookmark = null;
+  };
+
   const handleAddBookmark = () => {
-    // Placeholder for bookmark dialog integration
+    openCreateBookmarkDialog();
   };
 
   const handleEditBookmark = (id: string) => {
-    // Placeholder for bookmark dialog integration
-    void id;
+    openEditBookmarkDialog(id);
+  };
+
+  const handleDeleteBookmark = (id: string) => {
+    void stateStore.deleteBookmark(id);
+  };
+
+  const handleBookmarkDialogSubmit = (detail: {
+    title: string;
+    url: string;
+    categoryId: string | null;
+    description: string | null;
+  }) => {
+    if (bookmarkDialogMode === "create") {
+      void stateStore.addBookmark({
+        title: detail.title,
+        url: detail.url,
+        categoryId: detail.categoryId,
+        description: detail.description,
+      });
+    } else if (bookmarkDialogMode === "edit" && bookmarkDialogBookmark) {
+      void stateStore.updateBookmark({
+        id: bookmarkDialogBookmark.id,
+        title: detail.title,
+        url: detail.url,
+        categoryId: detail.categoryId,
+        description: detail.description,
+      });
+    }
+
+    closeBookmarkDialog();
+  };
+
+  const handleBookmarkDialogCancel = () => {
+    closeBookmarkDialog();
+  };
+
+  const handleBookmarkDialogDelete = (id: string) => {
+    void stateStore.deleteBookmark(id);
+    closeBookmarkDialog();
   };
 
   const handleSelectCategory = (categoryId: string | null) => {
-    // Placeholder for category selection integration
-    void categoryId;
+    void stateStore.setCurrentCategory(categoryId);
   };
 
   const handleChangeCategoryTree = () => {
@@ -76,73 +141,91 @@
   };
 </script>
 
-<LcarsApp ariaLabel="Zander LCARS Console">
-  <svelte:fragment slot="header">
-    <LcarsHeaderBar {title} onHomeClick={handleHomeClick} />
-  </svelte:fragment>
+{#snippet header()}
+  <LcarsHeaderBar {title} onHomeClick={handleHomeClick} />
+{/snippet}
 
-  <svelte:fragment slot="sidebar">
-    <LcarsSidebarBar ariaLabel="Navigation sidebar">
-      <!-- Navigation/content will go here in later phases -->
-    </LcarsSidebarBar>
-  </svelte:fragment>
+{#snippet sidebar()}
+  <LcarsSidebarBar ariaLabel="Navigation sidebar">
+    <!-- Navigation/content will go here in later phases -->
+  </LcarsSidebarBar>
+{/snippet}
 
-  <svelte:fragment slot="main">
-    {#if !isReady || $stateStore === null}
-      <main>
-        <h1>Initializing Zander console…</h1>
-        <p>Loading saved state… or creating defaults.</p>
-      </main>
+{#snippet main()}
+  {#if !isReady || $stateStore === null}
+    <main>
+      <h1>Initializing Zander console</h1>
+      <p>Loading saved state or creating defaults.</p>
+    </main>
+  {:else if $stateStore.currentView === "bookmarks"}
+    <BookmarksView
+      state={$stateStore}
+      onAddBookmark={handleAddBookmark}
+      onEditBookmark={handleEditBookmark}
+      onSelectCategory={handleSelectCategory}
+      onDeleteBookmark={handleDeleteBookmark}
+    />
+    <BookmarkDialog
+      open={isBookmarkDialogOpen}
+      mode={bookmarkDialogMode}
+      bookmark={bookmarkDialogBookmark}
+      categories={$stateStore.categories}
+      onSubmit={handleBookmarkDialogSubmit}
+      onCancel={handleBookmarkDialogCancel}
+      onDelete={handleBookmarkDialogDelete}
+    />
+  {:else if $stateStore.currentView === "settings"}
+    <SettingsView
+      state={$stateStore}
+      themeState={$themeStore}
+      onChangeCategoryTree={handleChangeCategoryTree}
+      onChangeTheme={handleChangeTheme}
+      onExportData={handleExportData}
+      onImportData={handleImportData}
+      onResetSystem={handleResetSystem}
+    />
+  {:else}
+    <AboutView
+      stardateLabel="TODO: stardate"
+      earthDateLabel="TODO: earth date"
+    />
+  {/if}
+{/snippet}
+
+{#snippet footerPrimaryActions()}
+  <button type="button" onclick={handleAddBookmark}>
+    ADD ENTRY
+  </button>
+  <button type="button" onclick={handleGoToSettings}>
+    SETTINGS
+  </button>
+  <button type="button" onclick={handleGoToAbout}>
+    ABOUT
+  </button>
+{/snippet}
+
+{#snippet footerStatus()}
+  <LcarsStatusDisplay ariaLabel="System status">
+    {#if !isReady}
+      Initializing
     {:else}
-      {#if $stateStore.currentView === "bookmarks"}
-        <BookmarksView
-          state={$stateStore}
-          onAddBookmark={handleAddBookmark}
-          onEditBookmark={handleEditBookmark}
-          onSelectCategory={handleSelectCategory}
-        />
-      {:else if $stateStore.currentView === "settings"}
-        <SettingsView
-          state={$stateStore}
-          themeState={$themeStore}
-          onChangeCategoryTree={handleChangeCategoryTree}
-          onChangeTheme={handleChangeTheme}
-          onExportData={handleExportData}
-          onImportData={handleImportData}
-          onResetSystem={handleResetSystem}
-        />
-      {:else}
-        <AboutView
-          stardateLabel="TODO: stardate"
-          earthDateLabel="TODO: earth date"
-        />
-      {/if}
+      Svelte shell initialized
     {/if}
-  </svelte:fragment>
+  </LcarsStatusDisplay>
+{/snippet}
 
-  <svelte:fragment slot="footer">
-    <LcarsFooterBar ariaLabel="Global footer actions">
-      <svelte:fragment slot="primaryActions">
-        <button type="button" onclick={handleAddBookmark}>
-          ADD ENTRY
-        </button>
-        <button type="button" onclick={handleGoToSettings}>
-          SETTINGS
-        </button>
-        <button type="button" onclick={handleGoToAbout}>
-          ABOUT
-        </button>
-      </svelte:fragment>
+{#snippet footer()}
+  <LcarsFooterBar
+    ariaLabel="Global footer actions"
+    primaryActions={footerPrimaryActions}
+    status={footerStatus}
+  />
+{/snippet}
 
-      <svelte:fragment slot="status">
-        <LcarsStatusDisplay ariaLabel="System status">
-          {#if !isReady}
-            Initializing…
-          {:else}
-            Svelte shell initialized
-          {/if}
-        </LcarsStatusDisplay>
-      </svelte:fragment>
-    </LcarsFooterBar>
-  </svelte:fragment>
-</LcarsApp>
+<LcarsApp
+  ariaLabel="Zander LCARS Console"
+  header={header}
+  sidebar={sidebar}
+  main={main}
+  footer={footer}
+/>

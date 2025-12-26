@@ -1,6 +1,9 @@
 <script lang="ts">
-  const { ariaLabel } = $props<{
+  import type { Snippet } from "svelte";
+
+  const { ariaLabel, children } = $props<{
     ariaLabel?: string;
+    children?: Snippet;
   }>();
 </script>
 
@@ -11,7 +14,7 @@
 >
   <div class="lcars-sidebar-bar-top-cap" />
   <div class="lcars-sidebar-bar-track">
-    <slot />
+    {@render children?.()}
   </div>
   <div class="lcars-sidebar-bar-bottom-cap" />
 </aside>
