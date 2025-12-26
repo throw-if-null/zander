@@ -23,6 +23,8 @@ export type StateStore = Writable<State | null> & {
       | null
   ) => Promise<State>;
   addCategory: (params: { parentId: string | null; name?: string | null }) => Promise<State>;
+  moveCategory: (params: { categoryId: string; direction: "up" | "down" }) => Promise<State>;
+  deleteCategory: (params: { categoryId: string }) => Promise<State>;
   addBookmark: (params: {
     title: string;
     url: string;
@@ -38,6 +40,18 @@ export type StateStore = Writable<State | null> & {
   }) => Promise<State>;
   deleteBookmark: (id: string) => Promise<State>;
 };
+
+function generateId(): string {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+
+  return Math.random().toString(36).slice(2);
+}
+
+function createTimestamp(): string {
+  return new Date().toISOString();
+}
 
 export function createStateStore(backend: PersistenceBackend): StateStore {
   const store = writable<State | null>(null);
@@ -134,25 +148,22 @@ export function createStateStore(backend: PersistenceBackend): StateStore {
   const addCategory = async (params: { parentId: string | null; name?: string | null }): Promise<State> => {
     return persistAndSet((current) => {
       const newCategory: Category = {
-        id:
-          typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
-            ? crypto.randomUUID()
-            : Math.random().toString(36).slice(2),
+        id: generateId(),
         name: params.name ?? "New category",
         color: "#ffffff",
-        createdAt: new Date().toISOString(),
+        createdAt: createTimestamp(),
         children: [],
       };
- 
+
       if (!params.parentId) {
         return {
           ...current,
           categories: [...current.categories, newCategory],
         };
       }
- 
+
       let inserted = false;
- 
+
       const insertInto = (categories: Category[]): Category[] => {
         return categories.map((category) => {
           if (category.id === params.parentId) {
@@ -162,32 +173,155 @@ export function createStateStore(backend: PersistenceBackend): StateStore {
               children: [...category.children, newCategory],
             };
           }
- 
+
           return {
             ...category,
             children: insertInto(category.children),
           };
         });
       };
- 
+
       const nextCategories = insertInto(current.categories);
- 
+
       if (!inserted) {
         return {
           ...current,
           categories: [...current.categories, newCategory],
         };
       }
- 
+
       return {
         ...current,
         categories: nextCategories,
       };
     });
   };
- 
-   const addBookmark = async (params: {
 
+  const moveCategory = async (params: { categoryId: string; direction: "up" | "down" }): Promise<State> => {
+    const { categoryId, direction } = params;
+
+    const moveInList = (categories: Category[]): { next: Category[]; moved: boolean } => {
+      let moved = false;
+
+      for (let index = 0; index < categories.length; index += 1) {
+        const category = categories[index];
+
+        if (category.id === categoryId) {
+          const targetIndex = direction === "up" ? index - 1 : index + 1;
+
+          if (targetIndex < 0 || targetIndex >= categories.length) {
+            return { next: categories, moved: false };
+          }
+
+          const next = [...categories];
+          const temp = next[targetIndex];
+          next[targetIndex] = next[index];
+          next[index] = temp;
+
+          return { next, moved: true };
+        }
+      }
+
+      const nextCategories = categories.map((category) => {
+        const { next, moved: childMoved } = moveInList(category.children);
+
+        if (childMoved) {
+          moved = true;
+          return { ...category, children: next };
+        }
+
+        return category;
+      });
+
+      return { next: moved ? nextCategories : categories, moved };
+    };
+
+    return persistAndSet((current) => {
+      const { next, moved } = moveInList(current.categories);
+
+      if (!moved) {
+        return current;
+      }
+
+      return {
+        ...current,
+        categories: next,
+      };
+    });
+  };
+
+  const deleteCategory = async (params: { categoryId: string }): Promise<State> => {
+    const { categoryId } = params;
+
+    type DeleteResult = {
+      nextCategories: Category[];
+      removedIds: Set<string>;
+      found: boolean;
+    };
+
+    const collectIds = (category: Category, acc: Set<string>): void => {
+      acc.add(category.id);
+      for (const child of category.children) {
+        collectIds(child, acc);
+      }
+    };
+
+    const deleteFromList = (categories: Category[]): DeleteResult => {
+      const nextCategories: Category[] = [];
+      const removedIds = new Set<string>();
+      let found = false;
+
+      for (const category of categories) {
+        if (category.id === categoryId) {
+          collectIds(category, removedIds);
+          found = true;
+          continue;
+        }
+
+        const childResult = deleteFromList(category.children);
+
+        if (childResult.found) {
+          found = true;
+          for (const id of childResult.removedIds) {
+            removedIds.add(id);
+          }
+
+          nextCategories.push({ ...category, children: childResult.nextCategories });
+        } else {
+          nextCategories.push(category);
+        }
+      }
+
+      return { nextCategories, removedIds, found };
+    };
+
+    return persistAndSet((current) => {
+      const { nextCategories, removedIds, found } = deleteFromList(current.categories);
+
+      if (!found || removedIds.size === 0) {
+        return current;
+      }
+
+      const nextBookmarks = current.bookmarks.filter(
+        (bookmark) => !removedIds.has(bookmark.categoryId)
+      );
+
+      let nextCurrentCategoryId = current.currentCategoryId;
+      if (nextCurrentCategoryId && removedIds.has(nextCurrentCategoryId)) {
+        const firstRoot = nextCategories[0];
+        nextCurrentCategoryId = firstRoot ? firstRoot.id : null;
+      }
+
+      return {
+        ...current,
+        categories: nextCategories,
+        bookmarks: nextBookmarks,
+        currentCategoryId: nextCurrentCategoryId,
+      };
+    });
+  };
+
+  const addBookmark = async (params: {
     title: string;
     url: string;
     categoryId: string | null;
@@ -206,17 +340,10 @@ export function createStateStore(backend: PersistenceBackend): StateStore {
         url: params.url,
         description: params.description ?? null,
         categoryId: effectiveCategoryId,
-        generateId: () => {
-          if (
-            typeof crypto !== "undefined" &&
-            typeof crypto.randomUUID === "function"
-          ) {
-            return crypto.randomUUID();
-          }
-          return Math.random().toString(36).slice(2);
-        },
-        createTimestamp: () => new Date().toISOString(),
+        generateId,
+        createTimestamp,
       });
+
 
       return {
         ...current,
@@ -326,10 +453,12 @@ export function createStateStore(backend: PersistenceBackend): StateStore {
     setCurrentView,
     setCurrentSettingsPage,
     addCategory,
+    moveCategory,
+    deleteCategory,
     addBookmark,
     updateBookmark,
     deleteBookmark,
   };
- 
 }
+
 

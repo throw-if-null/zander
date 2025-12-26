@@ -433,17 +433,225 @@ describe("stateStore", () => {
       currentSettingsPage: null,
       landingCategoryId: null,
     };
-
+ 
     const { backend, getSavedState } = createBackendMock(initial);
     const store = createStateStore(backend);
-
+ 
     await store.loadInitialState();
-
+ 
     const state = await store.deleteBookmark("missing");
-
+ 
     expect(state).toEqual(initial);
-
+ 
     const saved = getSavedState();
     expect(saved).toEqual(initial);
   });
+ 
+  it("addCategory adds root or child and falls back to root when parent missing", async () => {
+    const initial: State = {
+      bookmarks: [],
+      categories: [
+        {
+          id: "root",
+          name: "Root",
+          color: "#fff",
+          createdAt: "stardate",
+          children: [],
+        },
+      ],
+      currentCategoryId: null,
+      currentView: "bookmarks",
+      currentSettingsPage: null,
+      landingCategoryId: null,
+    };
+ 
+    const { backend, getSavedState } = createBackendMock(initial);
+    const store = createStateStore(backend);
+ 
+    await store.loadInitialState();
+ 
+    const afterRoot = await store.addCategory({ parentId: null, name: "Second root" });
+    expect(afterRoot.categories).toHaveLength(2);
+    const secondRoot = afterRoot.categories[1];
+    expect(secondRoot.name).toBe("Second root");
+    expect(secondRoot.children).toEqual([]);
+ 
+    const afterChild = await store.addCategory({ parentId: "root", name: "Child" });
+    const rootCategory = afterChild.categories.find((category) => category.id === "root");
+    expect(rootCategory).toBeDefined();
+    expect(rootCategory?.children).toHaveLength(1);
+    expect(rootCategory?.children[0].name).toBe("Child");
+ 
+    const afterMissingParent = await store.addCategory({
+      parentId: "missing",
+      name: "Fallback root",
+    });
+ 
+    expect(afterMissingParent.categories).toHaveLength(3);
+    const fallbackRoot = afterMissingParent.categories.find(
+      (category) => category.name === "Fallback root",
+    );
+    expect(fallbackRoot).toBeDefined();
+ 
+    const saved = getSavedState();
+    expect(saved).toEqual(afterMissingParent);
+  });
+ 
+  it("moveCategory only reorders siblings and preserves subtree", async () => {
+    const initial: State = {
+      bookmarks: [],
+      categories: [
+        {
+          id: "A",
+          name: "A",
+          color: "#fff",
+          createdAt: "stardate",
+          children: [],
+        },
+        {
+          id: "B",
+          name: "B",
+          color: "#fff",
+          createdAt: "stardate",
+          children: [
+            {
+              id: "D",
+              name: "D",
+              color: "#fff",
+              createdAt: "stardate",
+              children: [],
+            },
+          ],
+        },
+        {
+          id: "C",
+          name: "C",
+          color: "#fff",
+          createdAt: "stardate",
+          children: [],
+        },
+      ],
+      currentCategoryId: null,
+      currentView: "bookmarks",
+      currentSettingsPage: null,
+      landingCategoryId: null,
+    };
+ 
+    const { backend, getSavedState } = createBackendMock(initial);
+    const store = createStateStore(backend);
+ 
+    await store.loadInitialState();
+ 
+    const afterMoveUp = await store.moveCategory({ categoryId: "B", direction: "up" });
+    expect(afterMoveUp.categories.map((category) => category.id)).toEqual(["B", "A", "C"]);
+ 
+    const categoryB = afterMoveUp.categories[0];
+    expect(categoryB.children).toHaveLength(1);
+    expect(categoryB.children[0].id).toBe("D");
+ 
+    const afterMoveDown = await store.moveCategory({ categoryId: "B", direction: "down" });
+    expect(afterMoveDown.categories.map((category) => category.id)).toEqual(["A", "C", "B"]);
+ 
+    const movedB = afterMoveDown.categories[2];
+    expect(movedB.children).toHaveLength(1);
+    expect(movedB.children[0].id).toBe("D");
+ 
+    const afterNoOp = await store.moveCategory({ categoryId: "missing", direction: "up" });
+    expect(afterNoOp).toEqual(afterMoveDown);
+ 
+    const saved = getSavedState();
+    expect(saved).toEqual(afterNoOp);
+  });
+ 
+  it("deleteCategory cascades to descendants, bookmarks, and currentCategoryId", async () => {
+    const initial: State = {
+      bookmarks: [
+        {
+          id: "b1",
+          title: "Root bookmark",
+          url: "https://root.example",
+          description: "",
+          categoryId: "root",
+          createdAt: "sd1",
+        },
+        {
+          id: "b2",
+          title: "Child bookmark",
+          url: "https://child.example",
+          description: "",
+          categoryId: "child",
+          createdAt: "sd2",
+        },
+        {
+          id: "b3",
+          title: "Other bookmark",
+          url: "https://other.example",
+          description: "",
+          categoryId: "other",
+          createdAt: "sd3",
+        },
+      ],
+      categories: [
+        {
+          id: "root",
+          name: "Root",
+          color: "#fff",
+          createdAt: "stardate",
+          children: [
+            {
+              id: "child",
+              name: "Child",
+              color: "#eee",
+              createdAt: "stardate",
+              children: [],
+            },
+          ],
+        },
+        {
+          id: "other",
+          name: "Other",
+          color: "#fff",
+          createdAt: "stardate",
+          children: [],
+        },
+      ],
+      currentCategoryId: "child",
+      currentView: "bookmarks",
+      currentSettingsPage: null,
+      landingCategoryId: null,
+    };
+ 
+    const { backend, getSavedState } = createBackendMock(initial);
+    const store = createStateStore(backend);
+ 
+    await store.loadInitialState();
+ 
+    const afterDeleteChild = await store.deleteCategory({ categoryId: "child" });
+ 
+    expect(afterDeleteChild.categories).toHaveLength(2);
+    const rootCategory = afterDeleteChild.categories.find((category) => category.id === "root");
+    expect(rootCategory).toBeDefined();
+    expect(rootCategory?.children).toEqual([]);
+ 
+    expect(afterDeleteChild.bookmarks.find((bookmark) => bookmark.id === "b2")).toBeUndefined();
+    expect(afterDeleteChild.bookmarks.find((bookmark) => bookmark.id === "b1")).toBeDefined();
+    expect(afterDeleteChild.bookmarks.find((bookmark) => bookmark.id === "b3")).toBeDefined();
+ 
+    expect(afterDeleteChild.currentCategoryId).toBe("root");
+ 
+    const afterDeleteRoot = await store.deleteCategory({ categoryId: "root" });
+ 
+    expect(afterDeleteRoot.categories.map((category) => category.id)).toEqual(["other"]);
+    expect(afterDeleteRoot.bookmarks.find((bookmark) => bookmark.categoryId === "root")).toBeUndefined();
+    expect(afterDeleteRoot.bookmarks.find((bookmark) => bookmark.categoryId === "child")).toBeUndefined();
+    expect(afterDeleteRoot.bookmarks.find((bookmark) => bookmark.id === "b3")).toBeDefined();
+    expect(afterDeleteRoot.currentCategoryId).toBe("other");
+ 
+    const afterNoOp = await store.deleteCategory({ categoryId: "missing" });
+    expect(afterNoOp).toEqual(afterDeleteRoot);
+ 
+    const saved = getSavedState();
+    expect(saved).toEqual(afterNoOp);
+  });
 });
+
