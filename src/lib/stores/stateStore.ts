@@ -1,6 +1,13 @@
 import { writable, type Writable, get } from "svelte/store";
 import type { State } from "./stateTypes";
 import type { PersistenceBackend } from "../persistence/PersistenceBackend";
+import { createDefaultState } from "./stateDefaults";
+import {
+  createBookmark,
+  getEffectiveCategoryIdForNewBookmark,
+  applyBookmarkUpdate,
+  type BookmarkUpdate,
+} from "./bookmarks";
 
 export type StateStore = Writable<State | null> & {
   loadInitialState: () => Promise<State>;
@@ -15,6 +22,20 @@ export type StateStore = Writable<State | null> & {
       | "reset"
       | null
   ) => Promise<State>;
+  addBookmark: (params: {
+    title: string;
+    url: string;
+    categoryId: string | null;
+    description?: string | null;
+  }) => Promise<State>;
+  updateBookmark: (params: {
+    id: string;
+    title?: string | null;
+    url?: string | null;
+    description?: string | null;
+    categoryId?: string | null;
+  }) => Promise<State>;
+  deleteBookmark: (id: string) => Promise<State>;
 };
 
 export function createStateStore(backend: PersistenceBackend): StateStore {
@@ -22,15 +43,7 @@ export function createStateStore(backend: PersistenceBackend): StateStore {
 
   const persistAndSet = async (updater: (current: State) => State): Promise<State> => {
     const current = get(store);
-    const base: State =
-      current ?? {
-        bookmarks: [],
-        categories: [],
-        currentCategoryId: null,
-        currentView: "bookmarks",
-        currentSettingsPage: null,
-        landingCategoryId: null,
-      };
+    const base: State = current ?? createDefaultState();
 
     const nextState = updater(base);
     store.set(nextState);
@@ -46,14 +59,7 @@ export function createStateStore(backend: PersistenceBackend): StateStore {
       return persisted;
     }
 
-    const defaultState: State = {
-      bookmarks: [],
-      categories: [],
-      currentCategoryId: null,
-      currentView: "bookmarks",
-      currentSettingsPage: null,
-      landingCategoryId: null,
-    };
+    const defaultState = createDefaultState();
 
     await backend.saveState(defaultState);
     store.set(defaultState);
@@ -124,7 +130,111 @@ export function createStateStore(backend: PersistenceBackend): StateStore {
     }));
   };
 
-  const setCurrentSettingsPage = async (
+   const addBookmark = async (params: {
+    title: string;
+    url: string;
+    categoryId: string | null;
+    description?: string | null;
+  }): Promise<State> => {
+    return persistAndSet((current) => {
+      const effectiveCategoryId =
+        getEffectiveCategoryIdForNewBookmark({
+          explicitCategoryId: params.categoryId,
+          currentCategoryId: current.currentCategoryId,
+          categories: current.categories,
+        }) ?? "";
+
+      const bookmark = createBookmark({
+        title: params.title,
+        url: params.url,
+        description: params.description ?? null,
+        categoryId: effectiveCategoryId,
+        generateId: () => {
+          if (
+            typeof crypto !== "undefined" &&
+            typeof crypto.randomUUID === "function"
+          ) {
+            return crypto.randomUUID();
+          }
+          return Math.random().toString(36).slice(2);
+        },
+        createTimestamp: () => new Date().toISOString(),
+      });
+
+      return {
+        ...current,
+        bookmarks: [...current.bookmarks, bookmark],
+      };
+    });
+  };
+
+  const updateBookmark = async (params: {
+    id: string;
+    title?: string | null;
+    url?: string | null;
+    description?: string | null;
+    categoryId?: string | null;
+  }): Promise<State> => {
+    return persistAndSet((current) => {
+      const index = current.bookmarks.findIndex((b) => b.id === params.id);
+      if (index === -1) {
+        return current;
+      }
+
+      const existing = current.bookmarks[index];
+      const patch: BookmarkUpdate = {};
+
+      if (params.title !== undefined) {
+        patch.title = params.title;
+      }
+
+      if (params.url !== undefined) {
+        patch.url = params.url;
+      }
+
+      if (params.description !== undefined) {
+        patch.description = params.description;
+      }
+
+      if (params.categoryId !== undefined && params.categoryId !== null) {
+        const effectiveCategoryId = getEffectiveCategoryIdForNewBookmark({
+          explicitCategoryId: params.categoryId,
+          currentCategoryId: current.currentCategoryId,
+          categories: current.categories,
+        });
+
+        if (effectiveCategoryId) {
+          patch.categoryId = effectiveCategoryId;
+        }
+      }
+
+      const updated = applyBookmarkUpdate(existing, patch);
+      const nextBookmarks = [...current.bookmarks];
+      nextBookmarks[index] = updated;
+
+      return {
+        ...current,
+        bookmarks: nextBookmarks,
+      };
+    });
+  };
+
+  const deleteBookmark = async (id: string): Promise<State> => {
+    return persistAndSet((current) => {
+      const nextBookmarks = current.bookmarks.filter((b) => b.id !== id);
+      if (nextBookmarks.length === current.bookmarks.length) {
+        return current;
+      }
+
+      return {
+        ...current,
+        bookmarks: nextBookmarks,
+      };
+    });
+  };
+
+   const setCurrentSettingsPage = async (
+
     pageId:
       | "categories"
       | "home"
@@ -154,9 +264,13 @@ export function createStateStore(backend: PersistenceBackend): StateStore {
     subscribe: store.subscribe,
     set: store.set,
     update: store.update,
-    loadInitialState,
-    setCurrentCategory,
-    setCurrentView,
-    setCurrentSettingsPage,
-  };
+     loadInitialState,
+     setCurrentCategory,
+     setCurrentView,
+     setCurrentSettingsPage,
+     addBookmark,
+     updateBookmark,
+     deleteBookmark,
+   };
+
 }

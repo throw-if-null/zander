@@ -241,4 +241,209 @@ describe("stateStore", () => {
     const saved = getSavedState();
     expect(saved).toEqual(state);
   });
+
+  it("addBookmark chooses category using explicit id, then current, then first root", async () => {
+    const initial: State = {
+      bookmarks: [],
+      categories: [
+        {
+          id: "root",
+          name: "Root",
+          color: "#fff",
+          createdAt: "stardate",
+          children: [],
+        },
+      ],
+      currentCategoryId: "root",
+      currentView: "bookmarks",
+      currentSettingsPage: null,
+      landingCategoryId: null,
+    };
+
+    const { backend, getSavedState } = createBackendMock(initial);
+    const store = createStateStore(backend);
+
+    await store.loadInitialState();
+
+    const stateAfterA = await store.addBookmark({
+      title: "A",
+      url: "a.example",
+      categoryId: null,
+    });
+
+    expect(stateAfterA.bookmarks).toHaveLength(1);
+    const bookmarkA = stateAfterA.bookmarks[0];
+    expect(bookmarkA.title).toBe("A");
+    expect(bookmarkA.categoryId).toBe("root");
+    expect(bookmarkA.url).toBe("https://a.example");
+
+    const stateAfterB = await store.addBookmark({
+      title: "B",
+      url: "https://b.example",
+      categoryId: "non-existent",
+    });
+
+    expect(stateAfterB.bookmarks).toHaveLength(2);
+    const bookmarkB = stateAfterB.bookmarks.find((b) => b.title === "B");
+    expect(bookmarkB).toBeDefined();
+    expect(bookmarkB?.categoryId).toBe("root");
+
+    const saved = getSavedState();
+    expect(saved).toEqual(stateAfterB);
+  });
+
+  it("updateBookmark updates fields and preserves createdAt", async () => {
+    const initial: State = {
+      bookmarks: [
+        {
+          id: "b1",
+          title: "Original",
+          url: "https://original.example",
+          description: "desc",
+          categoryId: "root",
+          createdAt: "stardate-original",
+        },
+      ],
+      categories: [
+        {
+          id: "root",
+          name: "Root",
+          color: "#fff",
+          createdAt: "stardate",
+          children: [],
+        },
+      ],
+      currentCategoryId: "root",
+      currentView: "bookmarks",
+      currentSettingsPage: null,
+      landingCategoryId: null,
+    };
+
+    const { backend, getSavedState } = createBackendMock(initial);
+    const store = createStateStore(backend);
+
+    await store.loadInitialState();
+
+    const updatedState = await store.updateBookmark({
+      id: "b1",
+      title: "Updated",
+      url: "updated.example",
+      description: null,
+      categoryId: "root",
+    });
+
+    const bookmark = updatedState.bookmarks[0];
+    expect(bookmark.title).toBe("Updated");
+    expect(bookmark.url).toBe("https://updated.example");
+    expect(bookmark.description).toBeUndefined();
+    expect(bookmark.categoryId).toBe("root");
+    expect(bookmark.createdAt).toBe("stardate-original");
+
+    const saved = getSavedState();
+    expect(saved).toEqual(updatedState);
+  });
+
+  it("updateBookmark is a no-op when id is not found", async () => {
+    const initial: State = {
+      bookmarks: [
+        {
+          id: "b1",
+          title: "Original",
+          url: "https://original.example",
+          description: "desc",
+          categoryId: "root",
+          createdAt: "stardate-original",
+        },
+      ],
+      categories: [],
+      currentCategoryId: null,
+      currentView: "bookmarks",
+      currentSettingsPage: null,
+      landingCategoryId: null,
+    };
+
+    const { backend, getSavedState } = createBackendMock(initial);
+    const store = createStateStore(backend);
+
+    await store.loadInitialState();
+
+    const state = await store.updateBookmark({ id: "missing", title: "Updated" });
+
+    expect(state).toEqual(initial);
+    const saved = getSavedState();
+    expect(saved).toEqual(initial);
+  });
+
+  it("deleteBookmark removes a bookmark when id exists", async () => {
+    const initial: State = {
+      bookmarks: [
+        {
+          id: "b1",
+          title: "One",
+          url: "https://one.example",
+          description: "",
+          categoryId: "root",
+          createdAt: "sd1",
+        },
+        {
+          id: "b2",
+          title: "Two",
+          url: "https://two.example",
+          description: "",
+          categoryId: "root",
+          createdAt: "sd2",
+        },
+      ],
+      categories: [],
+      currentCategoryId: null,
+      currentView: "bookmarks",
+      currentSettingsPage: null,
+      landingCategoryId: null,
+    };
+
+    const { backend, getSavedState } = createBackendMock(initial);
+    const store = createStateStore(backend);
+
+    await store.loadInitialState();
+
+    const state = await store.deleteBookmark("b1");
+
+    expect(state.bookmarks).toHaveLength(1);
+    expect(state.bookmarks[0].id).toBe("b2");
+
+    const saved = getSavedState();
+    expect(saved).toEqual(state);
+  });
+
+  it("deleteBookmark is a no-op when id is not found", async () => {
+    const initial: State = {
+      bookmarks: [
+        {
+          id: "b1",
+          title: "One",
+          url: "https://one.example",
+          description: "",
+          categoryId: "root",
+          createdAt: "sd1",
+        },
+      ],
+      categories: [],
+      currentCategoryId: null,
+      currentView: "bookmarks",
+      currentSettingsPage: null,
+      landingCategoryId: null,
+    };
+
+    const { backend, getSavedState } = createBackendMock(initial);
+    const store = createStateStore(backend);
+
+    await store.loadInitialState();
+
+    const state = await store.deleteBookmark("missing");
+
+    expect(state).toEqual(initial);
+
+    const saved = getSavedState();
+    expect(saved).toEqual(initial);
+  });
 });
