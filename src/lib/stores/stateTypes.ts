@@ -34,9 +34,17 @@ export type State = {
   landingCategoryId: string | null;
 };
 
+export type ExportBundleVersion = "zander-v1";
+
+export type ExportBundleMeta = {
+  exportedAtStardate: string;
+  sourceBackend: "localStorage";
+};
+
 export type ExportBundle = {
-  bookmarks: Bookmark[];
-  categories: Category[];
+  version: ExportBundleVersion;
+  state: State;
+  meta: ExportBundleMeta;
 };
 
 export type PersistenceError = {

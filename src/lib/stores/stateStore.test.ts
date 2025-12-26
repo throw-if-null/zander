@@ -15,9 +15,20 @@ function createBackendMock(initialState: State | null) {
     },
     async exportData() {
       return {
-        bookmarks: savedState?.bookmarks ?? [],
-        categories: savedState?.categories ?? [],
-      };
+        version: "zander-v1",
+        state: savedState ?? {
+          bookmarks: [],
+          categories: [],
+          currentCategoryId: null,
+          currentView: "bookmarks",
+          currentSettingsPage: null,
+          landingCategoryId: null,
+        },
+        meta: {
+          exportedAtStardate: "sd-test",
+          sourceBackend: "localStorage",
+        },
+      } satisfies ExportBundle;
     },
     async importData() {
       // not needed for these tests
@@ -732,38 +743,49 @@ describe("stateStore", () => {
     await store.loadInitialState();
 
     const bundle: ExportBundle = {
-      bookmarks: [
-        {
-          id: "b1",
-          title: "New 1",
-          url: "https://one.example",
-          description: "",
-          categoryId: "cat1",
-          createdAt: "sd1",
-        },
-        {
-          id: "b2",
-          title: "Dangling",
-          url: "https://dangling.example",
-          description: "",
-          categoryId: "missing",
-          createdAt: "sd2",
-        },
-      ],
-      categories: [
-        {
-          id: "cat1",
-          name: "Cat 1",
-          color: "#fff",
-          createdAt: "stardate",
-          children: [],
-        },
-      ],
+      version: "zander-v1",
+      state: {
+        bookmarks: [
+          {
+            id: "b1",
+            title: "New 1",
+            url: "https://one.example",
+            description: "",
+            categoryId: "cat1",
+            createdAt: "sd1",
+          },
+          {
+            id: "b2",
+            title: "Dangling",
+            url: "https://dangling.example",
+            description: "",
+            categoryId: "missing",
+            createdAt: "sd2",
+          },
+        ],
+        categories: [
+          {
+            id: "cat1",
+            name: "Cat 1",
+            color: "#fff",
+            createdAt: "stardate",
+            children: [],
+          },
+        ],
+        currentCategoryId: "cat1",
+        currentView: "bookmarks",
+        currentSettingsPage: null,
+        landingCategoryId: null,
+      },
+      meta: {
+        exportedAtStardate: "sd-test",
+        sourceBackend: "localStorage",
+      },
     };
 
     const afterApply = await store.applyExportBundle(bundle);
 
-    expect(afterApply.categories).toEqual(bundle.categories);
+    expect(afterApply.categories).toEqual(bundle.state.categories);
     expect(afterApply.bookmarks).toHaveLength(1);
     expect(afterApply.bookmarks[0].id).toBe("b1");
     expect(afterApply.bookmarks[0].categoryId).toBe("cat1");

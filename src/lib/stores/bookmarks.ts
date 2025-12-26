@@ -11,7 +11,7 @@ export function normalizeUrl(raw: string): string {
   return `https://${trimmed}`;
 }
 
-function collectAllCategoryIds(categories: Category[]): Set<string> {
+export function collectCategoryIds(categories: Category[]): Set<string> {
   const result = new Set<string>();
 
   const walk = (nodes: Category[]) => {
@@ -38,7 +38,7 @@ export function getEffectiveCategoryIdForNewBookmark(options: {
 }): string | null {
   const { explicitCategoryId, currentCategoryId, categories } = options;
 
-  const allIds = collectAllCategoryIds(categories);
+  const allIds = collectCategoryIds(categories);
 
   if (explicitCategoryId && allIds.has(explicitCategoryId)) {
     return explicitCategoryId;
@@ -59,7 +59,8 @@ export function createBookmark(params: {
   generateId: () => string;
   createTimestamp: () => string;
 }): Bookmark {
-  const { title, url, description, categoryId, generateId, createTimestamp } = params;
+  const { title, url, description, categoryId, generateId, createTimestamp } =
+    params;
 
   return {
     id: generateId(),
@@ -78,7 +79,10 @@ export type BookmarkUpdate = {
   categoryId?: string | null;
 };
 
-export function applyBookmarkUpdate(bookmark: Bookmark, patch: BookmarkUpdate): Bookmark {
+export function applyBookmarkUpdate(
+  bookmark: Bookmark,
+  patch: BookmarkUpdate,
+): Bookmark {
   let next: Bookmark = { ...bookmark };
 
   if (patch.title !== undefined) {

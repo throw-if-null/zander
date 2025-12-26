@@ -46,21 +46,9 @@ export class LocalStorageBackend implements PersistenceBackend {
 
   async exportData(): Promise<ExportBundle> {
     const state = await this.loadState();
-    if (!state) {
-      return { bookmarks: [], categories: [] };
-    }
 
-    return {
-      bookmarks: state.bookmarks,
-      categories: state.categories,
-    };
-  }
-
-  async importData(bundle: ExportBundle): Promise<void> {
-    const existing = await this.loadState();
-
-    const baseState: State =
-      existing ?? {
+    const effectiveState: State =
+      state ?? {
         bookmarks: [],
         categories: [],
         currentCategoryId: null,
@@ -69,12 +57,21 @@ export class LocalStorageBackend implements PersistenceBackend {
         landingCategoryId: null,
       };
 
-    const nextState: State = {
-      ...baseState,
-      bookmarks: bundle.bookmarks,
-      categories: bundle.categories,
+    return {
+      version: "zander-v1",
+      state: effectiveState,
+      meta: {
+        exportedAtStardate: new Date().toISOString(),
+        sourceBackend: "localStorage",
+      },
     };
+  }
 
-    await this.saveState(nextState);
+  async importData(bundle: ExportBundle): Promise<void> {
+    if (bundle.version !== "zander-v1") {
+      throw new Error(`Unsupported export bundle version: ${bundle.version}`);
+    }
+
+    await this.saveState(bundle.state);
   }
 }

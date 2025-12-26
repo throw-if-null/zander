@@ -78,7 +78,7 @@ types:
       version:
         type: string
         description: >
-          Data format version. For Svelte v1 exports this MUST be 'svelte-v1'.
+          Data format version. For Zander Svelte v1 exports this MUST be 'zander-v1'.
       state:
         type: State
         description: Complete application state at time of export.

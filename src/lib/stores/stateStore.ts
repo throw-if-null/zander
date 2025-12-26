@@ -6,6 +6,7 @@ import {
   createBookmark,
   getEffectiveCategoryIdForNewBookmark,
   applyBookmarkUpdate,
+  collectCategoryIds,
   type BookmarkUpdate,
 } from "./bookmarks";
 
@@ -53,22 +54,6 @@ function generateId(): string {
 
 function createTimestamp(): string {
   return new Date().toISOString();
-}
-
-function collectCategoryIds(categories: Category[]): Set<string> {
-  const result = new Set<string>();
-
-  const walk = (nodes: Category[]): void => {
-    for (const node of nodes) {
-      result.add(node.id);
-      if (node.children.length > 0) {
-        walk(node.children);
-      }
-    }
-  };
-
-  walk(categories);
-  return result;
 }
 
 export function createStateStore(backend: PersistenceBackend): StateStore {
@@ -350,22 +335,25 @@ export function createStateStore(backend: PersistenceBackend): StateStore {
 
   const applyExportBundle = async (bundle: ExportBundle): Promise<State> => {
     return persistAndSet((current) => {
-      const allowedCategoryIds = collectCategoryIds(bundle.categories);
+      const incomingState = bundle.state;
 
-      const filteredBookmarks = bundle.bookmarks.filter((bookmark) =>
+      const allowedCategoryIds = collectCategoryIds(incomingState.categories);
+
+      const filteredBookmarks = incomingState.bookmarks.filter((bookmark) =>
         allowedCategoryIds.has(bookmark.categoryId),
       );
 
       let nextCurrentCategoryId = current.currentCategoryId;
       if (nextCurrentCategoryId && !allowedCategoryIds.has(nextCurrentCategoryId)) {
-        const firstRoot = bundle.categories[0];
+        const firstRoot = incomingState.categories[0];
         nextCurrentCategoryId = firstRoot ? firstRoot.id : null;
       }
 
       return {
         ...current,
+        ...incomingState,
         bookmarks: filteredBookmarks,
-        categories: bundle.categories,
+        categories: incomingState.categories,
         currentCategoryId: nextCurrentCategoryId,
       };
     });
