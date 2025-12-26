@@ -1,5 +1,5 @@
 import { writable, type Writable, get } from "svelte/store";
-import type { State } from "./stateTypes";
+import type { State, Category } from "./stateTypes";
 import type { PersistenceBackend } from "../persistence/PersistenceBackend";
 import { createDefaultState } from "./stateDefaults";
 import {
@@ -22,6 +22,7 @@ export type StateStore = Writable<State | null> & {
       | "reset"
       | null
   ) => Promise<State>;
+  addCategory: (params: { parentId: string | null; name?: string | null }) => Promise<State>;
   addBookmark: (params: {
     title: string;
     url: string;
@@ -129,8 +130,64 @@ export function createStateStore(backend: PersistenceBackend): StateStore {
       currentView: viewId,
     }));
   };
-
+ 
+  const addCategory = async (params: { parentId: string | null; name?: string | null }): Promise<State> => {
+    return persistAndSet((current) => {
+      const newCategory: Category = {
+        id:
+          typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+            ? crypto.randomUUID()
+            : Math.random().toString(36).slice(2),
+        name: params.name ?? "New category",
+        color: "#ffffff",
+        createdAt: new Date().toISOString(),
+        children: [],
+      };
+ 
+      if (!params.parentId) {
+        return {
+          ...current,
+          categories: [...current.categories, newCategory],
+        };
+      }
+ 
+      let inserted = false;
+ 
+      const insertInto = (categories: Category[]): Category[] => {
+        return categories.map((category) => {
+          if (category.id === params.parentId) {
+            inserted = true;
+            return {
+              ...category,
+              children: [...category.children, newCategory],
+            };
+          }
+ 
+          return {
+            ...category,
+            children: insertInto(category.children),
+          };
+        });
+      };
+ 
+      const nextCategories = insertInto(current.categories);
+ 
+      if (!inserted) {
+        return {
+          ...current,
+          categories: [...current.categories, newCategory],
+        };
+      }
+ 
+      return {
+        ...current,
+        categories: nextCategories,
+      };
+    });
+  };
+ 
    const addBookmark = async (params: {
+
     title: string;
     url: string;
     categoryId: string | null;
@@ -264,13 +321,15 @@ export function createStateStore(backend: PersistenceBackend): StateStore {
     subscribe: store.subscribe,
     set: store.set,
     update: store.update,
-     loadInitialState,
-     setCurrentCategory,
-     setCurrentView,
-     setCurrentSettingsPage,
-     addBookmark,
-     updateBookmark,
-     deleteBookmark,
-   };
-
+    loadInitialState,
+    setCurrentCategory,
+    setCurrentView,
+    setCurrentSettingsPage,
+    addCategory,
+    addBookmark,
+    updateBookmark,
+    deleteBookmark,
+  };
+ 
 }
+

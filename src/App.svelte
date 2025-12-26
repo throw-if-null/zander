@@ -111,6 +111,7 @@
   };
 
   const handleChangeCategoryTree = () => {
+    void stateStore.addCategory({ parentId: null, name: null });
     void stateStore.setCurrentView("settings");
     void stateStore.setCurrentSettingsPage("categories");
   };

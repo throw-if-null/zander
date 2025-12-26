@@ -57,7 +57,7 @@
     {/if}
 {/snippet}
 
-<main role="main">
+<main>
     <h1>Settings</h1>
 
     <section aria-labelledby="settings-categories-heading">
