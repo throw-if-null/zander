@@ -449,6 +449,7 @@ This document describes how agents should work on the **Svelte 5–based Zander 
   - `src/lib/persistence/` – Persistence ports and backends (`PersistenceBackend.ts`, `LocalStorageBackend.ts`, `FirestoreBackend.ts`).  
   - `src/lib/auth/` – Auth ports and Firebase Auth implementation (`AuthProvider.ts`, `FirebaseAuthProvider.ts`).  
   - `src/lib/telemetry/` – Observability ports and implementations.  
+  - Within each area, name modules after their domain (`bookmarks.ts`, `stateDefaults.ts`, `selectors.ts`); avoid generic buckets like `utils.ts` or `helpers.ts`.  
 
 - `spec/` (once introduced)  
   - OpenSpec/contract files describing:
