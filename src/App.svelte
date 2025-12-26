@@ -111,7 +111,8 @@
   };
 
   const handleChangeCategoryTree = () => {
-    // Placeholder for settings-driven category changes
+    void stateStore.setCurrentView("settings");
+    void stateStore.setCurrentSettingsPage("categories");
   };
 
   const handleChangeTheme = (themeId: string) => {
