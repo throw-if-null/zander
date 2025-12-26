@@ -1,4 +1,4 @@
-import { writable, type Writable } from "svelte/store";
+import { writable, type Writable, get } from "svelte/store";
 import type { State } from "./stateTypes";
 import type { PersistenceBackend } from "../persistence/PersistenceBackend";
 
@@ -21,26 +21,19 @@ export function createStateStore(backend: PersistenceBackend): StateStore {
   const store = writable<State | null>(null);
 
   const persistAndSet = async (updater: (current: State) => State): Promise<State> => {
-    let nextState: State;
+    const current = get(store);
+    const base: State =
+      current ?? {
+        bookmarks: [],
+        categories: [],
+        currentCategoryId: null,
+        currentView: "bookmarks",
+        currentSettingsPage: null,
+        landingCategoryId: null,
+      };
 
-    store.update((current) => {
-      if (!current) {
-        const fallback: State = {
-          bookmarks: [],
-          categories: [],
-          currentCategoryId: null,
-          currentView: "bookmarks",
-          currentSettingsPage: null,
-          landingCategoryId: null,
-        };
-        nextState = updater(fallback);
-        return nextState;
-      }
-
-      nextState = updater(current);
-      return nextState;
-    });
-
+    const nextState = updater(base);
+    store.set(nextState);
     await backend.saveState(nextState);
     return nextState;
   };
@@ -68,12 +61,20 @@ export function createStateStore(backend: PersistenceBackend): StateStore {
   };
 
   const categoryExists = (categories: State["categories"], id: string): boolean => {
+    if (!categories || categories.length === 0) {
+      return false;
+    }
+
     for (const category of categories) {
-      if (category.id === id) return true;
-      if (category.children && category.children.length > 0) {
-        if (categoryExists(category.children, id)) return true;
+      if (category.id === id) {
+        return true;
+      }
+
+      if (categoryExists(category.children, id)) {
+        return true;
       }
     }
+
     return false;
   };
 

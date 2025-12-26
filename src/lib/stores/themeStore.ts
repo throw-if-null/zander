@@ -1,4 +1,4 @@
-import { writable, type Writable } from "svelte/store";
+import { writable, type Writable, get } from "svelte/store";
 
 export type Theme = {
   id: string;
@@ -94,22 +94,19 @@ export function createThemeStore(
   };
 
   const setTheme = (themeId: string): ThemeState => {
-    let nextState: ThemeState;
+    const current = get(store);
+    const exists = current.themes.some((theme) => theme.id === themeId);
 
-    store.update((current) => {
-      const exists = current.themes.some((theme) => theme.id === themeId);
-      if (!exists) {
-        nextState = current;
-        return current;
-      }
+    if (!exists) {
+      return current;
+    }
 
-      nextState = {
-        ...current,
-        currentThemeId: themeId,
-      };
+    const nextState: ThemeState = {
+      ...current,
+      currentThemeId: themeId,
+    };
 
-      return nextState;
-    });
+    store.set(nextState);
 
     if (isBrowserStorageAvailable(storage) && nextState.currentThemeId) {
       storage.setItem(ZANDER_SVELTE_THEME_STORAGE_KEY, nextState.currentThemeId);
