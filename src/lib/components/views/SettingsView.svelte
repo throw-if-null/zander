@@ -5,7 +5,11 @@
     const {
         state,
         themeState,
-        onChangeCategoryTree,
+        onAddRootCategory,
+        onAddChildCategory,
+        onMoveCategoryUp,
+        onMoveCategoryDown,
+        onDeleteCategory,
         onChangeTheme,
         onExportData,
         onImportData,
@@ -13,16 +17,37 @@
     } = $props<{
         state: State;
         themeState: ThemeState;
-        onChangeCategoryTree: () => void;
+        onAddRootCategory: () => void;
+        onAddChildCategory: (categoryId: string) => void;
+        onMoveCategoryUp: (categoryId: string) => void;
+        onMoveCategoryDown: (categoryId: string) => void;
+        onDeleteCategory: (categoryId: string) => void;
         onChangeTheme: (themeId: string) => void;
         onExportData: () => void;
         onImportData: () => void;
         onResetSystem: () => void;
     }>();
 
-    const handleManageCategoriesClick = () => {
-        onChangeCategoryTree();
+    const handleAddRootCategoryClick = () => {
+        onAddRootCategory();
     };
+
+    const handleAddChildCategoryClick = (categoryId: string) => {
+        onAddChildCategory(categoryId);
+    };
+
+    const handleMoveCategoryUpClick = (categoryId: string) => {
+        onMoveCategoryUp(categoryId);
+    };
+
+    const handleMoveCategoryDownClick = (categoryId: string) => {
+        onMoveCategoryDown(categoryId);
+    };
+
+    const handleDeleteCategoryClick = (categoryId: string) => {
+        onDeleteCategory(categoryId);
+    };
+
 
     const handleThemeChange = (event: Event) => {
         const value = (event.target as HTMLInputElement).value;
@@ -50,6 +75,30 @@
             {#each categories as category}
                 <li>
                     <span>{category.name}</span>
+                    <button
+                        type="button"
+                        onclick={() => handleAddChildCategoryClick(category.id)}
+                    >
+                        + Subcategory
+                    </button>
+                    <button
+                        type="button"
+                        onclick={() => handleMoveCategoryUpClick(category.id)}
+                    >
+                        Move up
+                    </button>
+                    <button
+                        type="button"
+                        onclick={() => handleMoveCategoryDownClick(category.id)}
+                    >
+                        Move down
+                    </button>
+                    <button
+                        type="button"
+                        onclick={() => handleDeleteCategoryClick(category.id)}
+                    >
+                        Delete
+                    </button>
                     {@render renderCategoryList(category.children)}
                 </li>
             {/each}
@@ -63,8 +112,8 @@
     <section aria-labelledby="settings-categories-heading">
         <h2 id="settings-categories-heading">Categories</h2>
         <p>Configured categories: {state.categories.length}</p>
-        <button type="button" onclick={handleManageCategoriesClick}>
-            Manage categories
+        <button type="button" onclick={handleAddRootCategoryClick}>
+            Add root category
         </button>
 
         {#if state.categories.length === 0}

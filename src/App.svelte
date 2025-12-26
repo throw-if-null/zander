@@ -110,15 +110,32 @@
     void stateStore.setCurrentCategory(categoryId);
   };
 
-  const handleChangeCategoryTree = () => {
+  const handleAddRootCategory = () => {
     void stateStore.addCategory({ parentId: null, name: null });
     void stateStore.setCurrentView("settings");
     void stateStore.setCurrentSettingsPage("categories");
   };
 
+  const handleAddChildCategory = (categoryId: string) => {
+    void stateStore.addCategory({ parentId: categoryId, name: null });
+  };
+
+  const handleMoveCategoryUp = (categoryId: string) => {
+    void stateStore.moveCategory({ categoryId, direction: "up" });
+  };
+
+  const handleMoveCategoryDown = (categoryId: string) => {
+    void stateStore.moveCategory({ categoryId, direction: "down" });
+  };
+
+  const handleDeleteCategory = (categoryId: string) => {
+    void stateStore.deleteCategory({ categoryId });
+  };
+
   const handleChangeTheme = (themeId: string) => {
     themeStore.setTheme(themeId);
   };
+
 
   const handleExportData = () => {
     // Placeholder for export flow
@@ -180,7 +197,11 @@
     <SettingsView
       state={$stateStore}
       themeState={$themeStore}
-      onChangeCategoryTree={handleChangeCategoryTree}
+      onAddRootCategory={handleAddRootCategory}
+      onAddChildCategory={handleAddChildCategory}
+      onMoveCategoryUp={handleMoveCategoryUp}
+      onMoveCategoryDown={handleMoveCategoryDown}
+      onDeleteCategory={handleDeleteCategory}
       onChangeTheme={handleChangeTheme}
       onExportData={handleExportData}
       onImportData={handleImportData}
