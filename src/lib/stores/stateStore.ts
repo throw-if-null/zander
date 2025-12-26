@@ -4,6 +4,7 @@ import type { PersistenceBackend } from "../persistence/PersistenceBackend";
 
 export type StateStore = Writable<State | null> & {
   loadInitialState: () => Promise<State>;
+  setCurrentCategory: (categoryId: string | null) => Promise<State>;
   setCurrentView: (viewId: "bookmarks" | "settings" | "about") => Promise<State>;
   setCurrentSettingsPage: (
     pageId:
@@ -66,6 +67,42 @@ export function createStateStore(backend: PersistenceBackend): StateStore {
     return defaultState;
   };
 
+  const categoryExists = (categories: State["categories"], id: string): boolean => {
+    for (const category of categories) {
+      if (category.id === id) return true;
+      if (category.children && category.children.length > 0) {
+        if (categoryExists(category.children, id)) return true;
+      }
+    }
+    return false;
+  };
+
+  const setCurrentCategory = async (categoryId: string | null): Promise<State> => {
+    return persistAndSet((current) => {
+      if (categoryId === null) {
+        return {
+          ...current,
+          currentCategoryId: null,
+        };
+      }
+
+      const exists = categoryExists(current.categories, categoryId);
+
+      if (!exists) {
+        const firstRoot = current.categories[0];
+        return {
+          ...current,
+          currentCategoryId: firstRoot ? firstRoot.id : null,
+        };
+      }
+
+      return {
+        ...current,
+        currentCategoryId: categoryId,
+      };
+    });
+  };
+
   const setCurrentView = async (
     viewId: "bookmarks" | "settings" | "about"
   ): Promise<State> => {
@@ -76,7 +113,6 @@ export function createStateStore(backend: PersistenceBackend): StateStore {
     ];
 
     if (!allowed.includes(viewId)) {
-      // No change; ensure we still have a concrete State
       const current = await loadInitialState();
       return current;
     }
@@ -118,6 +154,7 @@ export function createStateStore(backend: PersistenceBackend): StateStore {
     set: store.set,
     update: store.update,
     loadInitialState,
+    setCurrentCategory,
     setCurrentView,
     setCurrentSettingsPage,
   };

@@ -64,14 +64,16 @@ describe("stateStore", () => {
 
   it("setCurrentView switches views but preserves data", async () => {
     const initial: State = {
-      bookmarks: [{
-        id: "b1",
-        title: "Test",
-        url: "https://example.com",
-        description: "desc",
-        categoryId: "c1",
-        createdAt: "stardate",
-      }],
+      bookmarks: [
+        {
+          id: "b1",
+          title: "Test",
+          url: "https://example.com",
+          description: "desc",
+          categoryId: "c1",
+          createdAt: "stardate",
+        },
+      ],
       categories: [
         {
           id: "c1",
@@ -135,5 +137,108 @@ describe("stateStore", () => {
 
     const saved = getSavedState();
     expect(saved).toEqual(clearedState);
+  });
+
+  it("setCurrentCategory updates currentCategoryId and preserves data", async () => {
+    const initial: State = {
+      bookmarks: [
+        {
+          id: "b1",
+          title: "Test 1",
+          url: "https://example.com/1",
+          description: "desc1",
+          categoryId: "root",
+          createdAt: "stardate1",
+        },
+        {
+          id: "b2",
+          title: "Test 2",
+          url: "https://example.com/2",
+          description: "desc2",
+          categoryId: "child",
+          createdAt: "stardate2",
+        },
+      ],
+      categories: [
+        {
+          id: "root",
+          name: "Root",
+          color: "#fff",
+          createdAt: "stardate",
+          children: [
+            {
+              id: "child",
+              name: "Child",
+              color: "#eee",
+              createdAt: "stardate",
+              children: [],
+            },
+          ],
+        },
+      ],
+      currentCategoryId: null,
+      currentView: "bookmarks",
+      currentSettingsPage: null,
+      landingCategoryId: null,
+    };
+
+    const { backend, getSavedState } = createBackendMock(initial);
+    const store = createStateStore(backend);
+
+    await store.loadInitialState();
+
+    const childState = await store.setCurrentCategory("child");
+    const allState = await store.setCurrentCategory(null);
+
+    expect(childState.bookmarks).toEqual(initial.bookmarks);
+    expect(childState.categories).toEqual(initial.categories);
+    expect(childState.currentCategoryId).toBe("child");
+
+    expect(allState.bookmarks).toEqual(initial.bookmarks);
+    expect(allState.categories).toEqual(initial.categories);
+    expect(allState.currentCategoryId).toBeNull();
+
+    const saved = getSavedState();
+    expect(saved).toEqual(allState);
+  });
+
+  it("setCurrentCategory falls back to first root when id invalid", async () => {
+    const initial: State = {
+      bookmarks: [],
+      categories: [
+        {
+          id: "root1",
+          name: "Root 1",
+          color: "#fff",
+          createdAt: "stardate",
+          children: [],
+        },
+        {
+          id: "root2",
+          name: "Root 2",
+          color: "#eee",
+          createdAt: "stardate",
+          children: [],
+        },
+      ],
+      currentCategoryId: null,
+      currentView: "bookmarks",
+      currentSettingsPage: null,
+      landingCategoryId: null,
+    };
+
+    const { backend, getSavedState } = createBackendMock(initial);
+    const store = createStateStore(backend);
+
+    await store.loadInitialState();
+
+    const state = await store.setCurrentCategory("non-existent");
+
+    expect(state.categories).toEqual(initial.categories);
+    expect(state.bookmarks).toEqual(initial.bookmarks);
+    expect(state.currentCategoryId).toBe("root1");
+
+    const saved = getSavedState();
+    expect(saved).toEqual(state);
   });
 });
