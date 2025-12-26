@@ -26,6 +26,11 @@
     isReady = true;
   });
 
+  const handleHomeClick = () => {
+    void stateStore.setCurrentView("bookmarks");
+    void stateStore.setCurrentSettingsPage(null);
+  };
+
   const handleAddBookmark = () => {
     // Placeholder for bookmark dialog integration
   };
@@ -59,11 +64,21 @@
   const handleResetSystem = () => {
     // Placeholder for reset flow
   };
+
+  const handleGoToSettings = () => {
+    void stateStore.setCurrentView("settings");
+    void stateStore.setCurrentSettingsPage("home");
+  };
+
+  const handleGoToAbout = () => {
+    void stateStore.setCurrentView("about");
+    void stateStore.setCurrentSettingsPage(null);
+  };
 </script>
 
 <LcarsApp ariaLabel="Zander LCARS Console">
   <svelte:fragment slot="header">
-    <LcarsHeaderBar {title} />
+    <LcarsHeaderBar {title} onHomeClick={handleHomeClick} />
   </svelte:fragment>
 
   <svelte:fragment slot="sidebar">
@@ -75,8 +90,8 @@
   <svelte:fragment slot="main">
     {#if !isReady || $stateStore === null}
       <main>
-        <h1>Initializing Zander console6</h1>
-        <p>Loading saved state026 or creating defaults.</p>
+        <h1>Initializing Zander console…</h1>
+        <p>Loading saved state… or creating defaults.</p>
       </main>
     {:else}
       {#if $stateStore.currentView === "bookmarks"}
@@ -107,10 +122,22 @@
 
   <svelte:fragment slot="footer">
     <LcarsFooterBar ariaLabel="Global footer actions">
+      <svelte:fragment slot="primaryActions">
+        <button type="button" onclick={handleAddBookmark}>
+          ADD ENTRY
+        </button>
+        <button type="button" onclick={handleGoToSettings}>
+          SETTINGS
+        </button>
+        <button type="button" onclick={handleGoToAbout}>
+          ABOUT
+        </button>
+      </svelte:fragment>
+
       <svelte:fragment slot="status">
         <LcarsStatusDisplay ariaLabel="System status">
           {#if !isReady}
-            Initializing026
+            Initializing…
           {:else}
             Svelte shell initialized
           {/if}

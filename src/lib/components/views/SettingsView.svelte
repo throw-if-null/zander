@@ -33,10 +33,10 @@
   <h1>Settings</h1>
   <p>Categories configured: {state.categories.length}</p>
   <p>Available themes: {themeState.themes.length}</p>
-  <button type="button" on:click={handleExportClick}>
+  <button type="button" onclick={handleExportClick}>
     Export data
   </button>
-  <button type="button" on:click={handleResetClick}>
+  <button type="button" onclick={handleResetClick}>
     Reset system
   </button>
 </main>

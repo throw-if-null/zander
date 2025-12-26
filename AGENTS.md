@@ -53,6 +53,7 @@ This document describes how agents should work on the **Svelte 5–based Zander 
   - When in doubt, follow the **current Svelte 5 documentation and recommendations**.
   - In runes mode, **do not** use `export let` for props; use `$props()` instead.
   - In runes mode, **do not** use legacy `$:` reactive statements; use `$derived()` or `$effect()` as appropriate.
+  - In runes mode, **do not** use legacy `on:xxx` event directives; use DOM-style event attributes like `onclick={...}` instead.
   - When writing unit tests, avoid calling Svelte DOM lifecycle APIs (e.g. `mount` via `@testing-library/svelte` render) until tests are configured to run in a true browser client context; prefer simple compilation/behavior tests instead.
 
 **Responsibilities:**

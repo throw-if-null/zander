@@ -19,7 +19,7 @@
     Bookmarks view stub. Categories: {state.categories.length},
     bookmarks: {state.bookmarks.length}.
   </p>
-  <button type="button" on:click={handleAddClick}>
+  <button type="button" onclick={handleAddClick}>
     Add bookmark
   </button>
 </main>
