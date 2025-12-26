@@ -98,8 +98,8 @@ types:
       - "version == 'svelte-v1' for all v1 exports."
       - "Theme selection is NOT included in ExportBundle."
 
-  PersistenceError:
-    description: Recoverable error encountered during persistence operations.
+  StorageError:
+    description: Recoverable error encountered during storage operations.
     fields:
       code:
         type: string
@@ -121,7 +121,7 @@ ports:
           type: State
           nullable: true
         errors:
-          - PersistenceError
+          - StorageError
       saveState:
         description: Persist the given State as the new source of truth.
         input:
@@ -129,14 +129,14 @@ ports:
         output:
           type: void
         errors:
-          - PersistenceError
+          - StorageError
       exportData:
         description: Produce an ExportBundle suitable for user download and later import.
         input: null
         output:
           type: ExportBundle
         errors:
-          - PersistenceError
+          - StorageError
       importData:
         description: >
           Replace current data with the contents of the given ExportBundle.
@@ -147,7 +147,7 @@ ports:
         output:
           type: void
         errors:
-          - PersistenceError
+          - StorageError
 
 scenarios:
   round_trip_export_import:

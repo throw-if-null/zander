@@ -47,7 +47,17 @@ export type ExportBundle = {
   meta: ExportBundleMeta;
 };
 
-export type PersistenceError = {
+export type StorageError = {
   code: string;
   message: string;
 };
+
+export function isStorageError(value: unknown): value is StorageError {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const candidate = value as { code?: unknown; message?: unknown };
+
+  return typeof candidate.code === "string" && typeof candidate.message === "string";
+}
