@@ -11,7 +11,6 @@
 
 <footer
   class="lcars-footer-bar"
-  role="contentinfo"
   aria-label={ariaLabel}
 >
   <div class="lcars-footer-bar-primary-actions">

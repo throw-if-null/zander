@@ -73,9 +73,10 @@
 
 {#if open}
   <div class="dialog-backdrop">
-    <div
+      <div
       class="dialog"
       role="dialog"
+      tabindex="-1"
       aria-modal="true"
       aria-label={isEditMode ? "Edit bookmark" : "Add bookmark"}
       onkeydown={handleKeydown}
@@ -114,10 +115,9 @@
           <label>
             Description
             <textarea
-              value={description}
               oninput={(event) =>
                 (description = (event.target as HTMLTextAreaElement).value)}
-            />
+            >{description}</textarea>
           </label>
         </div>
 

@@ -15,7 +15,6 @@
 
 <header
   class="lcars-header-bar"
-  role="banner"
   aria-label={ariaLabel ?? title}
 >
   {#if homeHref}
@@ -36,7 +35,7 @@
     </button>
   {/if}
 
-  <div class="lcars-header-bar-fill" />
+  <div class="lcars-header-bar-fill"></div>
 
-  <div class="lcars-header-bar-endcap" />
+  <div class="lcars-header-bar-endcap"></div>
 </header>

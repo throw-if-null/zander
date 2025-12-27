@@ -31,7 +31,7 @@
   };
 </script>
 
-<main role="main">
+<main>
   <h1>Bookmarks</h1>
 
   <p>
