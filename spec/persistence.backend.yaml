@@ -95,7 +95,7 @@ types:
               Identifier of the backend that produced this bundle.
               For v1 this is always 'localStorage'.
     invariants:
-      - "version == 'svelte-v1' for all v1 exports."
+      - "version == 'zander-v1' for all v1 exports."
       - "Theme selection is NOT included in ExportBundle."
 
   StorageError:
@@ -104,6 +104,11 @@ types:
       code:
         type: string
         description: Short machine-readable code (e.g. 'invalid-json', 'schema-mismatch').
+        allowedValues:
+          - storage-unavailable
+          - invalid-json
+          - write-failed
+          - version-unsupported
       message:
         type: string
         description: Human-readable description suitable for logs and debug UI.
