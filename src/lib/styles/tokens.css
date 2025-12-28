@@ -1,0 +1,113 @@
+/*
+  tokens.css — Semantic design tokens for Zander (Svelte 5)
+
+  Purpose:
+  - Single source of truth for colors, typography, spacing, radii, shadows and focus styles.
+  - Import this file into your global stylesheet (e.g. `src/app.css`) or include it in the build pipeline.
+
+  Usage:
+  - Reference tokens with `var(--lcars-...)` in component CSS.
+  - Switch themes by setting `data-theme` on `body` (e.g. `body.dataset.theme = 'high-contrast'`).
+
+  Accessibility:
+  - `--lcars-focus-glow` is the canonical neon focus ring (used with `:focus-visible`).
+  - No white focus bars; do not overwrite the focus styles with solid white outlines.
+*/
+
+:root {
+  /* Color roles */
+  --lcars-bg: #0b0b0d;                /* app background */
+  --lcars-panel: #121216;             /* surface for panels and tiles */
+  --lcars-accent-primary: #ff8a3d;    /* primary LCARS accent (warm) */
+  --lcars-accent-secondary: #2dd4bf;  /* secondary accent (teal/cyan) */
+  --lcars-meta: #98a0a8;              /* muted text / borders */
+  --lcars-text: #eef2f5;              /* primary body text */
+  --lcars-success: #2ecc71;
+  --lcars-danger: #ff6b6b;
+  --lcars-warning: #ffd166;
+
+  /* Focus & elevation */
+  --lcars-focus-glow: 0 0 8px 2px rgba(255,138,61,0.9); /* neon glow for :focus-visible */
+  --lcars-shadow: 0 6px 18px rgba(2,6,23,0.6);
+
+  /* Tile / badge */
+  --lcars-tile-bg: rgba(255,255,255,0.02);
+  --lcars-badge-bg: rgba(255,255,255,0.03);
+  --lcars-border: rgba(255,255,255,0.06);
+
+  /* Typography */
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --type-display-size: 28px;
+  --type-heading-size: 18px;
+  --type-body-size: 14px;
+  --type-line-height: 1.4;
+
+  /* Layout tokens */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --gap-xs: 6px;
+  --gap-sm: 12px;
+  --gap-md: 20px;
+
+  /* Motion */
+  --motion-fast: 120ms;
+  --motion-medium: 220ms;
+  --motion-ease: cubic-bezier(.2,.8,.2,1);
+}
+
+/* Classic theme (default) — values above are the classic theme
+   If you prefer an explicit theme wrapper, uncomment and use:
+
+body[data-theme="classic"] {
+  --lcars-bg: #0b0b0d;
+  ...
+}
+*/
+
+/* High contrast theme */
+body[data-theme="high-contrast"] {
+  --lcars-bg: #000000;
+  --lcars-panel: #0f0f10;
+  --lcars-accent-primary: #ffd166;
+  --lcars-accent-secondary: #7bf0d8;
+  --lcars-meta: #bfc8cf;
+  --lcars-text: #ffffff;
+  --lcars-focus-glow: 0 0 10px 2px rgba(255,209,102,0.95);
+
+  --lcars-border: rgba(255,255,255,0.12);
+  --lcars-tile-bg: rgba(255,255,255,0.02);
+}
+
+/* Convenience utilities (small, non-opinionated helpers) */
+.lcars-token-preview {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 1px solid var(--lcars-border);
+}
+
+/* Focus helper example (use in components with :focus-visible) */
+.lcars-focus-glow:focus-visible {
+  box-shadow: var(--lcars-focus-glow);
+  outline: none;
+}
+
+/* Example: button baseline using tokens (illustrative; override in component styles) */
+.lcars-btn {
+  font-family: var(--font-sans);
+  font-size: var(--type-body-size);
+  color: var(--lcars-text);
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+  border: 1px solid var(--lcars-border);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  transition: box-shadow var(--motion-medium) var(--motion-ease), transform var(--motion-fast) var(--motion-ease);
+}
+
+.lcars-btn:active {
+  transform: translateY(1px);
+}
+
+/* End of tokens.css */
