@@ -32,6 +32,64 @@
         isReady = true;
     });
 
+    // Set up global listeners after mount (non-async) so cleanup can be registered safely
+    const setupGlobalListeners = () => {
+        const handleGlobalShortcut = (ev: Event) => {
+            const ce = ev as CustomEvent;
+            const name = ce?.detail?.name as string | undefined;
+            if (!name) return;
+
+            switch (name) {
+                case "home":
+                    void stateStore.setCurrentView("bookmarks");
+                    void stateStore.setCurrentSettingsPage(null);
+                    break;
+                case "settings":
+                    void stateStore.setCurrentView("settings");
+                    void stateStore.setCurrentSettingsPage("home");
+                    break;
+                case "add-bookmark":
+                    openCreateBookmarkDialog();
+                    break;
+                case "add-category":
+                    // Add a new root category and navigate to categories page
+                    void stateStore.addCategory({ parentId: null, name: null });
+                    void stateStore.setCurrentView("settings");
+                    void stateStore.setCurrentSettingsPage("categories");
+                    break;
+                default:
+                    break;
+            }
+        };
+
+        const handleGlobalEscape = () => {
+            if (isBookmarkDialogOpen) {
+                closeBookmarkDialog();
+            }
+        };
+
+        window.addEventListener("zander:shortcut", handleGlobalShortcut as EventListener);
+        window.addEventListener("zander:escape", handleGlobalEscape as EventListener);
+
+        return () => {
+            window.removeEventListener("zander:shortcut", handleGlobalShortcut as EventListener);
+            window.removeEventListener("zander:escape", handleGlobalEscape as EventListener);
+        };
+    };
+
+    let teardownGlobalListeners = $state<(() => void) | null>(null);
+    onMount(() => {
+        teardownGlobalListeners = setupGlobalListeners();
+    });
+
+    // Ensure listeners are removed on destroy
+    import { onDestroy } from "svelte";
+    onDestroy(() => {
+        if (teardownGlobalListeners) {
+            teardownGlobalListeners();
+        }
+    });
+
     const handleHomeClick = () => {
         void stateStore.setCurrentView("bookmarks");
         void stateStore.setCurrentSettingsPage(null);
