@@ -10,225 +10,244 @@ Accessibility is not optional—it's part of the design from the start. The Zand
 
 ---
 
-## For All Agents
+## For contributors
 
-- **Accessibility is a first-class concern.** It's as important as LCARS visual authenticity and the single-file constraint.
+- **Accessibility is a first-class concern.** It's as important as LCARS visual authenticity and the core user flows.
 - **Inclusive design strengthens LCARS.** High contrast, keyboard navigation, and clear focus states fit the authoritative, technical feel of a starship interface.
 - **Test early and often.** Don't treat a11y as a final polish step; validate during development.
 
 ---
 
-## Frontend Agent: Implementation Checklist
+## Frontend implementation checklist
 
-### HTML & Semantic Structure
+### HTML & semantic structure
 
-- Use semantic elements: `<main>`, `<aside>`, `<nav>`, `<button>`, `<dialog>`, `<form>`, `<label>`, etc.
+- Use semantic elements: `<main>`, `<aside>`, `<nav>`, `<button>`, `<form>`, `<label>`, etc.
 - Avoid generic `<div>` and `<span>` when semantic alternatives exist.
-- Use `<button>` for all clickable actions (not `<div onclick>`).
-- Use `<a>` for links that navigate away from the app.
-- Use `<input>` with associated `<label>` for form fields; always include `for` and `id` attributes.
+- Use `<button>` for actions (not `<div onclick>`).
+- Use `<a>` for links that navigate (including “open in new tab” destinations).
+- Every form control must have an accessible name:
+  - Prefer `<label for="…">` + `id`
+  - Otherwise use `aria-label` / `aria-labelledby`
 
-### Keyboard Navigation
+### Skip link and focus targets
 
-- **All interactive elements must be keyboard-accessible:**
-  - Buttons and links: Tab to focus, Enter/Space to activate.
-  - Dialogs: Focus trap (keep focus inside until closed with Escape or confirm/cancel).
-  - Sidebar category buttons: Tab between them; arrow keys may enhance (optional but encouraged).
-  - Text inputs: Tab to focus, type to edit, Tab to move to next field.
+- Provide a **Skip to main content** link as the first focusable element in the app.
+- Ensure the main region can receive programmatic focus: `<main id="main" tabindex="-1">`.
+- On view changes, move focus to a predictable target (main region or view heading) to keep keyboard users oriented.
 
-- **Keyboard shortcuts must respect input focus:**
-  - Alt+H, Alt+B, Alt+S, Alt+C should not fire when user is typing in a text field.
-  - Check `event.target.tagName` and `event.target.contentEditable` before triggering shortcuts.
+### Keyboard navigation
 
-- **Escape key closes dialogs** (standard modal behavior).
+- **All interactive elements must be keyboard-accessible**
+  - Tab / Shift+Tab to move focus
+  - Enter activates links
+  - Enter/Space activates buttons
 
-- **Enter key submits dialog forms:**
-  - Dialog forms do not use `method="dialog"` to ensure Enter properly triggers the `submit` event.
-  - Pressing Enter in any form field saves the bookmark or category.
+- **Keyboard shortcuts must respect input focus**
+  - Shortcuts must not fire when the user is typing in an `<input>`, `<textarea>`, `<select>`, or `[contenteditable="true"]`.
+  - Check `event.target` and `closest('input, textarea, select, [contenteditable="true"]')` before triggering shortcuts.
 
-- **Add Entry menu keyboard navigation:**
-  - Tab to `ADD ENTRY` button: Focus lands on the button with visible focus bar; menu expands automatically (via CSS `:focus-within`) so keyboard users see the options.
-  - Tab again: Focus moves to `BOOKMARK` menu item (focus bar on top).
-  - Tab again: Focus moves to `CATEGORY` menu item (focus bar on top).
-  - Tab again: Focus moves to `SETTINGS`; menu closes as focus leaves the wrapper.
-  - Enter/Space on menu item: Opens the corresponding dialog.
-  - Click on `ADD ENTRY`: Moves focus to the first menu item (`BOOKMARK`).
+- **Shortcut policy**
+  - Shortcuts are optional enhancements and must never be required for core use.
+  - Shortcuts may conflict with browser/OS defaults (especially `Alt+…`). Document expected behavior and accept that some shortcuts may not work on all platforms/browsers.
+  - Always provide equivalent UI controls.
 
-### Focus States & Visibility
+- **Escape closes dialogs** (cancel).
+
+- **Enter behavior in dialogs**
+  - Enter should submit when focus is on the primary action button or when submitting from a single-line field is expected.
+  - Enter must **not** submit when focus is inside a `<textarea>`.
+  - Do not rely on `method="dialog"` for form submission behavior; treat submit as an explicit app action.
+
+- **Add Entry menu keyboard navigation** (if present)
+  - Tab to `ADD ENTRY`: focus lands on the button with visible focus indicator.
+  - Menu expansion must be keyboard-accessible (via explicit state or `:focus-within`).
+  - Tab moves through menu items in a logical order; menu closes when focus leaves.
+  - Enter/Space on a menu item triggers its action.
+  - Clicking `ADD ENTRY` should move focus to the first menu item.
+
+### Dialogs and modals
+
+- Dialogs must implement:
+  - **Initial focus on open** (first invalid field, otherwise the primary action).
+  - **Tab/Shift+Tab focus trapping** within the dialog.
+  - **Focus restoration on close** back to the triggering control.
+- `<dialog>` may be used as a container element, but focus management is still required and must be tested.
+- Dialog content must be labeled:
+  - Provide a visible title and connect it via `aria-labelledby`, or use `aria-label` when necessary.
+- For destructive/high-impact confirms, `role="alertdialog"` may be used **only** if the component follows the WAI-ARIA Authoring Practices pattern (labeling + focus management).
+
+### Focus states and visibility
 
 - **Every interactive element must have a visible focus state** that meets contrast requirements.
-- Neon glow effects and LCARS-style focus bars are welcome if they achieve sufficient contrast (4.5:1 for text, 3:1 for UI components).
-- Focus indicators must be distinguishable from other visual states (hover, active, disabled).
-- Do not remove default focus outlines without providing an equally visible alternative via CSS (for example, the LCARS white focus bar used on category, footer, and title buttons).
+- LCARS-style focus bars and glow effects are welcome if they achieve sufficient contrast:
+  - **3:1 minimum** contrast for focus indicators and UI component boundaries.
+- Focus indicators must be distinguishable from hover/active/selected states.
+- Do not remove default focus outlines without providing an equally visible alternative.
 
-**Example:** A neon cyan glow with sufficient brightness can serve as a focus indicator without relying on a traditional outline.
+### Color & contrast
 
-### Color & Contrast
+- **Text contrast**
+  - Normal text: **4.5:1 minimum**
+  - Large text: **3:1 minimum**
 
-- **Text contrast:**
-  - Normal text (≤18pt or ≤14pt bold): **4.5:1 minimum** (AA standard).
-  - Large text (≥18pt or ≥14pt bold): **3:1 minimum** (AA standard).
-  - This includes text on buttons, labels, and status displays.
+- **UI component contrast**
+  - Non-text UI components (borders, focus indicators, icons): **3:1 minimum**
 
-- **UI component contrast (borders, active states):**
-  - Non-text UI components: **3:1 minimum** (AA standard).
-  - Examples: button borders, focus rings, active tab indicators, icon colors.
+- **Do not rely on color alone**
+  - If color communicates state/meaning, also use text, icon, or pattern.
 
-- **Do not rely on color alone** to convey meaning:
-  - If a bookmark tile uses color to indicate status, also use text, icon, or pattern.
-  - Example: "Added today" (stardate indicator) should include text, not just a color wash.
+- **Test with tools**
+  - axe DevTools, WAVE, Lighthouse
+  - Contrast checker (WebAIM)
+  - Vision deficiency simulation (DevTools → Rendering → Emulate vision deficiency)
 
-- **Test with tools:**
-  - Use [axe DevTools](https://www.deque.com/axe/devtools/), [WAVE](https://wave.webaim.org/), or WebAIM's contrast checker.
-  - Simulate color blindness in DevTools (DevTools → Rendering → Emulate vision deficiency).
+### Target sizes and pointer accessibility
 
-### Screen Reader & ARIA
+- Interactive controls must be comfortably clickable:
+  - Prefer **44×44 CSS px** for primary actions.
+  - Icon-only buttons should be at least **24×24 CSS px**, preferably larger.
+- Ensure sufficient spacing so adjacent controls are not easily mis-clicked.
 
-- **Provide meaningful labels:**
-  - Use `aria-label` or `aria-labelledby` for icon-only buttons (e.g., close button: `aria-label="Close dialog"`).
-  - Use `<label>` for form inputs; ensure `for` attribute matches `id`.
+### Screen reader & ARIA
 
-- **Announce dynamic changes:**
-  - Use `aria-live="polite"` for status updates (e.g., "Bookmark added to Engineering").
-  - Use `aria-atomic="true"` if the entire region should be announced.
+- **Provide meaningful labels**
+  - Icon-only buttons must have `aria-label` describing the action (e.g., “Close dialog”, “Delete bookmark”).
+  - Use `<label>` for form inputs whenever possible.
 
-- **Dialogs & modals:**
-  - Use `<dialog>` element (native HTML5 focus trapping).
-  - For older browser support, ensure manual focus trapping: set initial focus, trap Tab/Shift+Tab, restore focus on close.
+- **Announce dynamic changes**
+  - Use an `aria-live="polite"` region for non-critical updates (e.g., “Bookmark added to ENGINEERING”).
+  - Use `aria-atomic="true"` if the whole region should be announced as a unit.
 
-- **ARIA roles (sparingly):**
-  - Prefer semantic HTML. Use ARIA only when HTML semantics are insufficient.
-  - Example: If a `<div>` must act like a button (only in edge cases), use `role="button"` **and** `tabindex="0"` **and** keyboard handlers.
+- **ARIA roles (sparingly)**
+  - Prefer semantic HTML. Use ARIA only when semantics are insufficient.
+  - If an element must act like a button (edge cases only), it must include:
+    - `role="button"`
+    - `tabindex="0"`
+    - Enter/Space keyboard activation handlers
 
-### Images & Icons
+### Truncated text and tooltips
 
-- **Icon-only buttons:** Provide `aria-label` describing the action.
-  - Example: `<button aria-label="Delete this bookmark">🗑️</button>`
-- **Decorative icons:** Use `aria-hidden="true"` if the icon is purely visual and the action is described elsewhere.
+- `title` may be used as a **mouse hover convenience** for truncated text, but must not be the only way to access essential information.
+- Essential truncated content must be accessible via:
+  - visible text, or
+  - `aria-label`, or
+  - `aria-describedby` referencing a visually-hidden full-text element.
 
-### Truncated Text & Tooltips
-
-- **Use `title` attribute for truncated content:**
-  - When text is visually truncated (e.g., via `text-overflow: ellipsis`), provide the full content in a `title` attribute so users can access it on hover.
-  - Example: Bookmark URLs are truncated on tiles but the full URL is available via `title` on `.bookmark-url-text`.
-- **Note:** `title` attributes are not reliably announced by all screen readers; ensure essential information is also available via `aria-label` on the parent element where appropriate.
-
-### Form Accessibility
+### Forms and validation
 
 - Every `<input>` and `<textarea>` must have an associated `<label>` or `aria-label`.
-  - The description textarea uses `aria-label="Bookmark Description"` since it has a visible label but benefits from explicit labeling for screen readers.
-- Use `aria-describedby` for hints or validation messages:
-  - Example: `<input id="url" aria-describedby="url-hint">` + `<small id="url-hint">Enter a valid HTTP or HTTPS URL</small>`
-- Use `maxlength` attribute to enforce character limits (e.g., `maxlength="64"` for title, `maxlength="512"` for description).
-- Use `placeholder` for optional fields to indicate they are not required (e.g., "Optional description...").
-- Validate on blur or submit; announce errors clearly.
+- Use `aria-describedby` for hints and validation messages.
+- Enforce limits with `maxlength` where applicable (e.g., title and description).
+- Errors must be:
+  - clearly described in text,
+  - associated to inputs via `aria-describedby` (or similar),
+  - announced in a screen-reader-friendly way (e.g., focus first invalid field + error text near it).
 
-### Headings & Document Structure
+### Headings & document structure
 
-- Use `<h1>`, `<h2>`, etc. in hierarchical order (don't skip levels like `<h1>` → `<h3>`).
-- Dialogs and panels may have their own heading hierarchy (e.g., a Settings dialog starts with `<h2>`).
+- Use headings in a logical hierarchy (`<h1>` → `<h2>` → `<h3>`; don’t skip levels).
+- Views should have a clear heading at the top of the main region.
+- Dialogs should have their own title heading and labeling.
+
+### Motion and visual effects
+
+- Respect `prefers-reduced-motion: reduce`:
+  - disable or significantly reduce non-essential animations
+  - avoid large parallax/scroll-linked effects
+- Avoid flashing effects above **3 flashes per second**.
 
 ---
 
-## Testing & Validation
+## Testing & validation
 
-### Automated Tools
+### Automated tools
 
-Before merging changes to `index.html`:
+Before merging UI changes:
 
-1. **axe DevTools** (Chrome/Firefox extension)
-   - Scan the page; fix high-priority issues.
-   - Focus on contrast, missing labels, and keyboard traps.
+1. **axe DevTools**
+   - Fix high-priority issues first (missing labels, contrast, keyboard traps).
 
-2. **WAVE** (WebAIM browser extension)
-   - Visual feedback on errors, warnings, and features.
-   - Good for learning what's missing.
+2. **WAVE**
+   - Useful for quick visual feedback and catching common omissions.
 
-3. **Lighthouse** (Chrome DevTools)
-   - Run Audits → Accessibility.
-   - Useful for a quick baseline.
+3. **Lighthouse**
+   - Provides a baseline accessibility score; not sufficient on its own.
 
-### Manual Keyboard Testing
+### Manual keyboard testing
 
-1. Open `index.html` in a browser.
-2. Press **Tab** and **Shift+Tab** to navigate all interactive elements.
-3. Press **Enter** or **Space** to activate buttons.
-4. Press **Escape** to close dialogs.
-5. Verify focus is always visible and logical.
+1. Run the SPA (dev server or built preview).
+2. Use **Tab** and **Shift+Tab** to navigate all interactive elements.
+3. Use **Enter/Space** to activate buttons; **Enter** to activate links.
+4. Use **Escape** to close dialogs.
+5. Verify focus is always visible, logical, and restored correctly after dialogs close.
+6. Verify the Skip link works and focus moves to main content.
 
-### Screen Reader Testing
+### Screen reader testing
 
-Choose one or more of:
+Choose one or more:
 
-- **NVDA** (Windows, free) – [Download](https://www.nvaccess.org/)
-- **JAWS** (Windows, paid) – Free trial available
-- **VoiceOver** (macOS/iOS, built-in) – Enable in System Preferences → Accessibility
+- **NVDA** (Windows) – https://www.nvaccess.org/
+- **JAWS** (Windows) – trial available
+- **VoiceOver** (macOS/iOS, built-in)
 - **TalkBack** (Android, built-in)
 
-**Test these flows:**
-- Navigate to Bookmarks view and add a new bookmark via dialog (including title, optional description, URL, and category).
-- Announce the bookmark tile content and available actions:
-  - Title (max 64 characters)
-  - Description (if present, max 512 characters, displayed with line clamping)
-  - URL (truncated visually; full URL available via `title` attribute on hover)
-- Navigate to Settings and adjust category colors.
-- Open and close dialogs; verify focus is restored.
+Test these flows:
+- Navigate to Bookmarks view and add a bookmark via dialog (including optional description).
+- Verify bookmark tile content and actions are announced meaningfully.
+- Navigate to Settings and adjust category colors (if supported).
+- Open/close dialogs; confirm labeling, focus trapping, and focus restoration.
+- Verify dynamic status announcements via `aria-live` when relevant.
 
 ---
 
-## Design Patterns for LCARS Accessibility
+## Design patterns for LCARS accessibility
 
-### Focus Indicators
+### Focus indicators
 
 LCARS neon aesthetic + accessibility:
 
-- **LCARS Focus Bar Pattern:** Primary LCARS controls (e.g., category buttons, footer action buttons, menu items, and the header title button) use a **white focus bar** rendered via `:focus-visible::after` instead of the default browser outline.
-  - Sidebar category buttons show a vertical white bar along the **leading edge** of the button.
-  - Footer action buttons show a horizontal white bar along the **top edge**.
-  - Add Entry menu items (BOOKMARK, CATEGORY) show a horizontal white bar along the **top edge**.
-  - The `ZANDER` title button shows a horizontal white bar along the **bottom edge** when focused via keyboard.
-- **Neon Glow Focus (optional):** A bright cyan or amber glow (box-shadow) may still be used for other focusable elements that do not participate in the LCARS button system, as long as it meets 4.5:1 contrast.
-- **Generic Focus Styles:** Elements without custom LCARS button styling retain a more generic but clearly visible focus outline so they remain discoverable via keyboard.
-- **Ensure visibility** in both light and dark contexts (test in DevTools).
+- **LCARS focus bar pattern**
+  - Primary LCARS controls (category buttons, footer actions, menu items, header title/home) use a high-contrast focus bar via `:focus-visible`.
+  - Focus bars must meet **3:1** contrast and be visually distinct from hover/selected styles.
 
-### High Contrast
+- **Neon glow focus (optional)**
+  - Glows are allowed if they remain clearly visible and do not become the only focus signal.
 
-- LCARS already uses high-contrast colors (black backgrounds, bright accent colors).
-- Verify text-on-background meets 4.5:1; if not, lighten text or darken background.
-- Avoid relying on subtle color shifts; use bold, distinct colors.
+- **Fallback focus**
+  - Controls that do not participate in LCARS primitives must still have a strong, visible focus outline.
 
-### Keyboard Shortcuts
+### High contrast
 
-- Display keyboard shortcuts in UI hints and dialogs (e.g., "Alt+N to create new bookmark").
-- Make them optional; ensure the same action is available via mouse/touch.
+- LCARS tends toward high-contrast colors (dark backgrounds, bright accents).
+- Verify text-on-background meets AA requirements; adjust text/background rather than reducing legibility.
+- Avoid relying on subtle color shifts; use bold and distinct states.
 
-### Status & Feedback
+### Status and feedback
 
-- When a bookmark is added, deleted, or moved, announce the action:
-  - Visual: Briefly highlight the affected area or show a toast message.
-  - Auditory (for screen reader users): Use `aria-live="polite"` region.
-  - Example: `<div aria-live="polite" aria-atomic="true" id="status"></div>` + update on state change.
+- Provide both visual and screen-reader-friendly feedback for important actions.
+- For screen readers, update a dedicated live region:
+  - Example: `<div aria-live="polite" aria-atomic="true" id="status"></div>`
 
 ---
 
-## Non-Negotiables
-
-These are hard requirements:
+## Non-negotiables
 
 1. ✅ All text meets WCAG AA contrast (4.5:1 normal, 3:1 large).
-2. ✅ All interactive elements are keyboard-accessible (Tab, Enter, Escape).
+2. ✅ All interactive elements are keyboard-accessible.
 3. ✅ Focus indicators are always visible.
-4. ✅ Dialogs trap focus and can be closed with Escape.
+4. ✅ Dialogs trap focus and restore focus on close.
 5. ✅ Form inputs have associated labels.
 6. ✅ Semantic HTML is used wherever possible.
-7. ✅ No information is conveyed by color alone.
+7. ✅ No essential information is conveyed by color alone.
+8. ✅ Reduced motion is respected.
 
 ---
 
 ## References
 
-- [WCAG 2.1 Overview](https://www.w3.org/WAI/WCAG21/quickref/)
-- [WebAIM: Contrast Checker](https://webaim.org/resources/contrastchecker/)
-- [MDN: ARIA Authoring Practices Guide](https://www.w3.org/WAI/ARIA/apg/)
-- [MDN: HTML5 Dialog Element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dialog)
-- [The A11Y Project Checklist](https://www.a11yproject.com/checklist/)
+- WCAG 2.1 Quick Reference: https://www.w3.org/WAI/WCAG21/quickref/
+- WebAIM Contrast Checker: https://webaim.org/resources/contrastchecker/
+- WAI-ARIA Authoring Practices: https://www.w3.org/WAI/ARIA/apg/
+- MDN: `<dialog>` element: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dialog
+- The A11Y Project Checklist: https://www.a11yproject.com/checklist/

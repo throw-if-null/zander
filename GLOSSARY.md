@@ -1,543 +1,258 @@
 # ZANDER Glossary & Ubiquitous Language
 
-This document defines the **ubiquitous language** for the ZANDER LCARS bookmark system.
+This document defines the **ubiquitous language** for the Zander LCARS Bookmark System.
 
-When there is disagreement between documentation, this glossary, and the implementation in `index.html`:
+## Source of truth for terminology
 
-- **`index.html` is the runtime source of truth.**
-- This glossary must be updated to match `index.html`.
-- Other docs (`AGENTS.md`, `ARCHITECTURE.md`, `DESIGN.md`, `README.md`) should use these terms consistently.
+When definitions disagree:
+
+1. **Implementation contracts**
+   - Domain types and contracts in `src/lib/stores/stateTypes.ts`
+   - Persistence port in `src/lib/persistence/PersistenceBackend.ts`
+2. **Behavioral truth**
+   - Tests (Vitest/component tests, Playwright when present)
+3. **Docs**
+   - `ARCHITECTURE.md`, then this glossary, then other docs
+
+This glossary should stay aligned with the contracts and behavior above.
 
 ---
 
-## 1. Core Domain Concepts
+## 1. Core domain concepts
 
 ### 1.1 Bookmark
 
-- **Meaning**: A saved URL with a title and optional description that belongs to exactly one category.
-- **Implementation**: The `Bookmark` object described in `ARCHITECTURE.md`.
-- **Fields (conceptual)**:
-  - `id`: Unique identifier (string, UUID-like).
-  - `title`: Human-readable label for the link (max 64 characters).
-  - `description`: Optional descriptive text (max 512 characters). Displayed on bookmark tiles with text wrapping, clamped to 3 lines.
-  - `url`: Normalized URL including protocol (e.g., `https://example.com`). Displayed truncated on tiles with full URL shown on hover.
-  - `categoryId`: ID of the category that owns the bookmark.
-  - `createdAt`: Stardate when the bookmark was created (numeric).
-- **Notes**:
-  - When any doc says **"entry"** it means **"bookmark"**, unless explicitly stated otherwise.
-  - Each bookmark is associated with exactly one category via `categoryId`.
+A saved URL with a title and optional description that belongs to **exactly one category**.
 
----
+**Contract (`Bookmark` in `stateTypes.ts`)**
+- `id: string` — stable identifier
+- `title: string`
+- `description?: string`
+- `url: string` — normalized URL including protocol
+- `categoryId: string` — owning `Category.id`
+- `createdAt: string` — creation timestamp (stardate string)
+
+**Notes**
+- “Entry” (if used informally) means “Bookmark” unless explicitly stated otherwise.
 
 ### 1.2 Category
 
-- **Meaning**: A user-defined grouping that organizes bookmarks.
-- **Implementation**: `Category` node in a nested tree.
-- **Fields (conceptual)**:
-  - `id`: Unique identifier.
-  - `name`: Display name (generally uppercase) used in sidebar and labels.
-  - `color`: Hex color string from the LCARS palette.
-  - `createdAt`: Stardate when the category was created.
-  - `children`: Array of child `Category` objects.
-- **Notes**:
-  - When something informally refers to a “folder”, it should be interpreted as a **category**.
-  - Categories can be nested to arbitrary depth using `children`.
+A user-defined grouping used to organize bookmarks.
+
+**Contract (`Category` in `stateTypes.ts`)**
+- `id: string` — stable identifier
+- `name: string`
+- `color: string` — LCARS palette color (stored as a hex string)
+- `createdAt: string` — creation timestamp (stardate string)
+- `children: Category[]` — nested subcategories
+
+### 1.3 Category tree (Category hierarchy)
+
+The complete nested structure of categories.
+
+**Contract**
+- Stored as `State.categories: Category[]` (root nodes)
+- Nesting is represented by `Category.children`
+
+### 1.4 Root category
+
+A category that appears directly in `State.categories` (i.e., not inside another category’s `children`).
+
+### 1.5 Child category (Subcategory)
+
+A category that appears inside another category’s `children`.
+
+### 1.6 Current category
+
+The user’s current category selection.
+
+**Contract**
+- `State.currentCategoryId: string | null`
+  - `null` means “All / no category filter”
+  - a non-null value must be a valid `Category.id`
+
+**Behavior**
+- Determines which bookmarks are shown in the Bookmarks View.
+- Used as the default category selection when creating a new bookmark (unless the UI explicitly overrides).
+
+### 1.7 Landing category (Home category)
+
+The user-configured “Home” destination when the user activates the Home control.
+
+**Contract**
+- `State.landingCategoryId: string | null`
+
+**Behavior**
+- When “Home” is activated, the app navigates to the Bookmarks View and selects:
+  - `landingCategoryId` if set and valid, otherwise
+  - the default home selection (implementation-defined)
 
 ---
 
-### 1.3 Category Tree / Category Hierarchy
+## 2. Application state and navigation
 
-- **Meaning**: The complete nested structure of all categories and their children.
-- **Implementation**:
-  - `state.categories`: Array of root `Category` nodes.
-  - Each `Category` has `children: Category[]`.
-- **Usage**:
-  - Sidebar rendering.
-  - Settings “Category Configuration” list.
-  - Deleting a category subtree (cascading deletion of bookmarks).
+### 2.1 State
 
----
+The full persisted application state.
 
-### 1.4 Root Category
+**Contract (`State` in `stateTypes.ts`)**
+- `bookmarks: Bookmark[]`
+- `categories: Category[]`
+- `currentCategoryId: string | null`
+- `currentView: ViewId`
+- `currentSettingsPage: SettingsPageId`
+- `landingCategoryId: string | null`
 
-- **Meaning**: A category that has no parent.
-- **Implementation**:
-  - A category found directly in `state.categories` rather than inside a `children` array.
-- **Usage**:
-  - Root-level buttons in the sidebar.
-  - Top-level rows in category configuration.
+### 2.2 View
 
----
+A top-level UI mode.
 
-### 1.5 Child Category / Subcategory
+**Contract**
+- `ViewId = "bookmarks" | "settings" | "about"`
+- `State.currentView` determines the active view.
 
-- **Meaning**: A category whose parent is another category.
-- **Implementation**:
-  - Appears in a parent category’s `children` array.
-- **Usage**:
-  - Shown as a nested submenu in the sidebar.
-  - Indented row in category configuration.
+### 2.3 Settings page
+
+A sub-page within Settings.
+
+**Contract**
+- `SettingsPageId = "categories" | "home" | "themes" | "data" | "reset" | null`
+- `State.currentSettingsPage` determines the active settings page (`null` means “Settings home/overview” if implemented).
 
 ---
 
-### 1.6 Current Category
+## 3. UI concepts
 
-- **Meaning**: The category the user currently has selected in the sidebar.
-- **Implementation**:
-  - `state.currentCategory`: ID of the selected category, or `null` for “All” (depending on implementation).
-- **Behavior**:
-  - Controls which bookmarks appear in the grid.
-  - Controls the path shown in the **Bookmark Location** bar.
-  - Used as the default category when adding a new bookmark.
+These terms describe user-facing concepts. They intentionally avoid DOM/CSS class names.
 
----
+### 3.1 LCARS shell (Frame)
 
-## 2. UI Shell & Layout
+The persistent LCARS chrome that wraps the app content and provides global navigation/actions.
 
-### 2.1 LCARS Frame
+Typical regions:
+- Header bar (includes Home control)
+- Sidebar bar (category navigation)
+- Main content region (active view)
+- Footer bar (global actions/status)
 
-- **Meaning**: The continuous C‑shaped LCARS structure that wraps the content area.
-- **Implementation (key elements)**:
-  - `.lcars-app` — Root layout container. Scopes visual styles (background, color, font) to the component
-  - `.lcars-app--fullpage` — Modifier for standalone full-viewport usage (`height: 100vh; overflow: hidden`).
-  - `.lcars-header-bar` — Top horizontal band.
-  - `.lcars-sidebar-bar` — Right vertical frame:
-    - `.lcars-sidebar-bar-top-cap`
-    - `.lcars-sidebar-bar-track`
-    - `.lcars-sidebar-bar-bottom-cap`
-  - `.lcars-footer-bar` — Bottom horizontal band.
-- **Visual Concept**:
-  - Represents a single continuous LCARS bracket:
-    - Header → Top Cap → Sidebar Track → Bottom Cap → Footer.
+### 3.2 Home control
 
----
+The primary “return to home” control in the header.
 
-### 2.2 Sidebar / Category Strip
+**Behavior**
+- Returns to the Bookmarks View.
+- Selects the Landing category if configured.
 
-- **Meaning**: The right-hand vertical LCARS band that functions as the primary navigation controller for categories.
-- **Implementation**:
-  - `.lcars-sidebar-bar` (outer column).
-  - `.lcars-sidebar-bar-top-cap`, `.lcars-sidebar-bar-track`, `.lcars-sidebar-bar-bottom-cap`, `.lcars-sidebar-bar-filler`.
-  - `.lcars-sidebar-item`, `.lcars-sidebar-btn`, `.lcars-sidebar-submenu` for categories and subcategories.
-- **Behavior**:
-  - Clicking a `.lcars-sidebar-btn` sets `state.currentCategory`.
-  - The active category button has a distinct visual style (e.g., `.active` class).
+### 3.3 Bookmarks View
 
----
+The primary view for browsing and opening bookmarks.
 
-### 2.3 Main Content / Main View
+Common elements:
+- Bookmark grid (tiles)
+- Location/breadcrumb readout (if implemented)
+- Status readout (counts, stardate, etc.)
 
-- **Meaning**: The central area inside the LCARS frame where the primary content (bookmarks, settings, about) appears.
-- **Implementation**:
-  - `.main-content`: Container for all main views.
-  - `.main-view`: Base class for each view; only one is `.active` at a time.
-    - Bookmarks view.
-    - Settings view.
-    - About view.
-- **Usage**:
-  - Toggled by footer buttons (`ADD ENTRY`, `SETTINGS`, `ABOUT`).
-  - Toggled by the **Home control** (`ZANDER` header title) which always returns to the Bookmarks view.
-  - Toggled programmatically via JavaScript and keyboard shortcuts (e.g., `Alt+H`, `Alt+S`).
+### 3.4 Settings View
+
+The view for configuring categories, theme, data import/export, and reset flows.
+
+### 3.5 About View
+
+A read-only view presenting system/project information and meta readouts.
+
+### 3.6 Dialog
+
+A modal UI used for focused tasks (create/edit bookmark, confirm destructive actions, pick a color, etc.).
+
+Dialog behaviors are governed by `ACCESSIBILITY.md` (focus trap, restore focus, Escape cancels, etc.).
+
+### 3.7 Bookmark tile
+
+A compact visual representation of a bookmark in the grid, typically including:
+- title
+- optional description snippet
+- URL (often visually truncated)
+- affordances for edit/open actions
 
 ---
 
-### 2.4 Bookmarks View
+## 4. Persistence, import/export, and modes
 
-- **Meaning**: The main view showing the bookmark grid, the current location/path, and the status block.
-- **Implementation (typical)**:
-  - `.main-view` variant containing:
-    - `.bookmark-location`
-    - `.bookmark-grid`
-    - `.status-display`
-- **Behavior**:
-  - Shown by default when the app loads.
-  - Reflects `state.currentCategory` and current counts.
+### 4.1 Persistence backend
 
----
+A concrete implementation of the persistence port.
 
-### 2.5 Settings View / Settings Panel
+**Contract**
+- `PersistenceBackend` (`loadState`, `saveState`, `exportData`, `importData`)
 
-- **Meaning**: The view where the user configures categories, manages data (import/export/reset), and sees system-related info.
-- **Implementation**:
-  - `.main-view.settings-panel` (and related nested elements):
-    - `.settings-accent`
-    - `.settings-content`
-    - `.category-config-list`
-    - `.settings-status` (where present)
-- **Behavior**:
-  - Activated via the `SETTINGS` footer button or `Alt+S`.
-  - Shows controls to mutate the category tree and data.
+### 4.2 Guest mode
 
----
+Mode where persistence is local to the browser.
 
-### 2.6 About View / About Panel
+**Behavior**
+- Uses `LocalStorageBackend`.
+- State is stored under the v1 storage key (`"zander-svelte:v1"`).
 
-- **Meaning**: The view that displays system information, credits, and stardate/date information.
-- **Implementation**:
-  - `.main-view.about-panel`
-- **Behavior**:
-  - Activated via the `ABOUT` footer button.
-  - Read-only; no configuration or data mutation.
+### 4.3 User mode
 
----
+Authenticated mode where persistence is scoped per user.
 
-### 2.7 Footer Bar
+**Behavior**
+- Uses `FirestoreBackend` (v2).
+- Requires an auth provider (Firebase Auth or Logto).
 
-- **Meaning**: The bottom LCARS band containing global actions (and sometimes status UI).
-- **Implementation**:
-  - `.lcars-footer-bar`
-  - `.lcars-footer-bar-button` elements for:
-    - `ADD ENTRY`
-    - `SETTINGS`
-    - `ABOUT`
-- **Behavior**:
-  - Footer buttons change the active view and open dialogs where appropriate.
-  - Together with the **Home control** in the header and keyboard shortcuts, they provide primary navigation between Bookmarks, Settings, and About.
+### 4.4 Export bundle
 
----
+A versioned exportable representation of the full state.
 
-## 3. Bookmark Presentation
+**Contract (`ExportBundle` in `stateTypes.ts`)**
+- `version: "zander-v1"`
+- `state: State`
+- `meta`:
+  - `exportedAtStardate: string`
+  - `sourceBackend: "localStorage"` (v1; extend in v2)
 
-### 3.1 Bookmark Tile
+### 4.5 Import
 
-- **Meaning**: The visual card representing a single bookmark in the grid.
-- **Implementation**:
-  - `.bookmark-tile` — uses a 3-row CSS grid layout with a `::before` pseudo-element creating the signature LCARS rounded notch in the top-left corner
-  - Contains:
-    - `.bookmark-title` — the bookmark's title (max 64 characters), spans full width, displayed on the theme color background (`--theme-main`) with category-colored text (row 1) for bold LCARS-style separation
-    - `.bookmark-description` — description text (max 512 characters stored, truncated to first 100 characters on tile with ellipsis; full text viewable in edit mode), displayed on the category-colored background with black text (row 2)
-    - `.bookmark-url-footer` — compact theme-colored footer strip with LCARS rounded cutout (row 3)
-      - `.lcars-tile-pin.lcars-tile-pin--url` — circular button in main theme color; opens bookmark URL; full URL shown on hover via `title` attribute
-      - `.lcars-tile-pin.lcars-tile-pin--edit` — circular button in LCARS orange; opens edit dialog
-- **Behavior**:
-  - Clicking the tile opens the URL in a new tab/window.
-  - Clicking the edit icon opens the **Bookmark Dialog** in edit mode.
-  - Hovering over the URL text shows the full URL in a tooltip.
+Loading an `ExportBundle` into the app.
+
+**Default semantics**
+- Import is a full replacement unless explicitly documented otherwise.
+
+### 4.6 Storage error
+
+A typed error emitted by persistence operations.
+
+**Contract (`StorageError` in `stateTypes.ts`)**
+- `code: string`
+- `message: string`
+
+Common codes used in v1 localStorage backend:
+- `storage-unavailable`
+- `invalid-json`
+- `write-failed`
+- `version-unsupported`
 
 ---
 
-### 3.2 Bookmark Grid
+## 5. Time terminology
 
-- **Meaning**: The layout container that arranges bookmark tiles.
-- **Implementation**:
-  - `.bookmark-grid`
-- **Behavior**:
-  - Dynamically populated by JavaScript according to `state.currentCategory`.
-  - May show an empty-state message when there are no bookmarks to display.
+### 5.1 Stardate
 
----
+The app uses a “stardate” string for creation timestamps.
 
-### 3.3 Bookmark Location / Location Path
+**Contract**
+- Stored in `Bookmark.createdAt` and `Category.createdAt` as `string`.
 
-- **Meaning**: A breadcrumb-like readout that shows the current category hierarchy for the active view.
-- **Implementation**:
-  - `.bookmark-location`
-  - `.bookmark-location-label` (e.g., “LOCATION”).
-  - `.bookmark-location-path` containing path segments and separators.
-- **Behavior**:
-  - Reflects the category path computed by `getCategoryPath(currentCategory)`.
-  - Updates whenever the current category changes.
+**Note**
+- The precise formatting/meaning is defined by the implementation and should remain consistent for imports/exports.
 
 ---
 
-## 4. Status & Meta Information
-
-### 4.1 Status Display / System Status
-
-- **Meaning**: The decorative data readout that surfaces key system metrics.
-- **Implementation**:
-  - `.status-display`
-  - `.status-text` (e.g., “STATUS:”).
-  - `.status-info` containing label/value blocks (e.g., `CT`, `BM`).
-- **Typical Contents**:
-  - **CT** — Category count (flattened across nested tree).
-  - **BM** — Bookmark count.
-- **Behavior**:
-  - Kept in sync with data via `updateSystemStatus()`.
-
----
-
-### 4.2 Settings Status
-
-- **Meaning**: Optional status or meta section inside the Settings view summarizing system information.
-- **Implementation**:
-  - `.settings-status` (and nested elements).
-- **Behavior**:
-  - May display stardate, last reset/import time, or counts.
-
----
-
-### 4.3 About Meta
-
-- **Meaning**: The section inside the About view that presents stardate, Earth date, and version info.
-- **Implementation**:
-  - `.about-meta`
-- **Behavior**:
-  - Updated via functions like `updateAboutStardate()`.
-
----
-
-## 5. Dialogs & Forms
-
-All dialogs use the `.lcars-dialog-container` class on the `<dialog>` element for scoped styling.
-
-### 5.1 Bookmark Dialog
-
-- **Meaning**: Modal used to add or edit a bookmark.
-- **Implementation**:
-  - `<dialog id="bookmarkDialog" class="lcars-dialog-container">` with `.lcars-dialog` structure.
-  - Contains form elements for:
-    - Title (max 64 characters)
-    - Description (optional, max 512 characters)
-    - Protocol selector (e.g., `https://` vs `http://`)
-    - URL body
-    - Category selection
-    - Creation stardate and Earth date readout
-- **Behavior**:
-  - Opened for:
-    - New bookmark (Add Entry).
-    - Editing an existing bookmark.
-  - On save:
-    - Creates/updates a `Bookmark` and persists to `localStorage`.
-
----
-
-### 5.2 Color Picker Dialog
-
-- **Meaning**: Modal presenting a grid of LCARS colors used to choose a category color.
-- **Implementation**:
-  - `<dialog id="colorPickerDialog">`
-  - `.color-grid` containing `.color-option` swatches.
-- **Behavior**:
-  - Opened when clicking a category’s color swatch in Settings.
-  - On selection:
-    - Updates the category’s `color`.
-    - Re-renders sidebar and bookmark tiles.
-
----
-
-### 5.3 Confirm Dialog
-
-- **Meaning**: Generic confirmation modal for destructive or irreversible actions.
-- **Implementation**:
-  - `<dialog id="confirmDialog">`
-  - Fields for:
-    - Title
-    - Message
-    - Confirm and Cancel buttons
-- **Behavior**:
-  - Used by `showConfirm(...)` for:
-    - Deleting categories.
-    - Deleting bookmarks (if implemented here, otherwise in bookmark dialog).
-    - Import overwrite confirmation.
-    - System reset confirmation.
-
----
-
-### 5.4 About Dialog / About Panel
-
-- **Meaning**: Informational view (panel or dialog) presenting project information and stardate.
-- **Implementation**:
-  - Implemented as a **panel**: `.about-panel` under `.main-content`.
-- **Behavior**:
-  - Activated via footer `ABOUT`.
-  - Can be exited by using the **Home control** (clicking the `ZANDER` title or pressing `Alt+H`) to return to the Bookmarks view.
-  - Does not modify state; read-only.
-
----
-
-## 6. Time & Stardates
-
-### 6.1 Stardate
-
-- **Meaning**: Fictional time representation inspired by *Star Trek: The Next Generation*.
-- **Implementation**:
-  - Stored as a string in `createdAt` fields using the format `YYYYDDD.MMMM` (e.g., `2025352.1200`).
-  - Computed via `calculateStardate()` from the current Earth date.
-- **Usage**:
-  - Bookmark and category creation timestamps.
-  - Displayed in dialogs and status panels.
-  - Sometimes shown alongside the approximate Earth date.
-
----
-
-### 6.2 Earth Date
-
-- **Meaning**: Human-readable date (e.g., `2363-01-09`) derived from a stardate or `Date` object.
-- **Implementation**:
-  - Derived via `parseStardate()` or equivalent helper.
-- **Usage**:
-  - Shown next to stardates in About and Settings panels.
-  - Used in tooltips or meta lines for clarity.
-
----
-
-## 7. Data & Persistence
-
-### 7.1 Application State
-
-- **Meaning**: In-memory object representing all current app data plus UI selection.
-- **Implementation (conceptual)**:
-  - `state = { bookmarks: Bookmark[], categories: Category[], currentCategory: string | null }`
-- **Usage**:
-  - All rendering is derived from `state`.
-  - Any mutation of `state` must be followed by `saveData()` and re-rendering.
-
----
-
-### 7.2 Storage Key
-
-- **Meaning**: The `localStorage` key under which the entire app state is saved.
-- **Implementation**:
-  - `STORAGE_KEY = "zander-lcars:v1"`
-- **Usage**:
-  - Read via `localStorage.getItem(STORAGE_KEY)` in `loadData()`.
-  - Written via `localStorage.setItem(STORAGE_KEY, serializedState)` in `saveData()`.
-
----
-
-### 7.3 Import
-
-- **Meaning**: Operation that loads bookmarks and categories from a JSON file, replacing current state.
-- **Implementation**:
-  - Triggered via `IMPORT DATA` in Settings.
-  - Handled by `handleImport()` and a confirmation step via confirm dialog.
-- **Behavior**:
-  - Parses JSON from a user-selected `.json` file.
-  - Validates presence of `bookmarks` and `categories` arrays.
-  - On confirmation:
-    - Replaces existing `state.bookmarks` and `state.categories`.
-    - Resets `currentCategory` as appropriate.
-    - Persists to `localStorage`.
-- **Contract**:
-  - JSON structure: `{ "bookmarks": Bookmark[], "categories": Category[] }`.
-
----
-
-### 7.4 Export
-
-- **Meaning**: Operation that downloads the current bookmarks and categories as a JSON backup file.
-- **Implementation**:
-  - Triggered via `EXPORT DATA` in Settings.
-  - Implemented in `exportData()`.
-- **Behavior**:
-  - Serializes:
-    - `bookmarks: state.bookmarks`
-    - `categories: state.categories`
-  - Initiates a download with filename similar to:
-    - `lcars-bookmarks-YYYY-MM-DD.json`.
-- **Contract**:
-  - Output matches the import format `{ bookmarks, categories }`.
-
----
-
-### 7.5 Reset System
-
-- **Meaning**: Operation that wipes user data and restores built-in defaults.
-- **Implementation**:
-  - Triggered via `RESET SYSTEM` in Settings.
-  - Implemented in `resetSystem()`.
-- **Behavior**:
-  - Confirms with the user.
-  - Clears app data from `localStorage` under `STORAGE_KEY`.
-  - Reinitializes state with `DEFAULT_BOOKMARKS` and `DEFAULT_CATEGORIES`.
-  - Re-renders sidebar, grid, and status.
-
----
-
-## 8. Colors & Palette
-
-### 8.1 LCARS Palette
-
-- **Meaning**: The set of predefined LCARS colors used for UI elements and category accents.
-- **Implementation**:
-  - `LCARS_PALETTE` constant in `index.html`.
-  - Exposed through CSS custom properties (e.g., `--lcars-orange`, `--lcars-beige`).
-- **Usage**:
-  - Frame elements (header, sidebar, footer).
-  - Category colors.
-  - Color picker options.
-  - Status labels and blocks.
-
----
-
-### 8.2 Theme
-
-- **Meaning**: A named LCARS visual variant that changes colors and accents while keeping the same layout and data.
-- **Implementation**:
-  - A small set of theme definitions in `index.html` (e.g., `PICKARD`, `DATA`, `DOCTOR`, `SPOCK`, `SEVEN OF NINE`).
-  - Applied via a `data-theme` attribute on `<body>` (for example, `body[data-theme="pickard"]`).
-  - The active theme id is stored in `localStorage` under a dedicated theme storage key.
-- **Usage**:
-  - Lets users switch between different LCARS-inspired palettes.
-  - Affects only visual styling (colors, some accents), not bookmarks, categories, or layout.
-
----
-
-### 8.3 Category Color
-
-- **Meaning**: The specific LCARS palette color assigned to a category.
-- **Implementation**:
-  - `Category.color` field (hex).
-- **Usage**:
-  - Sidebar button background for that category.
-  - Bookmark tile accent color for bookmarks in that category/tree.
-
----
-
-## 9. Keyboard & Interaction
-
-### 9.1 Keyboard Shortcuts
-
-- **Meaning**: Global hotkeys used to trigger common actions.
-- **Current shortcuts**:
-  - `Alt + N` — Open **Add Bookmark** dialog.
-  - `Alt + S` — Open **Settings** view.
-  - `Alt + C` — Add **New Category** (while in Settings).
-  - `Esc` — Close the active dialog (if any).
-- **Implementation**:
-  - Global `keydown` listener that respects text-input focus.
-
----
-
-### 9.2 Neon Glow Focus
-
-- **Meaning**: The LCARS-inspired visual style for focused interactive elements.
-- **Implementation**:
-  - CSS using `:focus-visible` pseudo-class.
-  - Outline plus layered `box-shadow` in yellow/orange.
-- **Usage**:
-  - Buttons, tiles, sidebar categories, dialog controls, inputs.
-
----
-
-## 10. Documentation & Governance
-
-### 10.1 Ubiquitous Language
-
-- **Meaning**: The shared, consistent vocabulary used by humans and AI across:
-  - Code
-  - Documentation
-  - Design discussions
-- **Usage**:
-  - All new docs and code comments should use these terms.
-  - When introducing a new concept, update this glossary.
-
----
-
-### 10.2 Source of Truth
-
-- **Meaning**: The artifact that takes precedence when definitions disagree.
-- **Rules**:
-  1. `index.html` (runtime behavior and structure).
-  2. `ARCHITECTURE.md` (data model and system behavior).
-  3. `DESIGN.md` (visual intent and interaction patterns).
-  4. `GLOSSARY.md` (this document, kept in sync with the above).
-  5. `AGENTS.md` / `README.md` (process and user-facing descriptions).
-
-When changing behavior in `index.html` that affects terminology:
-
-- Update this glossary first (or alongside).
-- Then update `ARCHITECTURE.md`, `DESIGN.md`, `AGENTS.md`, and `README.md` as needed.
-
----
+## 6. Documentation conventions
+
+- Use the terms in this glossary consistently in code, specs, and docs.
+- When introducing a new concept or renaming an existing one:
+  - update this glossary,
+  - update any relevant OpenSpec specs,
+  - update tests that encode the expected behavior.
