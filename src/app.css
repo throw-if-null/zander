@@ -1,4 +1,6 @@
 /* Minimal placeholder styles; LCARS theming comes later. */
+/* Import semantic tokens for LCARS (colors, type, spacing) */
+@import "./lib/styles/tokens.css";
 
 :root {
   color-scheme: dark;
@@ -15,4 +17,50 @@ body {
 
 main {
   padding: 1rem;
+}
+
+/* Global focus-visible styles using design tokens */
+:where(button, a, input, textarea, select, [role="button"]) :is(:focus-visible) {
+  outline: none;
+  box-shadow: var(--lcars-focus-glow);
+}
+
+/* Simpler selector for older browsers: apply focus glow to common controls */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[role="button"]:focus-visible {
+  outline: none;
+  box-shadow: var(--lcars-focus-glow);
+}
+
+/* Basic dialog/backdrop styles (components may override) */
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(0deg, rgba(0,0,0,0.55), rgba(0,0,0,0.6));
+  z-index: 1000;
+}
+
+.dialog {
+  background: var(--lcars-panel);
+  color: var(--lcars-text);
+  border: 1px solid var(--lcars-border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  min-width: 320px;
+  max-width: 720px;
+  box-shadow: var(--lcars-shadow);
+}
+
+.dialog-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 12px;
 }
