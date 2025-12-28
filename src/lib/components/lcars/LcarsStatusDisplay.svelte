@@ -22,3 +22,22 @@
 >
   {@render children?.()}
 </div>
+
+<style>
+  .lcars-status-display {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    font-family: var(--font-sans);
+    color: var(--lcars-text);
+  }
+
+  .lcars-status-display .lcars-status-label {
+    font-size: var(--type-body-size);
+    color: var(--lcars-meta);
+  }
+
+  .lcars-status-display .lcars-status-item {
+    font-size: var(--type-body-size);
+  }
+</style>
