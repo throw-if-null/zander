@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { createDefaultState } from "./stateDefaults";
+import { createDefaultState } from "./defaults";
 
 describe("createDefaultState", () => {
   it("returns an empty initial State with expected defaults", () => {

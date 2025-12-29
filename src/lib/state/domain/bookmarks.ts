@@ -1,4 +1,4 @@
-import type { Bookmark, Category } from "./stateTypes";
+import type { Bookmark, Category } from "../stateTypes";
 
 export function normalizeUrl(raw: string): string {
   const trimmed = raw.trim();
@@ -83,29 +83,22 @@ export function applyBookmarkUpdate(
   bookmark: Bookmark,
   patch: BookmarkUpdate,
 ): Bookmark {
-  let next: Bookmark = { ...bookmark };
+  const next: Bookmark = { ...bookmark };
 
-  if (patch.title !== undefined) {
-    if (patch.title !== null) {
-      next = { ...next, title: patch.title };
-    }
+  if (patch.title !== undefined && patch.title !== null) {
+    next.title = patch.title;
   }
 
-  if (patch.url !== undefined) {
-    if (patch.url !== null) {
-      next = { ...next, url: normalizeUrl(patch.url) };
-    }
+  if (patch.url !== undefined && patch.url !== null) {
+    next.url = normalizeUrl(patch.url);
   }
 
   if (patch.description !== undefined) {
-    const description = patch.description ?? undefined;
-    next = { ...next, description };
+    next.description = patch.description ?? undefined;
   }
 
-  if (patch.categoryId !== undefined) {
-    if (patch.categoryId !== null) {
-      next = { ...next, categoryId: patch.categoryId };
-    }
+  if (patch.categoryId !== undefined && patch.categoryId !== null) {
+    next.categoryId = patch.categoryId;
   }
 
   return next;

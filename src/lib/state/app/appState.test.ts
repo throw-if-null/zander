@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
-import { createStateStore } from "./stateStore";
+import { createAppState } from "./index.svelte";
 import type { PersistenceBackend } from "../persistence/PersistenceBackend";
-import type { State, ExportBundle } from "./stateTypes";
+import type { State, ExportBundle, Bookmark, Category } from "./stateTypes";
 
 function createBackendMock(initialState: State | null) {
   let savedState: State | null = initialState;
@@ -50,7 +50,7 @@ describe("stateStore", () => {
     };
 
     const { backend } = createBackendMock(persisted);
-    const store = createStateStore(backend);
+    const store = createAppState(backend);
 
     const state = await store.loadInitialState();
 
@@ -59,7 +59,7 @@ describe("stateStore", () => {
 
   it("loadInitialState creates and saves default state when none persisted", async () => {
     const { backend, getSavedState } = createBackendMock(null);
-    const store = createStateStore(backend);
+    const store = createAppState(backend);
 
     const state = await store.loadInitialState();
 
@@ -101,7 +101,7 @@ describe("stateStore", () => {
     };
 
     const { backend, getSavedState } = createBackendMock(initial);
-    const store = createStateStore(backend);
+    const store = createAppState(backend);
 
     await store.loadInitialState();
 
@@ -131,7 +131,7 @@ describe("stateStore", () => {
     };
 
     const { backend, getSavedState } = createBackendMock(initial);
-    const store = createStateStore(backend);
+    const store = createAppState(backend);
 
     await store.loadInitialState();
 
@@ -194,7 +194,7 @@ describe("stateStore", () => {
     };
 
     const { backend, getSavedState } = createBackendMock(initial);
-    const store = createStateStore(backend);
+    const store = createAppState(backend);
 
     await store.loadInitialState();
 
@@ -239,7 +239,7 @@ describe("stateStore", () => {
     };
 
     const { backend, getSavedState } = createBackendMock(initial);
-    const store = createStateStore(backend);
+    const store = createAppState(backend);
 
     await store.loadInitialState();
 
@@ -272,7 +272,7 @@ describe("stateStore", () => {
     };
 
     const { backend, getSavedState } = createBackendMock(initial);
-    const store = createStateStore(backend);
+    const store = createAppState(backend);
 
     await store.loadInitialState();
 
@@ -295,7 +295,9 @@ describe("stateStore", () => {
     });
 
     expect(stateAfterB.bookmarks).toHaveLength(2);
-    const bookmarkB = stateAfterB.bookmarks.find((b) => b.title === "B");
+    const bookmarkB = stateAfterB.bookmarks.find(
+      (b: Bookmark) => b.title === "B",
+    );
     expect(bookmarkB).toBeDefined();
     expect(bookmarkB?.categoryId).toBe("root");
 
@@ -331,7 +333,7 @@ describe("stateStore", () => {
     };
 
     const { backend, getSavedState } = createBackendMock(initial);
-    const store = createStateStore(backend);
+    const store = createAppState(backend);
 
     await store.loadInitialState();
 
@@ -374,11 +376,14 @@ describe("stateStore", () => {
     };
 
     const { backend, getSavedState } = createBackendMock(initial);
-    const store = createStateStore(backend);
+    const store = createAppState(backend);
 
     await store.loadInitialState();
 
-    const state = await store.updateBookmark({ id: "missing", title: "Updated" });
+    const state = await store.updateBookmark({
+      id: "missing",
+      title: "Updated",
+    });
 
     expect(state).toEqual(initial);
     const saved = getSavedState();
@@ -413,7 +418,7 @@ describe("stateStore", () => {
     };
 
     const { backend, getSavedState } = createBackendMock(initial);
-    const store = createStateStore(backend);
+    const store = createAppState(backend);
 
     await store.loadInitialState();
 
@@ -444,20 +449,20 @@ describe("stateStore", () => {
       currentSettingsPage: null,
       landingCategoryId: null,
     };
- 
+
     const { backend, getSavedState } = createBackendMock(initial);
-    const store = createStateStore(backend);
- 
+    const store = createAppState(backend);
+
     await store.loadInitialState();
- 
+
     const state = await store.deleteBookmark("missing");
- 
+
     expect(state).toEqual(initial);
- 
+
     const saved = getSavedState();
     expect(saved).toEqual(initial);
   });
- 
+
   it("addCategory adds root or child and falls back to root when parent missing", async () => {
     const initial: State = {
       bookmarks: [],
@@ -475,39 +480,47 @@ describe("stateStore", () => {
       currentSettingsPage: null,
       landingCategoryId: null,
     };
- 
+
     const { backend, getSavedState } = createBackendMock(initial);
-    const store = createStateStore(backend);
- 
+    const store = createAppState(backend);
+
     await store.loadInitialState();
- 
-    const afterRoot = await store.addCategory({ parentId: null, name: "Second root" });
+
+    const afterRoot = await store.addCategory({
+      parentId: null,
+      name: "Second root",
+    });
     expect(afterRoot.categories).toHaveLength(2);
     const secondRoot = afterRoot.categories[1];
     expect(secondRoot.name).toBe("Second root");
     expect(secondRoot.children).toEqual([]);
- 
-    const afterChild = await store.addCategory({ parentId: "root", name: "Child" });
-    const rootCategory = afterChild.categories.find((category) => category.id === "root");
+
+    const afterChild = await store.addCategory({
+      parentId: "root",
+      name: "Child",
+    });
+    const rootCategory = afterChild.categories.find(
+      (category: Category) => category.id === "root",
+    );
     expect(rootCategory).toBeDefined();
     expect(rootCategory?.children).toHaveLength(1);
     expect(rootCategory?.children[0].name).toBe("Child");
- 
+
     const afterMissingParent = await store.addCategory({
       parentId: "missing",
       name: "Fallback root",
     });
- 
+
     expect(afterMissingParent.categories).toHaveLength(3);
     const fallbackRoot = afterMissingParent.categories.find(
-      (category) => category.name === "Fallback root",
+      (category: Category) => category.name === "Fallback root",
     );
     expect(fallbackRoot).toBeDefined();
- 
+
     const saved = getSavedState();
     expect(saved).toEqual(afterMissingParent);
   });
- 
+
   it("moveCategory only reorders siblings and preserves subtree", async () => {
     const initial: State = {
       bookmarks: [],
@@ -547,34 +560,49 @@ describe("stateStore", () => {
       currentSettingsPage: null,
       landingCategoryId: null,
     };
- 
+
     const { backend, getSavedState } = createBackendMock(initial);
-    const store = createStateStore(backend);
- 
+    const store = createAppState(backend);
+
     await store.loadInitialState();
- 
-    const afterMoveUp = await store.moveCategory({ categoryId: "B", direction: "up" });
-    expect(afterMoveUp.categories.map((category) => category.id)).toEqual(["B", "A", "C"]);
- 
+
+    const afterMoveUp = await store.moveCategory({
+      categoryId: "B",
+      direction: "up",
+    });
+    expect(
+      afterMoveUp.categories.map((category: Category) => category.id),
+    ).toEqual(["B", "A", "C"]);
+
     const categoryB = afterMoveUp.categories[0];
     expect(categoryB.children).toHaveLength(1);
     expect(categoryB.children[0].id).toBe("D");
- 
-    const afterMoveDown = await store.moveCategory({ categoryId: "B", direction: "down" });
-    expect(afterMoveDown.categories.map((category) => category.id)).toEqual(["A", "B", "C"]);
- 
-    const movedB = afterMoveDown.categories.find((category) => category.id === "B");
+
+    const afterMoveDown = await store.moveCategory({
+      categoryId: "B",
+      direction: "down",
+    });
+    expect(
+      afterMoveDown.categories.map((category: Category) => category.id),
+    ).toEqual(["A", "B", "C"]);
+
+    const movedB = afterMoveDown.categories.find(
+      (category: Category) => category.id === "B",
+    );
     expect(movedB).toBeDefined();
     expect(movedB?.children).toHaveLength(1);
     expect(movedB?.children[0].id).toBe("D");
- 
-    const afterNoOp = await store.moveCategory({ categoryId: "missing", direction: "up" });
+
+    const afterNoOp = await store.moveCategory({
+      categoryId: "missing",
+      direction: "up",
+    });
     expect(afterNoOp).toEqual(afterMoveDown);
- 
+
     const saved = getSavedState();
     expect(saved).toEqual(afterNoOp);
   });
- 
+
   it("deleteCategory cascades to descendants, bookmarks, and currentCategoryId", async () => {
     const initial: State = {
       bookmarks: [
@@ -632,36 +660,66 @@ describe("stateStore", () => {
       currentSettingsPage: null,
       landingCategoryId: null,
     };
- 
+
     const { backend, getSavedState } = createBackendMock(initial);
-    const store = createStateStore(backend);
- 
+    const store = createAppState(backend);
+
     await store.loadInitialState();
- 
-    const afterDeleteChild = await store.deleteCategory({ categoryId: "child" });
- 
+
+    const afterDeleteChild = await store.deleteCategory({
+      categoryId: "child",
+    });
+
     expect(afterDeleteChild.categories).toHaveLength(2);
-    const rootCategory = afterDeleteChild.categories.find((category) => category.id === "root");
+    const rootCategory = afterDeleteChild.categories.find(
+      (category: Category) => category.id === "root",
+    );
     expect(rootCategory).toBeDefined();
     expect(rootCategory?.children).toEqual([]);
- 
-    expect(afterDeleteChild.bookmarks.find((bookmark) => bookmark.id === "b2")).toBeUndefined();
-    expect(afterDeleteChild.bookmarks.find((bookmark) => bookmark.id === "b1")).toBeDefined();
-    expect(afterDeleteChild.bookmarks.find((bookmark) => bookmark.id === "b3")).toBeDefined();
- 
+
+    expect(
+      afterDeleteChild.bookmarks.find(
+        (bookmark: Bookmark) => bookmark.id === "b2",
+      ),
+    ).toBeUndefined();
+    expect(
+      afterDeleteChild.bookmarks.find(
+        (bookmark: Bookmark) => bookmark.id === "b1",
+      ),
+    ).toBeDefined();
+    expect(
+      afterDeleteChild.bookmarks.find(
+        (bookmark: Bookmark) => bookmark.id === "b3",
+      ),
+    ).toBeDefined();
+
     expect(afterDeleteChild.currentCategoryId).toBe("root");
- 
+
     const afterDeleteRoot = await store.deleteCategory({ categoryId: "root" });
- 
-    expect(afterDeleteRoot.categories.map((category) => category.id)).toEqual(["other"]);
-    expect(afterDeleteRoot.bookmarks.find((bookmark) => bookmark.categoryId === "root")).toBeUndefined();
-    expect(afterDeleteRoot.bookmarks.find((bookmark) => bookmark.categoryId === "child")).toBeUndefined();
-    expect(afterDeleteRoot.bookmarks.find((bookmark) => bookmark.id === "b3")).toBeDefined();
+
+    expect(
+      afterDeleteRoot.categories.map((category: Category) => category.id),
+    ).toEqual(["other"]);
+    expect(
+      afterDeleteRoot.bookmarks.find(
+        (bookmark: Bookmark) => bookmark.categoryId === "root",
+      ),
+    ).toBeUndefined();
+    expect(
+      afterDeleteRoot.bookmarks.find(
+        (bookmark: Bookmark) => bookmark.categoryId === "child",
+      ),
+    ).toBeUndefined();
+    expect(
+      afterDeleteRoot.bookmarks.find(
+        (bookmark: Bookmark) => bookmark.id === "b3",
+      ),
+    ).toBeDefined();
     expect(afterDeleteRoot.currentCategoryId).toBe("other");
- 
+
     const afterNoOp = await store.deleteCategory({ categoryId: "missing" });
     expect(afterNoOp).toEqual(afterDeleteRoot);
- 
+
     const saved = getSavedState();
     expect(saved).toEqual(afterNoOp);
   });
@@ -694,7 +752,7 @@ describe("stateStore", () => {
     };
 
     const { backend, getSavedState } = createBackendMock(initial);
-    const store = createStateStore(backend);
+    const store = createAppState(backend);
 
     await store.loadInitialState();
 
@@ -738,7 +796,7 @@ describe("stateStore", () => {
     };
 
     const { backend, getSavedState } = createBackendMock(initial);
-    const store = createStateStore(backend);
+    const store = createAppState(backend);
 
     await store.loadInitialState();
 
@@ -796,4 +854,3 @@ describe("stateStore", () => {
     expect(saved).toEqual(afterApply);
   });
 });
-

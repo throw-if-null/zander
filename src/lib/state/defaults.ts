@@ -1,4 +1,4 @@
-import type { State } from "./stateTypes";
+import type { State } from "./model";
 
 export function createDefaultState(): State {
   return {

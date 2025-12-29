@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { createThemeStore, type ThemeState } from "./themeStore";
+import { createThemeState } from "./index.svelte";
+import { ThemeState } from "./themeTypes";
 
 class MemoryStorage implements Storage {
   private data = new Map<string, string>();
@@ -45,7 +46,7 @@ describe("themeStore", () => {
   it("loadInitialTheme uses stored valid id when present", () => {
     storage.setItem(THEME_KEY, "data");
 
-    const store = createThemeStore(storage);
+    const store = createThemeState(storage);
     const state: ThemeState = store.loadInitialTheme();
 
     expect(state.currentThemeId).toBe("data");
@@ -53,7 +54,7 @@ describe("themeStore", () => {
   });
 
   it("loadInitialTheme falls back to primary theme when storage empty or invalid", () => {
-    const storeEmpty = createThemeStore(storage);
+    const storeEmpty = createThemeState(storage);
     const stateEmpty = storeEmpty.loadInitialTheme();
 
     expect(stateEmpty.currentThemeId).toBe("laan");
@@ -63,7 +64,7 @@ describe("themeStore", () => {
     document.documentElement.removeAttribute("data-theme");
     storage.setItem(THEME_KEY, "invalid-theme-id");
 
-    const storeInvalid = createThemeStore(storage);
+    const storeInvalid = createThemeState(storage);
     const stateInvalid = storeInvalid.loadInitialTheme();
 
     expect(stateInvalid.currentThemeId).toBe("laan");
@@ -71,7 +72,7 @@ describe("themeStore", () => {
   });
 
   it("setTheme updates state, persists, and applies when id valid", () => {
-    const store = createThemeStore(storage);
+    const store = createThemeState(storage);
 
     // Seed an initial theme
     store.loadInitialTheme();
@@ -84,14 +85,14 @@ describe("themeStore", () => {
   });
 
   it("setTheme is a no-op for invalid ids", () => {
-    const store = createThemeStore(storage);
+    const store = createThemeState(storage);
     const initial = store.loadInitialTheme();
 
     const next = store.setTheme("nonexistent-theme");
 
     expect(next.currentThemeId).toBe(initial.currentThemeId);
     expect(document.documentElement.getAttribute("data-theme")).toBe(
-      initial.currentThemeId
+      initial.currentThemeId,
     );
   });
 });

@@ -1,6 +1,6 @@
 <script lang="ts">
-    import type { State } from "../../stores/stateTypes";
-    import { getVisibleBookmarks } from "../../stores/selectors";
+    import type { State } from "../../state/stateTypes";
+    import { getVisibleBookmarks } from "../../state/selectors/bookmarks";
 
     const {
         state,

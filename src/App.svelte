@@ -9,16 +9,15 @@
     import SettingsView from "./lib/components/views/SettingsView.svelte";
     import AboutView from "./lib/components/views/AboutView.svelte";
     import BookmarkDialog from "./lib/components/dialogs/BookmarkDialog.svelte";
-    import { createStateStore } from "./lib/stores/stateStore";
+    import { createAppState, createThemeState } from "./lib/state/index";
     import { LocalStorageBackend } from "./lib/persistence/LocalStorageBackend";
-    import { createThemeStore } from "./lib/stores/themeStore";
-    import type { Bookmark } from "./lib/stores/stateTypes";
+    import type { Bookmark } from "./lib/state/model";
 
     const title = "ZANDER";
 
     const backend = new LocalStorageBackend();
-    const stateStore = createStateStore(backend);
-    const themeStore = createThemeStore();
+    const app = createAppState(backend);
+    const theme = createThemeState();
 
     let isReady = $state(false);
 
@@ -27,8 +26,8 @@
     let bookmarkDialogBookmark = $state<Bookmark | null>(null);
 
     onMount(async () => {
-        await stateStore.loadInitialState();
-        themeStore.loadInitialTheme();
+        await app.loadInitialState();
+        theme.loadInitialTheme();
         isReady = true;
     });
 
@@ -41,21 +40,21 @@
 
             switch (name) {
                 case "home":
-                    void stateStore.setCurrentView("bookmarks");
-                    void stateStore.setCurrentSettingsPage(null);
+                    void app.setCurrentView("bookmarks");
+                    void app.setCurrentSettingsPage(null);
                     break;
                 case "settings":
-                    void stateStore.setCurrentView("settings");
-                    void stateStore.setCurrentSettingsPage("home");
+                    void app.setCurrentView("settings");
+                    void app.setCurrentSettingsPage("home");
                     break;
                 case "add-bookmark":
                     openCreateBookmarkDialog();
                     break;
                 case "add-category":
                     // Add a new root category and navigate to categories page
-                    void stateStore.addCategory({ parentId: null, name: null });
-                    void stateStore.setCurrentView("settings");
-                    void stateStore.setCurrentSettingsPage("categories");
+                    void app.addCategory({ parentId: null, name: null });
+                    void app.setCurrentView("settings");
+                    void app.setCurrentSettingsPage("categories");
                     break;
                 default:
                     break;
@@ -68,12 +67,24 @@
             }
         };
 
-        window.addEventListener("zander:shortcut", handleGlobalShortcut as EventListener);
-        window.addEventListener("zander:escape", handleGlobalEscape as EventListener);
+        window.addEventListener(
+            "zander:shortcut",
+            handleGlobalShortcut as EventListener,
+        );
+        window.addEventListener(
+            "zander:escape",
+            handleGlobalEscape as EventListener,
+        );
 
         return () => {
-            window.removeEventListener("zander:shortcut", handleGlobalShortcut as EventListener);
-            window.removeEventListener("zander:escape", handleGlobalEscape as EventListener);
+            window.removeEventListener(
+                "zander:shortcut",
+                handleGlobalShortcut as EventListener,
+            );
+            window.removeEventListener(
+                "zander:escape",
+                handleGlobalEscape as EventListener,
+            );
         };
     };
 
@@ -91,8 +102,8 @@
     });
 
     const handleHomeClick = () => {
-        void stateStore.setCurrentView("bookmarks");
-        void stateStore.setCurrentSettingsPage(null);
+        void app.setCurrentView("bookmarks");
+        void app.setCurrentSettingsPage(null);
     };
 
     const openCreateBookmarkDialog = () => {
@@ -102,7 +113,7 @@
     };
 
     const openEditBookmarkDialog = (id: string) => {
-        const currentState = $stateStore;
+        const currentState = app.model.state;
         if (!currentState) return;
         const existing =
             currentState.bookmarks.find((b) => b.id === id) ?? null;
@@ -127,7 +138,7 @@
     };
 
     const handleDeleteBookmark = (id: string) => {
-        void stateStore.deleteBookmark(id);
+        void app.deleteBookmark(id);
     };
 
     const handleBookmarkDialogSubmit = (detail: {
@@ -137,14 +148,14 @@
         description: string | null;
     }) => {
         if (bookmarkDialogMode === "create") {
-            void stateStore.addBookmark({
+            void app.addBookmark({
                 title: detail.title,
                 url: detail.url,
                 categoryId: detail.categoryId,
                 description: detail.description,
             });
         } else if (bookmarkDialogMode === "edit" && bookmarkDialogBookmark) {
-            void stateStore.updateBookmark({
+            void app.updateBookmark({
                 id: bookmarkDialogBookmark.id,
                 title: detail.title,
                 url: detail.url,
@@ -161,38 +172,38 @@
     };
 
     const handleBookmarkDialogDelete = (id: string) => {
-        void stateStore.deleteBookmark(id);
+        void app.deleteBookmark(id);
         closeBookmarkDialog();
     };
 
     const handleSelectCategory = (categoryId: string | null) => {
-        void stateStore.setCurrentCategory(categoryId);
+        void app.setCurrentCategory(categoryId);
     };
 
     const handleAddRootCategory = () => {
-        void stateStore.addCategory({ parentId: null, name: null });
-        void stateStore.setCurrentView("settings");
-        void stateStore.setCurrentSettingsPage("categories");
+        void app.addCategory({ parentId: null, name: null });
+        void app.setCurrentView("settings");
+        void app.setCurrentSettingsPage("categories");
     };
 
     const handleAddChildCategory = (categoryId: string) => {
-        void stateStore.addCategory({ parentId: categoryId, name: null });
+        void app.addCategory({ parentId: categoryId, name: null });
     };
 
     const handleMoveCategoryUp = (categoryId: string) => {
-        void stateStore.moveCategory({ categoryId, direction: "up" });
+        void app.moveCategory({ categoryId, direction: "up" });
     };
 
     const handleMoveCategoryDown = (categoryId: string) => {
-        void stateStore.moveCategory({ categoryId, direction: "down" });
+        void app.moveCategory({ categoryId, direction: "down" });
     };
 
     const handleDeleteCategory = (categoryId: string) => {
-        void stateStore.deleteCategory({ categoryId });
+        void app.deleteCategory({ categoryId });
     };
 
     const handleChangeTheme = (themeId: string) => {
-        themeStore.setTheme(themeId);
+        theme.setTheme(themeId);
     };
 
     const handleExportData = () => {
@@ -204,17 +215,17 @@
     };
 
     const handleResetSystem = () => {
-        void stateStore.resetSystem();
+        void app.resetSystem();
     };
 
     const handleGoToSettings = () => {
-        void stateStore.setCurrentView("settings");
-        void stateStore.setCurrentSettingsPage("home");
+        void app.setCurrentView("settings");
+        void app.setCurrentSettingsPage("home");
     };
 
     const handleGoToAbout = () => {
-        void stateStore.setCurrentView("about");
-        void stateStore.setCurrentSettingsPage(null);
+        void app.setCurrentView("about");
+        void app.setCurrentSettingsPage(null);
     };
 </script>
 
@@ -229,14 +240,14 @@
 {/snippet}
 
 {#snippet main()}
-    {#if !isReady || $stateStore === null}
+    {#if !app.model.isReady || app.model.state === null}
         <main>
             <h1>Initializing Zander console</h1>
             <p>Loading saved state or creating defaults.</p>
         </main>
-    {:else if $stateStore.currentView === "bookmarks"}
+    {:else if app.model.state.currentView === "bookmarks"}
         <BookmarksView
-            state={$stateStore}
+            state={app.model.state}
             onAddBookmark={handleAddBookmark}
             onEditBookmark={handleEditBookmark}
             onDeleteBookmark={handleDeleteBookmark}
@@ -245,15 +256,15 @@
             open={isBookmarkDialogOpen}
             mode={bookmarkDialogMode}
             bookmark={bookmarkDialogBookmark}
-            categories={$stateStore.categories}
+            categories={app.model.state.categories}
             onSubmit={handleBookmarkDialogSubmit}
             onCancel={handleBookmarkDialogCancel}
             onDelete={handleBookmarkDialogDelete}
         />
-    {:else if $stateStore.currentView === "settings"}
+    {:else if app.model.state.currentView === "settings"}
         <SettingsView
-            state={$stateStore}
-            themeState={$themeStore}
+            state={app.model.state}
+            themeState={theme.state}
             onAddRootCategory={handleAddRootCategory}
             onAddChildCategory={handleAddChildCategory}
             onMoveCategoryUp={handleMoveCategoryUp}

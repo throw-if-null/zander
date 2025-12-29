@@ -1,6 +1,6 @@
 <script lang="ts">
-    import type { Category, State } from "../../stores/stateTypes";
-    import type { ThemeState } from "../../stores/themeStore";
+    import type { Category, State } from "../../state/stateTypes";
+    import type { ThemeState } from "../../state/theme/index.svelte";
 
     const {
         state,
@@ -47,8 +47,6 @@
     const handleDeleteCategoryClick = (categoryId: string) => {
         onDeleteCategory(categoryId);
     };
-
-
     const handleThemeChange = (event: Event) => {
         const value = (event.target as HTMLInputElement).value;
         if (value) {

@@ -1,9 +1,11 @@
 import type { PersistenceBackend } from "./PersistenceBackend";
-import type { State, ExportBundle, StorageError } from "../stores/stateTypes";
+import type { State, ExportBundle, StorageError } from "../state/stateTypes";
 
 const STORAGE_KEY = "zander-svelte:v1";
 
-function isBrowserStorageAvailable(storage: Storage | null): storage is Storage {
+function isBrowserStorageAvailable(
+  storage: Storage | null,
+): storage is Storage {
   if (!storage) return false;
   try {
     const testKey = "__zander_test__";
@@ -18,8 +20,10 @@ function isBrowserStorageAvailable(storage: Storage | null): storage is Storage 
 export class LocalStorageBackend implements PersistenceBackend {
   private readonly storage: Storage | null;
 
-  constructor(storage: Storage | null =
-    typeof window !== "undefined" ? window.localStorage : null
+  constructor(
+    storage: Storage | null = typeof window !== "undefined"
+      ? window.localStorage
+      : null,
   ) {
     this.storage = storage;
   }
@@ -72,15 +76,14 @@ export class LocalStorageBackend implements PersistenceBackend {
   async exportData(): Promise<ExportBundle> {
     const state = await this.loadState();
 
-    const effectiveState: State =
-      state ?? {
-        bookmarks: [],
-        categories: [],
-        currentCategoryId: null,
-        currentView: "bookmarks",
-        currentSettingsPage: null,
-        landingCategoryId: null,
-      };
+    const effectiveState: State = state ?? {
+      bookmarks: [],
+      categories: [],
+      currentCategoryId: null,
+      currentView: "bookmarks",
+      currentSettingsPage: null,
+      landingCategoryId: null,
+    };
 
     return {
       version: "zander-v1",

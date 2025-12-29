@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import type { Category, Bookmark } from "./stateTypes";
+import type { Category, Bookmark } from "../stateTypes";
 import {
   normalizeUrl,
   getEffectiveCategoryIdForNewBookmark,
@@ -36,7 +36,9 @@ describe("normalizeUrl", () => {
   it("leaves existing schemes unchanged", () => {
     expect(normalizeUrl("http://example.com")).toBe("http://example.com");
     expect(normalizeUrl("https://example.com")).toBe("https://example.com");
-    expect(normalizeUrl("mailto:test@example.com")).toBe("mailto:test@example.com");
+    expect(normalizeUrl("mailto:test@example.com")).toBe(
+      "mailto:test@example.com",
+    );
   });
 
   it("returns empty string for empty input", () => {
