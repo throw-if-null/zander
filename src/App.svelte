@@ -9,6 +9,8 @@
     import SettingsView from "./lib/components/views/SettingsView.svelte";
     import AboutView from "./lib/components/views/AboutView.svelte";
     import BookmarkDialog from "./lib/components/dialogs/BookmarkDialog.svelte";
+    import ConfirmDialog from "./lib/components/dialogs/ConfirmDialog.svelte";
+    import CategoryDialog from "./lib/components/dialogs/CategoryDialog.svelte";
     import { createAppState, createThemeState } from "./lib/state/index";
     import { LocalStorageBackend } from "./lib/persistence/LocalStorageBackend";
     import type { Bookmark } from "./lib/state/model";
@@ -24,6 +26,17 @@
     let isBookmarkDialogOpen = $state(false);
     let bookmarkDialogMode = $state<"create" | "edit">("create");
     let bookmarkDialogBookmark = $state<Bookmark | null>(null);
+
+    // Category dialog state
+    let isCategoryDialogOpen = $state(false);
+    let categoryDialogParentId = $state<string | null>(null);
+    let categoryDialogParentName = $state<string | null>(null);
+
+    // Confirm dialog state
+    let isConfirmOpen = $state(false);
+    let confirmTitle = $state<string>();
+    let confirmMessage = $state<string>();
+    let confirmOnConfirm = $state<(() => void) | null>(null);
 
     onMount(async () => {
         await app.loadInitialState();
@@ -51,8 +64,11 @@
                     openCreateBookmarkDialog();
                     break;
                 case "add-category":
-                    // Add a new root category and navigate to categories page
-                    void app.addCategory({ parentId: null, name: null });
+                    // Open category dialog for creating a root category (or subcategory depending on context)
+                    // We'll open as root by default; settings UI can open a child dialog.
+                    categoryDialogParentId = null;
+                    categoryDialogParentName = null;
+                    isCategoryDialogOpen = true;
                     void app.setCurrentView("settings");
                     void app.setCurrentSettingsPage("categories");
                     break;
@@ -138,7 +154,12 @@
     };
 
     const handleDeleteBookmark = (id: string) => {
-        void app.deleteBookmark(id);
+        confirmTitle = "Delete bookmark";
+        confirmMessage = "Are you sure you want to delete this bookmark?";
+        confirmOnConfirm = () => {
+            void app.deleteBookmark(id);
+        };
+        isConfirmOpen = true;
     };
 
     const handleBookmarkDialogSubmit = (detail: {
@@ -172,8 +193,13 @@
     };
 
     const handleBookmarkDialogDelete = (id: string) => {
-        void app.deleteBookmark(id);
-        closeBookmarkDialog();
+        confirmTitle = "Delete bookmark";
+        confirmMessage = "Are you sure you want to delete this bookmark?";
+        confirmOnConfirm = () => {
+            void app.deleteBookmark(id);
+            closeBookmarkDialog();
+        };
+        isConfirmOpen = true;
     };
 
     const handleSelectCategory = (categoryId: string | null) => {
@@ -181,13 +207,20 @@
     };
 
     const handleAddRootCategory = () => {
-        void app.addCategory({ parentId: null, name: null });
+        categoryDialogParentId = null;
+        categoryDialogParentName = null;
+        isCategoryDialogOpen = true;
         void app.setCurrentView("settings");
         void app.setCurrentSettingsPage("categories");
     };
 
     const handleAddChildCategory = (categoryId: string) => {
-        void app.addCategory({ parentId: categoryId, name: null });
+        categoryDialogParentId = categoryId;
+        const current = app.model.state;
+        const parent =
+            current?.categories?.find((c) => c.id === categoryId) ?? null;
+        categoryDialogParentName = parent?.name ?? null;
+        isCategoryDialogOpen = true;
     };
 
     const handleMoveCategoryUp = (categoryId: string) => {
@@ -199,7 +232,14 @@
     };
 
     const handleDeleteCategory = (categoryId: string) => {
-        void app.deleteCategory({ categoryId });
+        // show confirm dialog before deleting
+        confirmTitle = "Delete category";
+        confirmMessage =
+            "Delete this category and its children? This will remove any bookmarks in the subtree.";
+        confirmOnConfirm = () => {
+            void app.deleteCategory({ categoryId });
+        };
+        isConfirmOpen = true;
     };
 
     const handleChangeTheme = (themeId: string) => {
@@ -260,6 +300,35 @@
             onSubmit={handleBookmarkDialogSubmit}
             onCancel={handleBookmarkDialogCancel}
             onDelete={handleBookmarkDialogDelete}
+        />
+
+        <CategoryDialog
+            open={isCategoryDialogOpen}
+            parentName={categoryDialogParentName}
+            onSubmit={(detail) => {
+                void app.addCategory({
+                    parentId: categoryDialogParentId,
+                    name: detail.name,
+                });
+                isCategoryDialogOpen = false;
+            }}
+            onCancel={() => {
+                isCategoryDialogOpen = false;
+            }}
+        />
+
+        <ConfirmDialog
+            open={isConfirmOpen}
+            title={confirmTitle}
+            message={confirmMessage}
+            onConfirm={() => {
+                const cb = confirmOnConfirm;
+                if (cb) cb();
+                isConfirmOpen = false;
+            }}
+            onCancel={() => {
+                isConfirmOpen = false;
+            }}
         />
     {:else if app.model.state.currentView === "settings"}
         <SettingsView

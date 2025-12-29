@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { AppState } from "../../state/app/appTypes";
+    import type { State } from "../../state/model";
     import { getVisibleBookmarks } from "../../state/selectors/bookmarks";
 
     const {
@@ -9,7 +9,7 @@
         onSelectCategory,
         onDeleteBookmark,
     } = $props<{
-        state: AppState;
+        state: State;
         onAddBookmark: () => void;
         onEditBookmark: (id: string) => void;
         onDeleteBookmark: (id: string) => void;
@@ -34,13 +34,12 @@
     <h1>Bookmarks</h1>
 
     <p>
-        Categories: {state.categories.length}, bookmarks: {state.bookmarks
-            .length}.
+        Categories: {state?.categories?.length ?? 0}, bookmarks: {state?.bookmarks?.length ?? 0}.
     </p>
 
     <button type="button" onclick={handleAddClick}> Add bookmark </button>
 
-    {#if visibleBookmarks.length === 0}
+    {#if (visibleBookmarks ?? []).length === 0}
         <p>No bookmarks to display.</p>
     {:else}
         <ul>
