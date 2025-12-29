@@ -65,8 +65,8 @@
                     break;
                 case "add-category":
                     // Open category dialog for creating a root category (or subcategory depending on context)
-                    // We'll open as root by default; settings UI can open a child dialog.
-                    categoryDialogParentId = null;
+                    // Preselect current category as parent if available.
+                    categoryDialogParentId = app.model.state?.currentCategoryId ?? null;
                     categoryDialogParentName = null;
                     isCategoryDialogOpen = true;
                     void app.setCurrentView("settings");
@@ -207,11 +207,8 @@
     };
 
     const handleAddRootCategory = () => {
-        categoryDialogParentId = null;
-        categoryDialogParentName = null;
-        isCategoryDialogOpen = true;
-        void app.setCurrentView("settings");
-        void app.setCurrentSettingsPage("categories");
+        // Add a root category directly with default values (legacy behaviour)
+        void app.addCategory({ parentId: null });
     };
 
     const handleAddChildCategory = (categoryId: string) => {
@@ -304,10 +301,11 @@
 
         <CategoryDialog
             open={isCategoryDialogOpen}
-            parentName={categoryDialogParentName}
+            categories={app.model.state.categories}
+            initialParentId={categoryDialogParentId ?? app.model.state.currentCategoryId}
             onSubmit={(detail) => {
                 void app.addCategory({
-                    parentId: categoryDialogParentId,
+                    parentId: detail.parentId,
                     name: detail.name,
                 });
                 isCategoryDialogOpen = false;
@@ -317,19 +315,6 @@
             }}
         />
 
-        <ConfirmDialog
-            open={isConfirmOpen}
-            title={confirmTitle}
-            message={confirmMessage}
-            onConfirm={() => {
-                const cb = confirmOnConfirm;
-                if (cb) cb();
-                isConfirmOpen = false;
-            }}
-            onCancel={() => {
-                isConfirmOpen = false;
-            }}
-        />
     {:else if app.model.state.currentView === "settings"}
         <SettingsView
             state={app.model.state}
@@ -350,6 +335,21 @@
             earthDateLabel="TODO: earth date"
         />
     {/if}
+
+    <ConfirmDialog
+        open={isConfirmOpen}
+        title={confirmTitle}
+        message={confirmMessage}
+        onConfirm={() => {
+            const cb = confirmOnConfirm;
+            if (cb) cb();
+            isConfirmOpen = false;
+        }}
+        onCancel={() => {
+            isConfirmOpen = false;
+        }}
+    />
+
 {/snippet}
 
 {#snippet footerPrimaryActions()}

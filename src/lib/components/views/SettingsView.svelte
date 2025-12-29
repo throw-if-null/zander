@@ -75,12 +75,6 @@
                     <span>{category.name}</span>
                     <button
                         type="button"
-                        onclick={() => handleAddChildCategoryClick(category.id)}
-                    >
-                        + Subcategory
-                    </button>
-                    <button
-                        type="button"
                         onclick={() => handleMoveCategoryUpClick(category.id)}
                     >
                         Move up

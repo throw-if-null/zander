@@ -1,25 +1,46 @@
 <script lang="ts">
     import { onDestroy } from "svelte";
+    import type { Category } from "../../state/model";
 
-    const { open, parentName, onSubmit, onCancel } = $props<{
+    const {
+        open,
+        categories,
+        initialParentId,
+        onSubmit,
+        onCancel,
+    } = $props<{
         open: boolean;
-        parentName?: string | null;
-        onSubmit: (detail: { name: string | null }) => void;
+        categories: Category[];
+        initialParentId?: string | null;
+        onSubmit: (detail: { name: string | null; parentId: string | null }) => void;
         onCancel: () => void;
     }>();
 
     let name = $state<string | null>(null);
+    let selectedParent = $state<string | null>(null);
     let dialogEl = $state.raw<HTMLElement | null>(null);
     let previouslyFocused = $state.raw<Element | null>(null);
 
     const FOCUSABLE =
         'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
+    function flatten(categories: Category[], depth = 0): Array<{ id: string; name: string; depth: number }> {
+        const out: Array<{ id: string; name: string; depth: number }> = [];
+        for (const c of categories) {
+            out.push({ id: c.id, name: c.name, depth });
+            if (c.children && c.children.length > 0) {
+                out.push(...flatten(c.children, depth + 1));
+            }
+        }
+        return out;
+    }
+
     $effect(() => {
         if (!open) return;
 
-        // reset name
+        // reset name and selectedParent
         name = null;
+        selectedParent = initialParentId ?? null;
 
         setTimeout(() => {
             previouslyFocused = document.activeElement;
@@ -49,7 +70,7 @@
     }
 
     const handleSubmit = () => {
-        onSubmit({ name: name === "" ? null : name });
+        onSubmit({ name: name === "" ? null : name, parentId: selectedParent ?? null });
     };
 
     $effect(() => {
@@ -71,14 +92,10 @@
             role="dialog"
             tabindex="-1"
             aria-modal="true"
-            aria-label={parentName ? `Add subcategory to ${parentName}` : "Add category"}
+            aria-label="Add category"
             bind:this={dialogEl}
         >
-            <h2>{parentName ? `Add Subcategory` : `Add Category`}</h2>
-
-            {#if parentName}
-                <p>Parent: {parentName}</p>
-            {/if}
+            <h2>Add Category</h2>
 
             <form
                 onsubmit={(event) => {
@@ -88,8 +105,22 @@
             >
                 <div>
                     <label>
-                        Name
+                        Title
                         <input type="text" bind:value={name} />
+                    </label>
+                </div>
+
+                <div>
+                    <label>
+                        Parent
+                        <select bind:value={selectedParent}>
+                            <option value="">(root)</option>
+                            {#each flatten(categories) as item}
+                                <option value={item.id}>
+                                    {@html '&nbsp;'.repeat(item.depth * 4) + item.name}
+                                </option>
+                            {/each}
+                        </select>
                     </label>
                 </div>
 
