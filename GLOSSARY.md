@@ -7,7 +7,7 @@ This document defines the **ubiquitous language** for the Zander LCARS Bookmark 
 When definitions disagree:
 
 1. **Implementation contracts**
-   - Domain types and contracts in `src/lib/stores/stateTypes.ts`
+   - Domain types and contracts in `src/lib/state/model.ts`
    - Persistence port in `src/lib/persistence/PersistenceBackend.ts`
 2. **Behavioral truth**
    - Tests (Vitest/component tests, Playwright when present)
@@ -24,7 +24,7 @@ This glossary should stay aligned with the contracts and behavior above.
 
 A saved URL with a title and optional description that belongs to **exactly one category**.
 
-**Contract (`Bookmark` in `stateTypes.ts`)**
+**Contract (`Bookmark` in `model.ts`)**
 - `id: string` — stable identifier
 - `title: string`
 - `description?: string`
@@ -39,7 +39,7 @@ A saved URL with a title and optional description that belongs to **exactly one 
 
 A user-defined grouping used to organize bookmarks.
 
-**Contract (`Category` in `stateTypes.ts`)**
+**Contract (`Category` in `model.ts`)**
 - `id: string` — stable identifier
 - `name: string`
 - `color: string` — LCARS palette color (stored as a hex string)
@@ -95,7 +95,7 @@ The user-configured “Home” destination when the user activates the Home cont
 
 The full persisted application state.
 
-**Contract (`State` in `stateTypes.ts`)**
+**Contract (`State` in `model.ts`)**
 - `bookmarks: Bookmark[]`
 - `categories: Category[]`
 - `currentCategoryId: string | null`
@@ -205,7 +205,7 @@ Authenticated mode where persistence is scoped per user.
 
 A versioned exportable representation of the full state.
 
-**Contract (`ExportBundle` in `stateTypes.ts`)**
+**Contract (`ExportBundle` in `model.ts`)**
 - `version: "zander-v1"`
 - `state: State`
 - `meta`:
@@ -223,7 +223,7 @@ Loading an `ExportBundle` into the app.
 
 A typed error emitted by persistence operations.
 
-**Contract (`StorageError` in `stateTypes.ts`)**
+**Contract (`StorageError` in `model.ts`)**
 - `code: string`
 - `message: string`
 

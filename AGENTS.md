@@ -76,7 +76,7 @@ This document describes how agents should work on the **Svelte 5–based Zander 
     - `src/lib/components/lcars/` for LCARS primitives.
     - `src/lib/components/views/` for Bookmarks/Settings/About.
     - `src/lib/components/dialogs/` for Bookmark/ColorPicker/Confirm dialogs.
-    - `src/lib/stores/` for state and theme stores.
+    - `src/lib/state/` for state and theme stores.
     - `spec/` (once introduced) for OpenSpec/contract files.
   - Choose and maintain tooling:
     - Svelte 5 + Vite.
@@ -469,7 +469,7 @@ This document describes how agents should work on the **Svelte 5–based Zander 
   - `src/lib/components/lcars/` – LCARS primitive components (`LcarsApp.svelte`, `LcarsHeaderBar.svelte`, etc.).  
   - `src/lib/components/views/` – `BookmarksView.svelte`, `SettingsView.svelte`, `AboutView.svelte`.  
   - `src/lib/components/dialogs/` – `BookmarkDialog.svelte`, `ColorPickerDialog.svelte`, `ConfirmDialog.svelte`.  
-  - `src/lib/stores/` – State, theme, and auth stores (`stateStore.ts`, `themeStore.ts`, `authStore.ts`).  
+  - `src/lib/state/` – State, theme, and auth stores (`stateStore.ts`, `themeStore.ts`, `authStore.ts`).  
   - `src/lib/persistence/` – Persistence ports and backends (`PersistenceBackend.ts`, `LocalStorageBackend.ts`, `FirestoreBackend.ts`).  
   - `src/lib/auth/` – Auth port and implementations (`AuthProvider.ts`, `FirebaseAuthProvider.ts`, future `LogtoAuthProvider.ts`).  
   - `src/lib/telemetry/` – Observability ports and implementations.  

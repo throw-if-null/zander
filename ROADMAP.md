@@ -73,14 +73,14 @@ Phases 0–6 deliver **Svelte v1 (guest-only, localStorage-backed)**.
   - Ensure it uses the Svelte v1 storage keys and data contracts defined in P2.1.
 
 - `[ ]` P2.4 Implement `stateStore` for bookmarks, categories, and view state
-  - Create `src/lib/stores/stateStore.ts` exposing a store for `State`.
+  - Create `src/lib/state/stateStore.ts` exposing a store for `State`.
   - Implement helper methods equivalent to legacy functions:
     - `loadState`, `saveState`, `addCategory`, `moveCategory`, `deleteCategory`,
       `addBookmark`, `updateBookmark`, `deleteBookmark`, `getCategoryPath`, etc.
   - Have the store depend only on the `PersistenceBackend` interface, not directly on `localStorage`.
 
 - `[ ]` P2.5 Implement theme store
-  - Create `src/lib/stores/themeStore.ts` managing `currentTheme` and the Svelte theme list.
+  - Create `src/lib/state/themeStore.ts` managing `currentTheme` and the Svelte theme list.
   - Persist theme selection via `localStorage` (separate key from bookmark data).
   - Mirror legacy behavior of applying theme via a `data-theme` attribute on `<body>`.
 

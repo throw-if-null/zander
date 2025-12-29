@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { createAppState } from "./index.svelte";
-import type { PersistenceBackend } from "../persistence/PersistenceBackend";
-import type { State, ExportBundle, Bookmark, Category } from "./stateTypes";
+import type { PersistenceBackend } from "../../persistence/PersistenceBackend";
+import type { State, ExportBundle, Bookmark, Category } from "../model";
 
 function createBackendMock(initialState: State | null) {
   let savedState: State | null = initialState;

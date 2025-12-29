@@ -152,7 +152,7 @@ About View (`AboutView.svelte`):
 Composition notes:
 
 - Views assemble primitives rather than duplicating styling.
-- All state mutations (add/edit/delete Bookmark/Category) are implemented via stores under `src/lib/stores/` and invoked by view actions; primitives are passive.
+- All state mutations (add/edit/delete Bookmark/Category) are implemented via stores under `src/lib/state/` and invoked by view actions; primitives are passive.
 
 **Dialog Patterns**
 
@@ -193,7 +193,7 @@ Non‑modal toasts / status messages:
 Theme primitives and tokens:
 
 - Themes are collections of token values (colors and minor layout tweaks). Each theme must provide values for the core color roles and be contrast‑checked.
-- Theme identifiers live in the theme store (`src/lib/stores/themeStore.ts`). Theme switcher UI lives in Settings.
+- Theme identifiers live in the theme store (`src/lib/state/themeStore.ts`). Theme switcher UI lives in Settings.
 
 Applying themes:
 

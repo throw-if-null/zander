@@ -10,7 +10,7 @@ Legacy reference: the previous single-file implementation is preserved as `index
 
 The architecture is defined by these artifacts:
 
-- **Types and data contracts:** `src/lib/stores/stateTypes.ts`
+- **Types and data contracts:** `src/lib/state/model.ts`
 - **Persistence port:** `src/lib/persistence/PersistenceBackend.ts`
 - **Persistence implementations:**
   - `src/lib/persistence/LocalStorageBackend.ts` (v1 guest mode)
@@ -60,8 +60,8 @@ UI composition:
   - (Color picker dialog if present)
 
 State and domain:
-- `src/lib/stores/` — state store, selectors, defaults, theme store
-- Canonical types: `src/lib/stores/stateTypes.ts`
+- `src/lib/state/` — state store, selectors, defaults, theme store
+- Canonical types: `src/lib/state/model.ts`
 
 Persistence:
 - `src/lib/persistence/` — persistence port + backends
@@ -77,7 +77,7 @@ Auth and telemetry:
 
 ## Data model
 
-Canonical types are defined in `src/lib/stores/stateTypes.ts`. Architectural invariants:
+Canonical types are defined in `src/lib/state/model.ts`. Architectural invariants:
 
 - **Category is a tree**
   - `Category.children: Category[]` is the canonical representation.

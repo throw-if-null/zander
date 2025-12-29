@@ -4,7 +4,7 @@ This file maps **UI concepts** (from `GLOSSARY.md`) to **current CSS classes / D
 It exists to help refactors and keep styling changes organized.
 
 This is **not** the authoritative source of behavior or architecture:
-- Domain contracts live in `src/lib/stores/stateTypes.ts`
+- Domain contracts live in `src/lib/state/model.ts`
 - Behavior is asserted by tests and `ACCESSIBILITY.md`
 - Visual intent/LCARS primitives are described in `DESIGN.md`
 
