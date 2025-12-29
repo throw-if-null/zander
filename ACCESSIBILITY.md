@@ -18,6 +18,19 @@ Accessibility is not optional—it's part of the design from the start. The Zand
 
 ---
 
+## Svelte 5 implementation notes
+
+- Prefer **semantic elements** over ARIA wherever possible.
+- Prefer DOM-style event attributes (`onclick={...}` etc.) rather than legacy `on:click` directives.
+- Do not create “fake buttons” with `<div onclick>`. Use `<button>` or `<a>`.
+- If you must implement custom keyboard interaction:
+  - handle `keydown` for **Enter** and **Space** (Space should call `preventDefault()` to avoid page scroll)
+  - ensure focusability (`tabindex="0"`) and role only when semantics truly cannot be used
+- When shifting focus programmatically after state changes (view switches, dialog open):
+  - do it after the DOM updates (e.g. `queueMicrotask`, `requestAnimationFrame`, or a `$effect` that runs after the relevant element exists)
+
+---
+
 ## Frontend implementation checklist
 
 ### HTML & semantic structure
@@ -41,7 +54,7 @@ Accessibility is not optional—it's part of the design from the start. The Zand
 - **All interactive elements must be keyboard-accessible**
   - Tab / Shift+Tab to move focus
   - Enter activates links
-  - Enter/Space activates buttons
+  - Enter/Space activates buttons (Space must not scroll the page)
 
 - **Keyboard shortcuts must respect input focus**
   - Shortcuts must not fire when the user is typing in an `<input>`, `<textarea>`, `<select>`, or `[contenteditable="true"]`.
@@ -64,7 +77,7 @@ Accessibility is not optional—it's part of the design from the start. The Zand
   - Menu expansion must be keyboard-accessible (via explicit state or `:focus-within`).
   - Tab moves through menu items in a logical order; menu closes when focus leaves.
   - Enter/Space on a menu item triggers its action.
-  - Clicking `ADD ENTRY` should move focus to the first menu item.
+  - Activating `ADD ENTRY` should move focus to the first menu item.
 
 ### Dialogs and modals
 
@@ -84,6 +97,16 @@ Accessibility is not optional—it's part of the design from the start. The Zand
   - **3:1 minimum** contrast for focus indicators and UI component boundaries.
 - Focus indicators must be distinguishable from hover/active/selected states.
 - Do not remove default focus outlines without providing an equally visible alternative.
+
+#### `:focus-visible` fallback
+
+Some older browsers may not fully support `:focus-visible`.
+
+- Prefer using `:focus-visible` when available.
+- Provide a fallback so keyboard users still get a visible focus indicator:
+  - Either a conservative `:focus` style (acceptable if it doesn’t harm the UI), or
+  - A `focus-visible` polyfill strategy if you decide it’s necessary later
+- Never ship “no focus style” on older targets.
 
 ### Color & contrast
 
@@ -178,7 +201,7 @@ Before merging UI changes:
 
 1. Run the SPA (dev server or built preview).
 2. Use **Tab** and **Shift+Tab** to navigate all interactive elements.
-3. Use **Enter/Space** to activate buttons; **Enter** to activate links.
+3. Use **Enter** to activate links; use **Enter/Space** to activate buttons.
 4. Use **Escape** to close dialogs.
 5. Verify focus is always visible, logical, and restored correctly after dialogs close.
 6. Verify the Skip link works and focus moves to main content.

@@ -7,7 +7,7 @@ This document defines the **ubiquitous language** for the Zander LCARS Bookmark 
 When definitions disagree:
 
 1. **Implementation contracts**
-   - Domain types and contracts in `src/lib/state/model.ts`
+   - Domain types and contracts in `src/lib/state/model.ts` (or `src/lib/state/stateTypes.ts` until `model.ts` is the canonical file)
    - Persistence port in `src/lib/persistence/PersistenceBackend.ts`
 2. **Behavioral truth**
    - Tests (Vitest/component tests, Playwright when present)
@@ -24,13 +24,13 @@ This glossary should stay aligned with the contracts and behavior above.
 
 A saved URL with a title and optional description that belongs to **exactly one category**.
 
-**Contract (`Bookmark` in `model.ts`)**
+**Contract (`Bookmark` in the canonical state model file)**
 - `id: string` — stable identifier
 - `title: string`
 - `description?: string`
 - `url: string` — normalized URL including protocol
 - `categoryId: string` — owning `Category.id`
-- `createdAt: string` — creation timestamp (stardate string)
+- `createdAt: string` — creation timestamp (ISO-8601 string)
 
 **Notes**
 - “Entry” (if used informally) means “Bookmark” unless explicitly stated otherwise.
@@ -39,11 +39,11 @@ A saved URL with a title and optional description that belongs to **exactly one 
 
 A user-defined grouping used to organize bookmarks.
 
-**Contract (`Category` in `model.ts`)**
+**Contract (`Category` in the canonical state model file)**
 - `id: string` — stable identifier
 - `name: string`
 - `color: string` — LCARS palette color (stored as a hex string)
-- `createdAt: string` — creation timestamp (stardate string)
+- `createdAt: string` — creation timestamp (ISO-8601 string)
 - `children: Category[]` — nested subcategories
 
 ### 1.3 Category tree (Category hierarchy)
@@ -72,7 +72,7 @@ The user’s current category selection.
   - a non-null value must be a valid `Category.id`
 
 **Behavior**
-- Determines which bookmarks are shown in the Bookmarks View.
+- Determines which bookmarks are shown in the Bookmarks View (typically the selected category subtree).
 - Used as the default category selection when creating a new bookmark (unless the UI explicitly overrides).
 
 ### 1.7 Landing category (Home category)
@@ -95,7 +95,7 @@ The user-configured “Home” destination when the user activates the Home cont
 
 The full persisted application state.
 
-**Contract (`State` in `model.ts`)**
+**Contract (`State` in the canonical state model file)**
 - `bookmarks: Bookmark[]`
 - `categories: Category[]`
 - `currentCategoryId: string | null`
@@ -191,7 +191,7 @@ Mode where persistence is local to the browser.
 
 **Behavior**
 - Uses `LocalStorageBackend`.
-- State is stored under the v1 storage key (`"zander-svelte:v1"`).
+- State is stored under the v1 storage key (example: `"zander-svelte:v1"`).
 
 ### 4.3 User mode
 
@@ -205,12 +205,12 @@ Authenticated mode where persistence is scoped per user.
 
 A versioned exportable representation of the full state.
 
-**Contract (`ExportBundle` in `model.ts`)**
+**Contract (`ExportBundle` in the canonical state model file)**
 - `version: "zander-v1"`
 - `state: State`
 - `meta`:
-  - `exportedAtStardate: string`
-  - `sourceBackend: "localStorage"` (v1; extend in v2)
+  - `exportedAt` (string timestamp)
+  - `sourceBackend` (backend identifier, e.g. `"localStorage"`)
 
 ### 4.5 Import
 
@@ -223,7 +223,7 @@ Loading an `ExportBundle` into the app.
 
 A typed error emitted by persistence operations.
 
-**Contract (`StorageError` in `model.ts`)**
+**Contract (Storage error type in the canonical state model file)**
 - `code: string`
 - `message: string`
 
@@ -237,15 +237,16 @@ Common codes used in v1 localStorage backend:
 
 ## 5. Time terminology
 
-### 5.1 Stardate
+### 5.1 Timestamp
 
-The app uses a “stardate” string for creation timestamps.
+The app stores creation timestamps as strings.
 
 **Contract**
 - Stored in `Bookmark.createdAt` and `Category.createdAt` as `string`.
 
 **Note**
-- The precise formatting/meaning is defined by the implementation and should remain consistent for imports/exports.
+- The formatting/meaning is implementation-defined and must remain consistent for imports/exports.
+- Current implementation uses ISO-8601 strings (via `new Date().toISOString()`).
 
 ---
 
@@ -253,6 +254,6 @@ The app uses a “stardate” string for creation timestamps.
 
 - Use the terms in this glossary consistently in code, specs, and docs.
 - When introducing a new concept or renaming an existing one:
-  - update this glossary,
-  - update any relevant OpenSpec specs,
-  - update tests that encode the expected behavior.
+  - update this glossary
+  - update any relevant OpenSpec specs
+  - update tests that encode the expected behavior

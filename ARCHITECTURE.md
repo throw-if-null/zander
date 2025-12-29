@@ -10,7 +10,9 @@ Legacy reference: the previous single-file implementation is preserved as `index
 
 The architecture is defined by these artifacts:
 
-- **Types and data contracts:** `src/lib/state/model.ts`
+- **Types and data contracts:** `src/lib/state/model.ts` (or `src/lib/state/stateTypes.ts` if not yet renamed)
+- **App state controller:** `src/lib/state/index.svelte.ts` (rune-based shared module)
+- **Theme controller:** `src/lib/state/theme/index.svelte.ts` (rune-based shared module)
 - **Persistence port:** `src/lib/persistence/PersistenceBackend.ts`
 - **Persistence implementations:**
   - `src/lib/persistence/LocalStorageBackend.ts` (v1 guest mode)
@@ -45,7 +47,7 @@ Non-goals:
 
 Entry points:
 - `index.html` — SPA entry (boots `src/main.ts`)
-- `src/main.ts` — mounts `src/App.svelte`
+- `src/main.ts` — mounts `src/App.svelte` (avoid top-level `await` to preserve older browser targets)
 - `src/App.svelte` — root LCARS shell and view switcher
 
 UI composition:
@@ -59,9 +61,16 @@ UI composition:
   - `ConfirmDialog.svelte`
   - (Color picker dialog if present)
 
-State and domain:
-- `src/lib/state/` — state store, selectors, defaults, theme store
-- Canonical types: `src/lib/state/model.ts`
+State and domain (no `svelte/store`):
+- `src/lib/state/` — domain model, selectors, and rune-based shared state modules
+  - `index.svelte.ts` — app state controller (uses runes; must be `.svelte.ts`)
+  - `index.ts` — plain TypeScript barrel re-export surface (no runes)
+  - `app/` — app-state modules: persistence queue + mutation actions
+  - `theme/` — theme controller module(s)
+  - `domain/` — pure domain functions (no side effects; unit-testable)
+  - `selectors/` — pure derived reads (selectors; no side effects)
+  - `model.ts` (or `stateTypes.ts`) — canonical domain types
+  - `defaults.ts` (or `stateDefaults.ts`) — default state factory
 
 Persistence:
 - `src/lib/persistence/` — persistence port + backends
@@ -77,7 +86,7 @@ Auth and telemetry:
 
 ## Data model
 
-Canonical types are defined in `src/lib/state/model.ts`. Architectural invariants:
+Canonical types are defined in `src/lib/state/model.ts` (or `stateTypes.ts`). Architectural invariants:
 
 - **Category is a tree**
   - `Category.children: Category[]` is the canonical representation.
@@ -95,22 +104,47 @@ State-driven navigation:
 
 ---
 
+## State management (rune-based shared modules)
+
+Zander does not use `svelte/store` (`writable`, `derived`, `$store`) for app state.
+
+Instead, app state and theme state are managed via Svelte 5 shared modules (`.svelte.ts`) using runes:
+
+- `$state` for shared mutable reactive state
+- `$derived` for derived values (if/when needed)
+- `$effect` for side effects when appropriate
+
+### Rune module boundary rules
+
+- Any file that uses runes must be a `.svelte.ts` (or `.svelte.js`) module.
+- Plain `.ts` modules must not call runes.
+- To avoid accidental `rune_outside_svelte` at runtime, Zander uses a two-file entrypoint pattern:
+  - `src/lib/state/index.svelte.ts` contains the rune-based implementation
+  - `src/lib/state/index.ts` re-exports from `.svelte.ts` and exports types (no runes)
+
+This keeps imports stable (`$lib/state`) while ensuring rune usage is always inside Svelte-compiled modules.
+
+---
+
 ## Application flow
 
 ### Startup
-1. App mounts `App.svelte`.
-2. App initializes stores.
-3. Store loads persisted state via `PersistenceBackend.loadState()`.
-4. Store validates and normalizes loaded state (e.g., required fields present, ids refer to existing categories).
-5. UI renders based on store state (current view, current category, etc.).
+1. `main.ts` mounts `App.svelte`.
+2. `App.svelte` creates controllers:
+   - `createAppState(backend)` from `$lib/state`
+   - `createThemeState(storage?)` from `$lib/state`
+3. `App.svelte` calls:
+   - `app.loadInitialState()` to load persisted app state
+   - `theme.loadInitialTheme()` to apply persisted theme + set `data-theme`
+4. UI renders based on `app.model.state` and other controller state.
 
 ### Mutations and persistence
-- All mutations go through store APIs (not direct component writes).
-- Store triggers persistence via `PersistenceBackend.saveState(state)`.
-- Persistence is written as full-state snapshots (implementation may debounce).
+- All mutations go through controller APIs (not direct component writes).
+- Mutations persist via `PersistenceBackend.saveState(state)` as full-state snapshots.
+- Writes are serialized through a single `persistAndSet` queue to prevent lost updates when multiple async mutations occur.
 
 ### View switching (no router)
-- Header “Home” and footer buttons update store state (`currentView`, etc.).
+- Header “Home” and footer buttons update app state (`currentView`, etc.).
 - Keyboard shortcuts provide fast navigation between views and dialogs.
 - When switching views, focus is moved to a predictable target (e.g., `<main tabindex="-1">`) to keep keyboard users oriented.
 
@@ -125,5 +159,4 @@ export interface PersistenceBackend {
   loadState(): Promise<State | null>;
   saveState(state: State): Promise<void>;
   exportData(): Promise<ExportBundle>;
-  importData(bundle: ExportBundle): Promise<void>;
-}
+  importData(bundle: ExportBundle): Pro
