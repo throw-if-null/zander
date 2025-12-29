@@ -1,4 +1,4 @@
-import type { State, Bookmark, Category } from "../stateTypes";
+import type { State, Bookmark, Category } from "../model";
 
 function findCategory(categories: Category[], id: string): Category | null {
   for (const category of categories) {

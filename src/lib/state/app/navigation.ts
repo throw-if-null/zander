@@ -1,6 +1,6 @@
 // lib/stores/state/navigation.ts
-import type { State } from "./stateTypes";
-import type { PersistAndSet } from "./types";
+import type { State } from "../model";
+import type { PersistAndSet } from "./appTypes";
 
 export function createNavigationActions(args: {
   persistAndSet: PersistAndSet;

@@ -1,5 +1,5 @@
 // lib/stores/state/utils.ts
-import type { Category, State } from "./stateTypes";
+import type { Category, State } from "../model";
 
 export function generateId(): string {
   if (

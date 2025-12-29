@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { State } from "../../state/stateTypes";
+    import type { AppState } from "../../state/app/appTypes";
     import { getVisibleBookmarks } from "../../state/selectors/bookmarks";
 
     const {
@@ -9,7 +9,7 @@
         onSelectCategory,
         onDeleteBookmark,
     } = $props<{
-        state: State;
+        state: AppState;
         onAddBookmark: () => void;
         onEditBookmark: (id: string) => void;
         onDeleteBookmark: (id: string) => void;

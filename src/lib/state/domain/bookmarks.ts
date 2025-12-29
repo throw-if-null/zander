@@ -1,4 +1,4 @@
-import type { Bookmark, Category } from "../stateTypes";
+import type { Bookmark, Category } from "../model";
 
 export function normalizeUrl(raw: string): string {
   const trimmed = raw.trim();

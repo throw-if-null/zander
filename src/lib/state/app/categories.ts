@@ -1,6 +1,6 @@
 // lib/stores/state/categories.ts
-import type { Bookmark, Category, State } from "./stateTypes";
-import type { PersistAndSet } from "./types";
+import type { Bookmark, Category, State } from "../model";
+import type { PersistAndSet } from "./appTypes";
 import {
   categoryExists,
   collectIdsForCategoryTree,

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import type { Category, Bookmark } from "../stateTypes";
+import type { Category, Bookmark } from "../model";
 import {
   normalizeUrl,
   getEffectiveCategoryIdForNewBookmark,

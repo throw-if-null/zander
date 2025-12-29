@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import type { State, Bookmark, Category } from "../stateTypes";
+import type { State, Bookmark, Category } from "../model";
 import { getVisibleBookmarks } from "./bookmarks";
 
 function createState(opts: {

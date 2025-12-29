@@ -1,6 +1,6 @@
 <script lang="ts">
-    import type { Category, State } from "../../state/stateTypes";
-    import type { ThemeState } from "../../state/theme/index.svelte";
+    import type { Category, State } from "../../state/model";
+    import type { ThemeState } from "../../state/theme/themeTypes";
 
     const {
         state,

@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onDestroy } from "svelte";
-    import type { Bookmark, Category } from "../../stores/stateTypes";
+    import type { Bookmark, Category } from "../../state/model";
 
     const { open, mode, bookmark, categories, onSubmit, onCancel, onDelete } =
         $props<{

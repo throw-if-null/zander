@@ -1,5 +1,5 @@
 import type { PersistenceBackend } from "./PersistenceBackend";
-import type { State, ExportBundle, StorageError } from "../state/stateTypes";
+import type { State, ExportBundle, StorageError } from "../state/model";
 
 const STORAGE_KEY = "zander-svelte:v1";
 

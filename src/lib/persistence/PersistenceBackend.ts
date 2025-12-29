@@ -1,4 +1,4 @@
-import type { State, ExportBundle } from "../state/stateTypes";
+import type { State, ExportBundle } from "../state/model";
 
 export interface PersistenceBackend {
   loadState(): Promise<State | null>;
